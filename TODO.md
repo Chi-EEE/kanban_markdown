@@ -1,8 +1,13 @@
 ---
-Title:
-Description: 
+Title: Test TODO
+Description: This is used as the main template
 ---
 # TODO:
+
+## Labels:
+- <span id="kanban_md-label-bug">Bug Report</span>  
+    - [Task](#user-content-kanban_md-task-task)
+    - [Huge Bug](#user-content-kanban_md-task-huge_bug)
 
 ## Board:
 
@@ -40,9 +45,3 @@ Description:
 
 <!-- Kanban-MD:List -->
 ### Done:
-
-
-## Labels:
-- <span id="kanban_md-label-bug">Bug Report</span>  
-    - [Task](#user-content-kanban_md-task-task)
-    - [Huge Bug](#user-content-kanban_md-task-huge_bug)
