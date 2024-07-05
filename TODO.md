@@ -10,8 +10,8 @@ Description: This is used as the main template
 
 ## Labels:
 - <span id="kanban_md-label-bug">Bug Report</span>  
-    - [Task](#user-content-kanban_md-task-task)
-    - [Huge Bug](#user-content-kanban_md-task-huge_bug)
+    - [Task](#user-content-kanban_md-task-task)  
+    - [Huge Bug](#user-content-kanban_md-task-huge_bug)  
 
 ## Board:
 
@@ -24,7 +24,7 @@ Description: This is used as the main template
     skadmasdfdfsdf
     asdfnjasd
     - **Labels**:  
-        - [Bug Report](#kanban_md-label-bug)
+        - [Bug Report](#user-content-kanban_md-label-bug)
     - **Attachments**:  
         -  [Test_Image | test_image.txt](test_image.txt)  
     - **Checklist**:  
@@ -33,7 +33,7 @@ Description: This is used as the main template
     - **Description**: sadbfdhubsidfghhausgbifdsiohjaisufjia dfjidsafasdjhksdafbasdnjkls hfnasdkfjladsfndas asndnfjkasdnjkfnaskfnasd  
     - **Category**: Bug Report  
     - **Labels**:  
-        - [Bug Report](#kanban_md-label-bug)
+        - [Bug Report](#user-content-kanban_md-label-bug)
     - **Attachments**:  
         -  [Test_Image | test_image.txt](test_image.txt)  
     - **Checklist**:  
@@ -42,7 +42,7 @@ Description: This is used as the main template
     - **Description**: sadbfdhubsidfghhausgbifdsiohjaisufjia dfjidsafasdjhksdafbasdnjkls hfnasdkfjladsfndas asndnfjkasdnjkfnaskfnasd  
     - **Category**: Bug Report  
     - **Labels**:  
-        - [Bug Report](#kanban_md-label-bug)
+        - [Bug Report](#user-content-kanban_md-label-bug)
     - **Attachments**:  
         -  [Test_Image | test_image.txt](test_image.txt)  
     - **Checklist**:  
