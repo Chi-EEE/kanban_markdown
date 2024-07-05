@@ -1,16 +1,16 @@
 add_rules("mode.debug", "mode.release")
 
-add_requires("fmt", "md4c")
+add_requires("fmt", "tl_expected")
 
 target("kanban-markdown")
     set_kind("binary")
     set_languages("cxx17")
 
-    add_packages("fmt", "md4c")
+    add_packages("fmt", "tl_expected")
 
     add_files("src/*.cpp")
 
-    add_headerfiles("include/**.hpp")
+    add_headerfiles("include/(**.hpp)")
     add_includedirs("include")
 
     add_defines("VC_EXTRALEAN", "WIN32_LEAN_AND_MEAN")
