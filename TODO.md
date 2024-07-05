@@ -23,7 +23,7 @@ Description: This is used as the main template
     - **Labels**:  
         - [Bug Report](#kanban_md-label-bug)
     - **Attachments**:  
-        -  [Test Image](other_file.md)  
+        -  [Test_Image | test_image.txt](test_image.txt)  
     - **Checklist**:  
         - [ ] aaa  
 - [x] <span id="kanban_md-task-huge_bug">Huge Bug</span>  
@@ -33,7 +33,7 @@ Description: This is used as the main template
     - **Labels**:  
         - [Bug Report](#kanban_md-label-bug)
     - **Attachments**:  
-        -  Test_Image | test_image.txt  
+        -  [Test_Image | test_image.txt](test_image.txt)  
     - **Checklist**:  
         - [ ] aaa  
 
