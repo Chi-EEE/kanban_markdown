@@ -26,7 +26,7 @@ Description:
     - **Checklist**:  
         - [ ] aaa  
     
-- [x] Completed task  
+- #### [x] Completed task  
     - **Description**: sadbfdhubsidfghhausgbifdsiohjaisufjia dfjidsafasdjhksdafbasdnjkls hfnasdkfjladsfndas asndnfjkasdnjkfnaskfnasd  
     - **Category**: Bug Report  
     - **Assigned**: Chi-EEE  
@@ -39,7 +39,7 @@ Description:
 <!-- Kanban-MD:List -->
 ### Doing:
 [aaa](#board)  
-[sadzdxfc](#--task)
+[sadzdxfc](#)
 
 <!-- Kanban-MD:List -->
 ### On Hold:
