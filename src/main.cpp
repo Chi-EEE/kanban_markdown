@@ -114,25 +114,14 @@ void debug(const char* msg, void* userdata) {
 
 
 int main() {
-    const std::string markdown = R"(
-# Header
-This is a *Markdown* **document**.
-
-- Item 1
-- Item 2
-- Item 3
-
-[Link](http://example.com)
-
-- [x] #739
-- [ ] https://github.com/octo-org/octo-repo/issues/740
-- [ ] Add delight to the experience when all tasks are complete :tada:
-)";
     const std::string test_string = R"(---
 Description: 
 ---
 
 # TODO:
+
+<!-- Kanban-MD:Board -->
+## AA
 
 <!-- Kanban-MD:List -->
 ### To Do:
