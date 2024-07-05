@@ -25,7 +25,6 @@ Description:
         -  [Test Image](other_file.md)  
     - **Checklist**:  
         - [ ] aaa  
-    
 - [x] Completed task  
     - **Description**: sadbfdhubsidfghhausgbifdsiohjaisufjia dfjidsafasdjhksdafbasdnjkls hfnasdkfjladsfndas asndnfjkasdnjkfnaskfnasd  
     - **Category**: Bug Report  
@@ -39,7 +38,7 @@ Description:
 <!-- Kanban-MD:List -->
 ### Doing:
 [aaa](#board)  
-[sadzdxfc](#)
+[sadzdxfc](#user-content-kanban-md:label:bug)
 
 <!-- Kanban-MD:List -->
 ### On Hold:
