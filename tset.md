@@ -48,7 +48,6 @@ www.ElectricRCAircraftGuy.com
 </details>
 
 
-<a id="all-of-my-wifi-adapter-repos"></a>
 # All of my Wifi adapter repos:
 
 - **If you are using Linux and desire a high-speed WiFi adapter, I recommend [this BrosTrend Wifi adapter](https://amzn.to/33qXt9i) above all others! It installs with a simple 1-line or 3-line command and has an excellent installation script, as well as great performance, speed, and range.** 
