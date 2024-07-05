@@ -12,13 +12,13 @@ Description:
 
 <!-- Kanban-MD:List -->
 ### To do:  
-- [ ] ###### Task  
+- [ ] Task  
     - **Description**: sadbfdhubsidfghhausgbifdsiohjaisufjia dfjidsafasdjhksdafbasdnjkls hfnasdkfjladsfndas asndnfjkasdnjkfnaskfnasd  
     sdfgfaddzA
     czxzxc
     skadmasdfdfsdf
     asdfnjasd
-    - **Assigned**: Chi-EEE  
+    - **Assigned**: @Chi-EEE  
     - **Labels**:  
         - [Bug Report](#kanban-md:label:bug)
     - **Attachments**:  
