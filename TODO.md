@@ -21,7 +21,7 @@ Description: This is used as the main template
     asdfnjasd
     - **Assigned**: Chi-EEE  
     - **Labels**:  
-        - [Bug Report](#kanban_md:label:bug)
+        - [Bug Report](#kanban_md-label-bug)
     - **Attachments**:  
         -  [Test Image](other_file.md)  
     - **Checklist**:  
@@ -31,7 +31,7 @@ Description: This is used as the main template
     - **Category**: Bug Report  
     - **Assigned**: Chi-EEE  
     - **Labels**:  
-        - [Bug Report](#kanban_md:label:bug)
+        - [Bug Report](#kanban_md-label-bug)
     - **Attachments**:  
         -  Test_Image | test_image.txt  
     - **Checklist**:  
