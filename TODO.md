@@ -13,7 +13,7 @@ Description:
 
 <!-- Kanban-MD:List -->
 ### To do:  
-- [ ] [Task](#task)  
+- [ ] <span id="task">Task</span>  
     - **Description**: sadbfdhubsidfghhausgbifdsiohjaisufjia dfjidsafasdjhksdafbasdnjkls hfnasdkfjladsfndas asndnfjkasdnjkfnaskfnasd  
     sdfgfaddzA
     czxzxc
@@ -40,7 +40,6 @@ Description:
 ### Doing:
 [aaa](#board)  
 [sadzdxfc](#)
-[Task](#task)  
 
 <!-- Kanban-MD:List -->
 ### On Hold:
