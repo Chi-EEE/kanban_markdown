@@ -8,7 +8,7 @@ Description:
 
 <!-- Kanban-MD:List -->
 ### To do:  
-- [ ] <span id="kanban_md:task:task">Task</span>  
+- [ ] <span id="kanban_md-task-task">Task</span>  
     - **Description**: sadbfdhubsidfghhausgbifdsiohjaisufjia dfjidsafasdjhksdafbasdnjkls hfnasdkfjladsfndas asndnfjkasdnjkfnaskfnasd  
     sdfgfaddzA
     czxzxc
@@ -21,7 +21,7 @@ Description:
         -  [Test Image](other_file.md)  
     - **Checklist**:  
         - [ ] aaa  
-- [x] <span id="kanban_md:task:huge_bug">Huge Bug</span>  
+- [x] <span id="kanban_md-task-huge_bug">Huge Bug</span>  
     - **Description**: sadbfdhubsidfghhausgbifdsiohjaisufjia dfjidsafasdjhksdafbasdnjkls hfnasdkfjladsfndas asndnfjkasdnjkfnaskfnasd  
     - **Category**: Bug Report  
     - **Assigned**: Chi-EEE  
@@ -43,6 +43,6 @@ Description:
 
 
 ## Labels:
-- <span id="kanban_md:label:bug">Bug Report</span>  
-    - [Task](#user-content-kanban_md:task:task)
-    - [Huge Bug](#user-content-kanban_md:task:huge_bug)
+- <span id="kanban_md-label-bug">Bug Report</span>  
+    - [Task](#user-content-kanban_md-task-task)
+    - [Huge Bug](#user-content-kanban_md-task-huge_bug)
