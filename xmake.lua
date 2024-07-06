@@ -1,12 +1,12 @@
 add_rules("mode.debug", "mode.release")
 
-add_requires("fmt", "re2", "tl_expected")
+add_requires("fmt", "re2", "md4c", "tl_expected", "magic_enum")
 
 target("kanban-markdown")
     set_kind("binary")
     set_languages("cxx17")
 
-    add_packages("fmt", "re2", "tl_expected")
+    add_packages("fmt", "re2", "md4c", "tl_expected", "magic_enum")
 
     add_files("src/*.cpp")
 

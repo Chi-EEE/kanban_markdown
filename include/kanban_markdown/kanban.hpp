@@ -14,8 +14,8 @@ namespace kanban_markdown {
 
 	struct KanbanBoard
 	{
-		std::string name = "dsa";
-		std::string description = "dsa";
+		std::string name;
+		std::string description;
 		std::vector<KanbanLabel> labels;
 		std::vector<KanbanList> list;
 	};
@@ -28,7 +28,7 @@ namespace kanban_markdown {
 
 	struct KanbanList
 	{
-		std::string name = "TODO:";
+		std::string name;
 		std::vector<KanbanTask> tasks;
 	};
 

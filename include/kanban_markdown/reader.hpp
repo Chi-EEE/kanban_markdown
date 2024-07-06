@@ -8,12 +8,87 @@
 #include <cctype>
 #include <locale>
 
+#include <unordered_map>
+
 #include <re2/re2.h>
+#include <md4c.h>
+#include <magic_enum_all.hpp>
 
 #include "kanban.hpp"
 #include "constants.hpp"
 
 namespace kanban_markdown {
+	static constexpr uint32_t hash(const std::string_view s) noexcept
+	{
+		uint32_t hash = 5381;
+
+		for (const char* c = s.data(); c < s.data() + s.size(); ++c)
+			hash = ((hash << 5) + hash) + (unsigned char)*c;
+
+		return hash;
+	}
+
+	enum class KanbanState {
+		None = 0,
+		Labels,
+		Board,
+	};
+
+	enum class TaskReadState {
+		None = 0,
+		Description,
+		Labels,
+		Attachments,
+		Checklist,
+	};
+
+	struct LabelSection {
+		std::vector<std::string> list_items;
+	};
+
+	struct TaskDetail {
+		std::string name;
+		std::vector<std::string> description;
+		std::vector<std::string> labels;
+		std::vector<std::string> attachments;
+		std::vector<std::string> checklist;
+	};
+
+	struct BoardSection {
+		BoardSection() {
+			/*magic_enum::enum_for_each<TaskReadState>([](auto val) {
+				constexpr TaskReadState task_read_state = val;
+				task_detail[task_read_state] = TaskDetail();
+				});*/
+		}
+		std::string name;
+		std::string current_task_name;
+		std::unordered_map<std::string, TaskDetail> task_details;
+	};
+
+	struct BoardListSection {
+		std::vector<BoardSection> boards;
+		BoardSection* current_board = nullptr;
+		TaskReadState task_read_state = TaskReadState::None;
+		bool reading_task_detail = false;
+	};
+
+	struct KanbanParser {
+		unsigned int header_level = 0;
+		KanbanState state = KanbanState::None;
+
+		std::string kanban_board_name;
+		bool read_kanban_board_name = false;
+
+		std::string kanban_board_description;
+
+		LabelSection label_section;
+		BoardListSection board_section;
+
+		unsigned int list_item_level = 0;
+		unsigned int sub_list_item_count = 0;
+	};
+
 	const char* ws = " \t\n\r\f\v";
 
 	// trim from end of string (right)
@@ -36,149 +111,358 @@ namespace kanban_markdown {
 		return ltrim(rtrim(s, t), t);
 	}
 
-	tl::expected<KanbanBoard, std::string> parse(std::string md_string) {
-		const std::string_view md_string_view(md_string);
-		std::size_t offset = 0;
-
-		KanbanBoard kanban_board;
-
-		auto first_header_pos = md_string.find(constants::first_header);
-		if (first_header_pos == std::string::npos) {
-			return tl::make_unexpected("Invalid file");
-		}
-		offset += first_header_pos;
-
-		auto first_header_eol_pos = md_string_view.substr(offset + 1).find("\n");
-		if (first_header_eol_pos == std::string::npos) {
-			return tl::make_unexpected("Invalid file");
-		}
-
-		std::string name_text = md_string.substr(first_header_pos + constants::first_header.size(), first_header_eol_pos);
-		kanban_board.name = name_text;
-		offset += constants::first_header.size() + first_header_eol_pos;
-
-		auto second_header_pos = md_string_view.substr(offset + 1).find(constants::second_header);
-		if (second_header_pos == std::string::npos) {
-			return tl::make_unexpected("Invalid file");
-		}
-
-		std::string description_text = md_string.substr(offset, second_header_pos);
-		kanban_board.description = description_text;
-		offset += constants::second_header.size() + second_header_pos;
-
-		int indent = 0;
-		bool found_labels = false;
-		bool found_board = false;
-
-		while (!found_board || !found_labels)
+	int enter_block_callback(MD_BLOCKTYPE type, void* detail, void* userdata) {
+		KanbanParser* kanban_parser = static_cast<KanbanParser*>(userdata);
+		switch (type) {
+		case MD_BLOCK_DOC:
 		{
-			auto second_header_eol_pos = md_string_view.substr(offset + 1).find("\n");
-			if (second_header_eol_pos == std::string::npos) {
-				return tl::make_unexpected("Invalid file");
+			//std::cout << "[Document Start]\n";
+			break;
+		}
+		case MD_BLOCK_H:
+		{
+			MD_BLOCK_H_DETAIL* header_detail = static_cast<MD_BLOCK_H_DETAIL*>(detail);
+			kanban_parser->header_level = header_detail->level;
+			std::cout << "[Header - Open] " << header_detail->level << "\n";
+			break;
+		}
+		case MD_BLOCK_P:
+		{
+			//std::cout << "[Paragraph]\n";
+			break;
+		}
+		case MD_BLOCK_UL:
+		{
+			MD_BLOCK_UL_DETAIL* ul_detail = static_cast<MD_BLOCK_UL_DETAIL*>(detail);
+			//std::cout << "[Unordered List]\n";
+			break;
+		}
+		case MD_BLOCK_OL:
+		{
+			//std::cout << "[Ordered List]\n";
+			break;
+		}
+		case MD_BLOCK_LI:
+		{
+			//std::cout << "[List Item - Open]\n";
+			if (kanban_parser->list_item_level == 1) {
+				kanban_parser->sub_list_item_count++;
 			}
+			kanban_parser->list_item_level++;
+			break;
+		}
+		default:
+		{
+			//std::cout << "Unknown Type: " << type << "\n";
+			break;
+		}
+		}
+		return 0;
+	}
 
-			std::string secondary_header_text = md_string.substr(offset + 1, second_header_eol_pos);
-			//std::cout << "s[" << secondary_header_text << "]" << "\n";
-			offset += secondary_header_text.size();
 
-			if (secondary_header_text == "Labels:") {
-				found_labels = true;
-
-				auto li_pos = md_string_view.substr(offset).find(constants::ul_list_item);
-				if (li_pos == std::string::npos) {
-					return tl::make_unexpected("Invalid file");
-				}
-				offset += li_pos;
-
-				auto li_eol_pos = md_string_view.substr(offset + 1).find("\n");
-				if (li_eol_pos == std::string::npos) {
-					return tl::make_unexpected("Invalid file");
-				}
-
-				std::string label_name_html = md_string.substr(offset + 1, li_eol_pos);
-
-				re2::RE2 word_pattern("<span id=\"kanban_md-label-.+\">(.*)<\/span>");
-				std::string label_name;
-
-				if (!RE2::PartialMatch(trim(label_name_html), word_pattern, &label_name)) {
-					return tl::make_unexpected("Invalid file");
-				}
-
-				KanbanLabel label;
-				label.name = trim(label_name);
-				offset += li_eol_pos;
-
-				auto li_pos_3 = md_string_view.substr(offset + 1).find(constants::ul_list_item);
-				if (li_pos_3 == std::string::npos) {
-					return tl::make_unexpected("Invalid file");
-				}
-				offset += li_pos_3;
-
-				auto li_eol_pos_3 = md_string_view.substr(offset + 1).find("\n");
-				if (li_eol_pos_3 == std::string::npos) {
-					return tl::make_unexpected("Invalid file");
-				}
-
-				KanbanTask task;
-				std::string task_item = md_string.substr(offset + 1, li_eol_pos_3);
-				re2::RE2 word_pattern_1(R"(- \[(.*)\])");
-				std::string task_name;
-
-				if (!RE2::PartialMatch(trim(task_item), word_pattern_1, &task_name)) {
-					return tl::make_unexpected("Invalid file..");
-				}
-
-				task.name = task_name;
-				offset += task_item.size();
-				std::cout << "[" << task.name << "]" << "\n";
-
-				//auto li_pos_2 = md_string_view.substr(offset + 1).find(constants::ul_list_item);
-				//if (li_pos_2 == std::string::npos) {
-				//	return tl::make_unexpected("Invalid file");
-				//}
-				//offset += li_pos_2;
-
-				//auto li_eol_pos_2 = md_string_view.substr(offset + 1).find("\n");
-				//if (li_eol_pos_2 == std::string::npos) {
-				//	return tl::make_unexpected("Invalid file");
-				//}
-
-				//KanbanTask task_2;
-				//std::string task_item_2 = md_string.substr(offset + 1, li_eol_pos_2);
-				//std::string task_name_2;
-				//if (!RE2::PartialMatch(trim(task_item_2), word_pattern_1, &task_name_2)) {
-				//	return tl::make_unexpected("Invalid file..");
-				//}
-
-				//task_2.name = task_name_2;
-				//offset += task_item_2.size();
-				//std::cout << "[" << task_2.name << "]" << "\n";
-
+	// Callback for leaving block elements
+	int leave_block_callback(MD_BLOCKTYPE type, void* detail, void* userdata) {
+		KanbanParser* kanban_parser = static_cast<KanbanParser*>(userdata);
+		switch (type) {
+		case MD_BLOCK_DOC:
+		{
+			//std::cout << "[Document End]\n";
+			break;
+		}
+		case MD_BLOCK_H:
+		{
+			MD_BLOCK_H_DETAIL* header_detail = static_cast<MD_BLOCK_H_DETAIL*>(detail);
+			kanban_parser->header_level = 0;
+			break;
+		}
+		case MD_BLOCK_P:
+		{
+			//std::cout << "[Paragraph]\n";
+			break;
+		}
+		case MD_BLOCK_UL:
+		{
+			//std::cout << "[Unordered List]\n";
+			//std::cout << "[List Item - Close]\n";
+			if (kanban_parser->list_item_level == 0) {
+				kanban_parser->state = KanbanState::None;
 			}
 			break;
 		}
-
-
-		/*auto second_horizonal_rule = md_string.substr(first_header_pos + 1).find(horizonal_line_break);
-		if (second_horizonal_rule == std::string::npos)
+		case MD_BLOCK_OL:
 		{
-			return tl::make_unexpected("Invalid file");
+			//std::cout << "[Ordered List]\n";
+			break;
 		}
+		case MD_BLOCK_LI:
+		{
+			//std::cout << "[List Item - Close]\n";
+			if (kanban_parser->list_item_level == 1) {
+				kanban_parser->sub_list_item_count = 0;
+			}
+			if (kanban_parser->state == KanbanState::Board) {
+				kanban_parser->board_section.reading_task_detail = false;
+			}
+			kanban_parser->list_item_level--;
+			break;
+		}
+		default:
+		{
+			//std::cout << "Unknown Type: " << type << "\n";
+			break;
+		}
+		}
+		return 0;
+	}
 
-		std::string top_section = md_string.substr(first_header_pos, second_horizonal_rule);
-		const std::string a = "Title: ";
-		const std::string b = "Description: ";
-		auto name = top_section.find(a);
-		auto description = top_section.find(b);
+	// Callback for processing span elements
+	int enter_span_callback(MD_SPANTYPE type, void* detail, void* userdata) {
+		KanbanParser* kanban_parser = static_cast<KanbanParser*>(userdata);
+		switch (type) {
+		case MD_SPAN_EM:
+		{
+			//std::cout << "[Emphasis]\n";
+			break;
+		}
+		case MD_SPAN_STRONG:
+		{
+			//std::cout << "[Strong]\n";
+			break;
+		}
+		case MD_SPAN_A:
+		{
+			//std::cout << "[Link]\n";
+			break;
+		}
+		case MD_SPAN_IMG:
+		{
+			//std::cout << "[Image]\n";
+			break;
+		}
+		default:
+		{
+			break;
+		}
+		}
+		return 0;
+	}
 
-		std::string name_text = top_section.substr(name + a.size(), description - (b.size() - 1));
-		std::string description_text = top_section.substr(description + b.size(), second_horizonal_rule - (horizonal_line_break.size() - 1));
+	// Callback for leaving span elements
+	int leave_span_callback(MD_SPANTYPE type, void* detail, void* userdata) {
+		KanbanParser* kanban_parser = static_cast<KanbanParser*>(userdata);
+		//std::cout << "Leaving span type: " << type << std::endl;
+		return 0;
+	}
 
-		kanban_board.name = name_text;
-		kanban_board.description = description_text;*/
+	void parseHeader(KanbanParser* kanban_parser, const std::string& text_content) {
+		switch (kanban_parser->header_level) {
+		case 0:
+		{
+			if (kanban_parser->read_kanban_board_name && kanban_parser->kanban_board_description.empty())
+			{
+				kanban_parser->kanban_board_description = text_content;
+			}
+			break;
+		}
+		case 1:
+		{
+			if (!kanban_parser->read_kanban_board_name)
+			{
+				kanban_parser->kanban_board_name = text_content;
+				kanban_parser->read_kanban_board_name = true;
+			}
+			break;
+		}
+		case 2:
+		{
+			if (text_content == "Labels:") {
+				kanban_parser->state = KanbanState::Labels;
+			}
+			else if (text_content == "Board:") {
+				kanban_parser->state = KanbanState::Board;
+			}
+			break;
+		}
+		default:
+		{
+			break;
+		}
+		}
+	}
 
+	void parseLabelSection(KanbanParser* kanban_parser, const std::string& text_content) {
+		switch (kanban_parser->list_item_level) {
+		case 1:
+		{
+			break;
+		}
+		case 2:
+		{
+			kanban_parser->label_section.list_items.push_back(text_content);
+			break;
+		}
+		}
+	}
 
+	void parseTaskDetails(KanbanParser* kanban_parser, const std::string& text_content) {
+		bool is_task_property = false;
+		switch (hash(text_content)) {
+		case hash("Description"):
+			kanban_parser->board_section.task_read_state = TaskReadState::Description;
+			is_task_property = true;
+			break;
+		case hash("Labels"):
+			kanban_parser->board_section.task_read_state = TaskReadState::Labels;
+			is_task_property = true;
+			break;
+		case hash("Attachments"):
+			kanban_parser->board_section.task_read_state = TaskReadState::Attachments;
+			is_task_property = true;
+			break;
+		case hash("Checklist"):
+			kanban_parser->board_section.task_read_state = TaskReadState::Checklist;
+			is_task_property = true;
+			break;
+		}
+		if (!is_task_property && kanban_parser->board_section.task_read_state == TaskReadState::Description) {
+			BoardSection* current_board = kanban_parser->board_section.current_board;
+			current_board->task_details[kanban_parser->board_section.current_board->current_task_name].description.push_back(text_content);
+		}
+	}
 
+	void parseTaskDetailList(KanbanParser* kanban_parser, const std::string& text_content) {
+		switch (kanban_parser->board_section.task_read_state) {
+		case TaskReadState::Labels:
+		{
+			std::cout << "Labels: " << text_content << '\n';
+			kanban_parser->board_section.current_board->task_details[kanban_parser->board_section.current_board->current_task_name].labels.push_back(text_content);
+			break;
+		}
+		case TaskReadState::Attachments:
+		{
+			std::cout << "Attachments: " << text_content << '\n';
+			kanban_parser->board_section.current_board->task_details[kanban_parser->board_section.current_board->current_task_name].attachments.push_back(text_content);
+			break;
+		}
+		case TaskReadState::Checklist:
+		{
+			std::cout << "Checklist: " << text_content << '\n';
+			bool is_checked = false;
+			std::string checkbox_characters = text_content.substr(0, 4);
+			if (checkbox_characters == "[ ] ") {
+				is_checked = false;
+			}
+			else if (checkbox_characters == "[x] ") {
+				is_checked = true;
+			}
+			else {
+				std::cerr << "Invalid checklist item: " << text_content << '\n';
+			}
+			kanban_parser->board_section.current_board->task_details[kanban_parser->board_section.current_board->current_task_name].checklist.push_back(text_content.substr(4));
+			break;
+		}
+		}
+	}
+
+	void parseBoardSection(KanbanParser* kanban_parser, const std::string& text_content) {
+		if (text_content == "[ ] " || text_content == "[x] ") {
+			return;
+		}
+		switch (kanban_parser->list_item_level) {
+		case 0:
+		{
+			BoardSection board_section;
+			board_section.name = text_content;
+			kanban_parser->board_section.boards.push_back(board_section);
+			kanban_parser->board_section.current_board = &kanban_parser->board_section.boards.back();
+			break;
+		}
+		case 1:
+		{
+			kanban_parser->board_section.current_board->current_task_name = text_content;
+			kanban_parser->board_section.current_board->task_details[text_content] = TaskDetail();
+			break;
+		}
+		case 2:
+		{
+			parseTaskDetails(kanban_parser, text_content);
+			break;
+		}
+		case 3:
+		{
+			parseTaskDetailList(kanban_parser, text_content);
+			break;
+		}
+		}
+	}
+
+	void parseSection(KanbanParser* kanban_parser, const std::string& text_content) {
+		switch (kanban_parser->state) {
+		case KanbanState::None:
+		{
+			parseHeader(kanban_parser, text_content);
+			break;
+		}
+		case KanbanState::Labels:
+		{
+			parseLabelSection(kanban_parser, text_content);
+			break;
+		}
+		case KanbanState::Board:
+		{
+			parseBoardSection(kanban_parser, text_content);
+			break;
+		}
+		default:
+		{
+			break;
+		}
+		}
+	}
+
+	// Callback for processing text
+	int text_callback(MD_TEXTTYPE type, const MD_CHAR* text, MD_SIZE size, void* userdata) {
+		KanbanParser* kanban_parser = static_cast<KanbanParser*>(userdata);
+		std::string text_content(text, size);
+		switch (type) {
+		case MD_TEXT_NORMAL:
+		{
+			parseSection(kanban_parser, text_content);
+			break;
+		}
+		default:
+		{
+			break;
+		}
+		}
+		return 0;
+	}
+
+	void debug(const char* msg, void* userdata) {
+		KanbanBoard* kanban_board = static_cast<KanbanBoard*>(userdata);
+		std::cout << msg << '\n';
+	}
+
+	tl::expected<KanbanBoard, std::string> parse(std::string md_string) {
+		MD_PARSER parser;
+		parser.abi_version = 0;
+		parser.enter_block = enter_block_callback;
+		parser.leave_block = leave_block_callback;
+		parser.enter_span = enter_span_callback;
+		parser.leave_span = leave_span_callback;
+		parser.text = text_callback;
+		parser.flags = 0;
+		parser.syntax = nullptr;
+		parser.debug_log = debug;
+
+		KanbanParser kanban_parser;
+
+		int result = md_parse(md_string.c_str(), md_string.size(), &parser, &kanban_parser);
+		if (result != 0) {
+			std::cerr << "Error parsing Markdown text." << std::endl;
+		}
+		KanbanBoard kanban_board;
 		return kanban_board;
 	}
 }
