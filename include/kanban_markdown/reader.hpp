@@ -66,6 +66,7 @@ namespace kanban_markdown {
 		kanban_board.description = description_text;
 		offset += constants::second_header.size() + second_header_pos;
 
+		int indent = 0;
 		bool found_labels = false;
 		bool found_board = false;
 
@@ -107,8 +108,19 @@ namespace kanban_markdown {
 				label.name = trim(label_name);
 				offset += li_eol_pos;
 
+				auto li_pos_3 = md_string_view.substr(offset + 1).find(constants::ul_list_item);
+				if (li_pos_3 == std::string::npos) {
+					return tl::make_unexpected("Invalid file");
+				}
+				offset += li_pos_3;
+
+				auto li_eol_pos_3 = md_string_view.substr(offset + 1).find("\n");
+				if (li_eol_pos_3 == std::string::npos) {
+					return tl::make_unexpected("Invalid file");
+				}
+
 				KanbanTask task;
-				std::string task_item = md_string.substr(offset + 1, li_eol_pos);
+				std::string task_item = md_string.substr(offset + 1, li_eol_pos_3);
 				re2::RE2 word_pattern_1(R"(- \[(.*)\])");
 				std::string task_name;
 
@@ -120,27 +132,27 @@ namespace kanban_markdown {
 				offset += task_item.size();
 				std::cout << "[" << task.name << "]" << "\n";
 
-				auto li_pos_2 = md_string_view.substr(offset + 1).find(constants::ul_list_item);
-				if (li_pos_2 == std::string::npos) {
-					return tl::make_unexpected("Invalid file");
-				}
-				offset += li_pos_2;
+				//auto li_pos_2 = md_string_view.substr(offset + 1).find(constants::ul_list_item);
+				//if (li_pos_2 == std::string::npos) {
+				//	return tl::make_unexpected("Invalid file");
+				//}
+				//offset += li_pos_2;
 
-				auto li_eol_pos_2 = md_string_view.substr(offset + 1).find("\n");
-				if (li_eol_pos_2 == std::string::npos) {
-					return tl::make_unexpected("Invalid file");
-				}
+				//auto li_eol_pos_2 = md_string_view.substr(offset + 1).find("\n");
+				//if (li_eol_pos_2 == std::string::npos) {
+				//	return tl::make_unexpected("Invalid file");
+				//}
 
-				KanbanTask task_2;
-				std::string task_item_2 = md_string.substr(offset + 1, li_eol_pos_2);
-				std::string task_name_2;
-				if (!RE2::PartialMatch(trim(task_item_2), word_pattern_1, &task_name_2)) {
-					return tl::make_unexpected("Invalid file..");
-				}
+				//KanbanTask task_2;
+				//std::string task_item_2 = md_string.substr(offset + 1, li_eol_pos_2);
+				//std::string task_name_2;
+				//if (!RE2::PartialMatch(trim(task_item_2), word_pattern_1, &task_name_2)) {
+				//	return tl::make_unexpected("Invalid file..");
+				//}
 
-				task_2.name = task_name_2;
-				offset += task_item_2.size();
-				std::cout << "[" << task_2.name << "]" << "\n";
+				//task_2.name = task_name_2;
+				//offset += task_item_2.size();
+				//std::cout << "[" << task_2.name << "]" << "\n";
 
 			}
 			break;
