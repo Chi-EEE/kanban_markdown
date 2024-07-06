@@ -41,15 +41,15 @@ namespace kanban_markdown {
 		markdown_file += kanban_board.description + constants::END_OF_MARKDOWN_LINE;
 		markdown_file += '\n';
 		markdown_file += "## Labels:" + constants::END_OF_MARKDOWN_LINE;
-		for (KanbanLabel kanban_label : kanban_board.labels) {
-			const std::string kanban_label_name = kanban_label.name;
+		for (auto& [kanban_label_name, kanban_label] : kanban_board.labels) {
+			const std::string kanban_label_name = kanban_label->name;
 			markdown_file += fmt::format(
 				R"(- <span id="kanban_md-task-{id}">{name}</span>{eol})",
 				fmt::arg("id", string_to_id(kanban_label_name)),
 				fmt::arg("name", kanban_label_name),
 				fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 			);
-			for (std::shared_ptr<KanbanTask> kanban_task : kanban_label.tasks) {
+			for (std::shared_ptr<KanbanTask> kanban_task : kanban_label->tasks) {
 				const std::string kanban_task_name = kanban_task->name;
 				markdown_file += fmt::format(
 					R"(  - [{name}](#user-content-{id}){eol})",
@@ -61,21 +61,25 @@ namespace kanban_markdown {
 		}
 		markdown_file += '\n';
 		markdown_file += "## Board:" + constants::END_OF_MARKDOWN_LINE;
-		for (KanbanList kanban_list : kanban_board.list) {
+		for (auto& [kanban_list_name, kanban_list] : kanban_board.list) {
 			markdown_file += fmt::format("### {name}:{eol}",
 				fmt::arg("name", kanban_list.name),
 				fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 			);
-			for (KanbanTask kanban_task : kanban_list.tasks) {
-				const std::string kanban_task_name = kanban_task.name;
+			for (auto& [kanban_task_name, kanban_task] : kanban_list.tasks) {
+				const std::string kanban_task_name = kanban_task->name;
 				markdown_file += fmt::format(R"(- [ ] <span id="kanban_md-task-{id}">{name}</span>{eol})",
 					fmt::arg("id", string_to_id(kanban_task_name)),
 					fmt::arg("name", kanban_task_name),
 					fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 				);
-				markdown_file += "  - **Description**:" + kanban_task.description + constants::END_OF_MARKDOWN_LINE;
+				std::string description_string = "  - **Description**:";
+				for (std::string description_line : kanban_task->description) {
+					description_string += description_line + "\n";
+				}
+				markdown_file += description_string + constants::END_OF_MARKDOWN_LINE;
 				markdown_file += "  - **Labels**:" + constants::END_OF_MARKDOWN_LINE;
-				for (std::shared_ptr<KanbanLabel> kanban_label : kanban_task.labels) {
+				for (std::shared_ptr<KanbanLabel> kanban_label : kanban_task->labels) {
 					const std::string kanban_label_name = kanban_label->name;
 					fmt::format(
 						"    - [{name}](#user-content-{id})",
@@ -84,7 +88,7 @@ namespace kanban_markdown {
 					);
 				}
 				markdown_file += "  - **Attachments**:" + constants::END_OF_MARKDOWN_LINE;
-				for (KanbanAttachment kanban_attachment : kanban_task.attachments) {
+				for (KanbanAttachment kanban_attachment : kanban_task->attachments) {
 					fmt::format(
 						"    - [{name} | {url_1}]({url_2})",
 						fmt::arg("name", kanban_attachment.name),
@@ -93,7 +97,7 @@ namespace kanban_markdown {
 					);
 				}
 				markdown_file += "  - **Checklist**:" + constants::END_OF_MARKDOWN_LINE;
-				for (KanbanChecklistItem kanban_checklist_item : kanban_task.checklist) {
+				for (KanbanChecklistItem kanban_checklist_item : kanban_task->checklist) {
 					fmt::format(
 						"    - [ ] {name}",
 						fmt::arg("name", kanban_checklist_item.name)

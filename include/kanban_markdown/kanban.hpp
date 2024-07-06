@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <unordered_map>
 
 namespace kanban_markdown {
 	struct KanbanBoard;
@@ -16,8 +17,8 @@ namespace kanban_markdown {
 	{
 		std::string name;
 		std::string description;
-		std::vector<KanbanLabel> labels;
-		std::vector<KanbanList> list;
+		std::unordered_map<std::string, std::shared_ptr<KanbanLabel>> labels;
+		std::unordered_map<std::string, KanbanList> list;
 	};
 
 	struct KanbanLabel
@@ -29,14 +30,14 @@ namespace kanban_markdown {
 	struct KanbanList
 	{
 		std::string name;
-		std::vector<KanbanTask> tasks;
+		std::unordered_map<std::string, std::shared_ptr<KanbanTask>> tasks;
 	};
 
 	struct KanbanTask
 	{
 		bool checked = false;
 		std::string name;
-		std::string description;
+		std::vector<std::string> description;
 		std::vector<std::shared_ptr<KanbanLabel>> labels;
 		std::vector<KanbanAttachment> attachments;
 		std::vector<KanbanChecklistItem> checklist;

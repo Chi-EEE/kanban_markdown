@@ -463,6 +463,39 @@ namespace kanban_markdown {
 			std::cerr << "Error parsing Markdown text." << std::endl;
 		}
 		KanbanBoard kanban_board;
+		kanban_board.name = kanban_parser.kanban_board_name;
+		kanban_board.description = kanban_parser.kanban_board_description;
+		for (const std::string& label : kanban_parser.label_section.list_items) {
+			std::shared_ptr<KanbanLabel> kanban_label = std::make_shared<KanbanLabel>();
+			kanban_label->name = label;
+			kanban_board.labels.insert({ label, kanban_label });
+		}
+		for (BoardSection board_section : kanban_parser.board_section.boards) {
+			KanbanList kanban_list;
+			kanban_list.name = board_section.name;
+			for (auto& [task_name, task_detail] : board_section.task_details) {
+				std::shared_ptr<KanbanTask> kanban_task = std::make_shared<KanbanTask>();
+				kanban_task->name = task_name;
+				kanban_task->description = task_detail.description;
+				for (const std::string& label : task_detail.labels) {
+					kanban_task->labels.push_back(kanban_board.labels[label]);
+				}
+				//kanban_task.attachments = task_detail.attachments;
+				//kanban_task.checklist = task_detail.checklist;
+				kanban_list.tasks.insert({ task_name, kanban_task });
+			}
+			kanban_board.list.insert({ board_section.name , kanban_list });
+		}
+		for (const std::string& label : kanban_parser.label_section.list_items) {
+			std::shared_ptr<KanbanLabel> kanban_label = kanban_board.labels[label];
+			for (BoardSection board_section : kanban_parser.board_section.boards) {
+				for (auto& [task_name, task_detail] : board_section.task_details) {
+					for (const std::string& label : task_detail.labels) {
+						kanban_label->tasks.push_back(kanban_board.list[board_section.name].tasks[task_name]);
+					}
+				}
+			}
+		}
 		return kanban_board;
 	}
 }
