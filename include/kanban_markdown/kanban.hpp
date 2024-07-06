@@ -14,7 +14,7 @@ namespace kanban_markdown {
 
 	struct KanbanBoard
 	{
-		std::string title = "dsa";
+		std::string name = "dsa";
 		std::string description = "dsa";
 		std::vector<KanbanLabel> labels;
 		std::vector<KanbanList> list;
@@ -22,20 +22,20 @@ namespace kanban_markdown {
 
 	struct KanbanLabel
 	{
-		std::string title;
+		std::string name;
 		std::vector<std::shared_ptr<KanbanTask>> tasks;
 	};
 
 	struct KanbanList
 	{
-		std::string title = "TODO:";
+		std::string name = "TODO:";
 		std::vector<KanbanTask> tasks;
 	};
 
 	struct KanbanTask
 	{
 		bool checked = false;
-		std::string title;
+		std::string name;
 		std::string description;
 		std::vector<std::shared_ptr<KanbanLabel>> labels;
 		std::vector<KanbanAttachment> attachments;
@@ -44,13 +44,13 @@ namespace kanban_markdown {
 
 	struct KanbanAttachment
 	{
-		std::string title;
+		std::string name;
 		std::string url;
 	};
 
 	struct KanbanChecklistItem
 	{
 		bool checked = false;
-		std::string title;
+		std::string name;
 	};
 }
