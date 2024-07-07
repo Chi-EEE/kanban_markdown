@@ -8,7 +8,7 @@
 #include <cctype>
 #include <locale>
 
-#include <unordered_map>
+#include <tsl/ordered_map.h>
 
 #include <re2/re2.h>
 #include <md4c.h>
@@ -49,7 +49,7 @@ namespace kanban_markdown {
 
 	struct LabelSection {
 		std::string current_label_name;
-		std::unordered_map<std::string, LabelDetail> label_details;
+		tsl::ordered_map<std::string, LabelDetail> label_details;
 	};
 
 	struct Attachment {
@@ -70,7 +70,7 @@ namespace kanban_markdown {
 	struct BoardSection {
 		std::string name;
 		std::string current_task_name;
-		std::unordered_map<std::string, TaskDetail> task_details;
+		tsl::ordered_map<std::string, TaskDetail> task_details;
 	};
 
 	struct BoardListSection {
@@ -348,13 +348,16 @@ namespace kanban_markdown {
 				{
 					text_content = text_content.substr(1);
 				}
-				text_content = ltrim(text_content);
+				text_content = trim(text_content);
 				if (!text_content.empty()) {
 					tail_detail.description.push_back(text_content);
 				}
 			}
 			else {
-				tail_detail.description.push_back(text_content);
+				text_content = trim(text_content);
+				if (!text_content.empty()) {
+					tail_detail.description.push_back(text_content);
+				}
 			}
 		}
 	}
@@ -521,10 +524,10 @@ namespace kanban_markdown {
 						kanban_board.labels[label] = kanban_label;
 					}
 				}
-				for (Attachment& attachment : task_detail.attachments) {
+				for (const Attachment& attachment : task_detail.attachments) {
 					kanban_task->attachments.push_back({ attachment.name, attachment.url });
 				}
-				for (KanbanChecklistItem& checkbox : task_detail.checklist) {
+				for (const KanbanChecklistItem& checkbox : task_detail.checklist) {
 					kanban_task->checklist.push_back(checkbox);
 				}
 				kanban_list.tasks.insert({ task_name, kanban_task });

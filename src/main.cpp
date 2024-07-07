@@ -6,17 +6,8 @@
 #include "kanban_markdown/kanban_markdown.hpp"
 
 int main(int argc, char* argv[]) {
-
-	//kanban_markdown::KanbanBoard board;
-	//kanban_markdown::KanbanLabel kanban_label;
-	//kanban_markdown::KanbanTask kanban_task;
-	//kanban_task.title = "Huge Bug";
-	//kanban_label.title = "Bug";
-	//kanban_label.tasks.push_back(std::make_shared<kanban_markdown::KanbanTask>(kanban_task));
-	//board.labels.push_back(kanban_label);
-	//std::cout << kanban_markdown::format(board);
 	std::filesystem::path exe_dir = std::filesystem::weakly_canonical(std::filesystem::path(argv[0])).parent_path();
-	const std::string TODO_MD_PATH = exe_dir.string() + "/TODO.md";
+	const std::string TODO_MD_PATH = exe_dir.string() + "/aaa.md";
 
 	if (!std::filesystem::exists(TODO_MD_PATH))
 	{
@@ -37,7 +28,7 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	std::ofstream out(exe_dir.string() + "/aaa.txt");
+	std::ofstream out(exe_dir.string() + "/aaa.md");
 	std::cout << kanban_markdown::markdown_format(maybe_kanban_board.value());
 	out << kanban_markdown::markdown_format(maybe_kanban_board.value());
 	out.close();

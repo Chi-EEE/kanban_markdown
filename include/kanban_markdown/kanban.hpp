@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <unordered_map>
+#include <tsl/ordered_map.h>
 
 namespace kanban_markdown {
 	struct KanbanBoard;
@@ -13,24 +13,24 @@ namespace kanban_markdown {
 	struct KanbanAttachment;
 	struct KanbanChecklistItem;
 
+	struct KanbanList
+	{
+		std::string name;
+		tsl::ordered_map<std::string, std::shared_ptr<KanbanTask>> tasks;
+	};
+
 	struct KanbanBoard
 	{
 		std::string name;
 		std::string description;
-		std::unordered_map<std::string, std::shared_ptr<KanbanLabel>> labels;
-		std::unordered_map<std::string, KanbanList> list;
+		tsl::ordered_map<std::string, std::shared_ptr<KanbanLabel>> labels;
+		tsl::ordered_map<std::string, KanbanList> list;
 	};
 
 	struct KanbanLabel
 	{
 		std::string name;
 		std::vector<std::shared_ptr<KanbanTask>> tasks;
-	};
-
-	struct KanbanList
-	{
-		std::string name;
-		std::unordered_map<std::string, std::shared_ptr<KanbanTask>> tasks;
 	};
 
 	struct KanbanTask
