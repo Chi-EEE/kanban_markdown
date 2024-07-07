@@ -42,8 +42,14 @@ namespace kanban_markdown {
 		Checklist,
 	};
 
-	struct LabelSection {
+	struct LabelDetail {
+		std::string name;
 		std::vector<std::string> list_items;
+	};
+
+	struct LabelSection {
+		std::string current_label_name;
+		std::unordered_map<std::string, LabelDetail> label_details;
 	};
 
 	struct TaskDetail {
@@ -295,11 +301,13 @@ namespace kanban_markdown {
 		switch (kanban_parser->list_item_level) {
 		case 1:
 		{
+			kanban_parser->label_section.label_details[text_content] = LabelDetail();
+			kanban_parser->label_section.current_label_name = text_content;
 			break;
 		}
 		case 2:
 		{
-			kanban_parser->label_section.list_items.push_back(text_content);
+			kanban_parser->label_section.label_details[kanban_parser->label_section.current_label_name].list_items.push_back(text_content);
 			break;
 		}
 		}
@@ -465,10 +473,10 @@ namespace kanban_markdown {
 		KanbanBoard kanban_board;
 		kanban_board.name = kanban_parser.kanban_board_name;
 		kanban_board.description = kanban_parser.kanban_board_description;
-		for (const std::string& label : kanban_parser.label_section.list_items) {
+		for (auto& [label_name, label_detail] : kanban_parser.label_section.label_details) {
 			std::shared_ptr<KanbanLabel> kanban_label = std::make_shared<KanbanLabel>();
-			kanban_label->name = label;
-			kanban_board.labels.insert({ label, kanban_label });
+			kanban_label->name = label_name;
+			kanban_board.labels.insert({ label_name, kanban_label });
 		}
 		for (BoardSection board_section : kanban_parser.board_section.boards) {
 			KanbanList kanban_list;
@@ -478,7 +486,16 @@ namespace kanban_markdown {
 				kanban_task->name = task_name;
 				kanban_task->description = task_detail.description;
 				for (const std::string& label : task_detail.labels) {
-					kanban_task->labels.push_back(kanban_board.labels[label]);
+					auto& kanban_label_pair = kanban_board.labels.find(label);
+					if (kanban_label_pair != kanban_board.labels.end()) {
+						kanban_task->labels.push_back(kanban_label_pair->second);
+					}
+					else {
+						auto kanban_label = std::make_shared<KanbanLabel>();
+						kanban_label->name = label;
+						kanban_label->tasks.push_back(kanban_task);
+						kanban_board.labels[label] = kanban_label;
+					}
 				}
 				//kanban_task.attachments = task_detail.attachments;
 				//kanban_task.checklist = task_detail.checklist;
@@ -486,8 +503,8 @@ namespace kanban_markdown {
 			}
 			kanban_board.list.insert({ board_section.name , kanban_list });
 		}
-		for (const std::string& label : kanban_parser.label_section.list_items) {
-			std::shared_ptr<KanbanLabel> kanban_label = kanban_board.labels[label];
+		for (auto& [label_name, label_detail] : kanban_parser.label_section.label_details) {
+			std::shared_ptr<KanbanLabel> kanban_label = kanban_board.labels[label_name];
 			for (BoardSection board_section : kanban_parser.board_section.boards) {
 				for (auto& [task_name, task_detail] : board_section.task_details) {
 					for (const std::string& label : task_detail.labels) {
