@@ -13,7 +13,8 @@ This is used as the main template
 
 ### To do:  
 - [ ] <span id="kanban_md-task-task">Task</span>  
-    - **Description**: sadbfdhubsidfghhausgbifdsiohjaisufjia dfjidsafasdjhksdafbasdnjkls hfnasdkfjladsfndas asndnfjkasdnjkfnaskfnasd  
+    - **Description**:   
+    sadbfdhubsidfghhausgbifdsiohjaisufjia dfjidsafasdjhksdafbasdnjkls hfnasdkfjladsfndas asndnfjkasdnjkfnaskfnasd  
     sdfgfaddzA
     czxzxc
     skadmasdfdfsdf
@@ -21,25 +22,23 @@ This is used as the main template
     - **Labels**:  
         - [Bug Report](#user-content-kanban_md-label-bug)
     - **Attachments**:  
-        -  [Test_Image | test_image.txt](test_image.txt)  
+        -  [Test_Image](test_image.txt)  
     - **Checklist**:  
         - [ ] aaa  
 - [x] <span id="kanban_md-task-huge_bug">Huge Bug</span>  
     - **Description**: sadbfdhubsidfghhausgbifdsiohjaisufjia dfjidsafasdjhksdafbasdnjkls hfnasdkfjladsfndas asndnfjkasdnjkfnaskfnasd  
-    - **Category**: Bug Report  
     - **Labels**:  
         - [Bug Report](#user-content-kanban_md-label-bug)
     - **Attachments**:  
-        -  [Test_Image | test_image.txt](test_image.txt)  
+        -  [Test_Image](test_image.txt)  
     - **Checklist**:  
         - [ ] aaa  
 - [x] <span id="kanban_md-task-huge_bug">Huge Bug</span>  
     - **Description**: sadbfdhubsidfghhausgbifdsiohjaisufjia dfjidsafasdjhksdafbasdnjkls hfnasdkfjladsfndas asndnfjkasdnjkfnaskfnasd  
-    - **Category**: Bug Report  
     - **Labels**:  
         - [Bug Report](#user-content-kanban_md-label-bug)
     - **Attachments**:  
-        -  [Test_Image | test_image.txt](test_image.txt)  
+        -  [Test_Image](test_image.txt)  
     - **Checklist**:  
         - [ ] aaa  
 

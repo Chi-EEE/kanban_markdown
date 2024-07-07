@@ -36,7 +36,11 @@ int main(int argc, char* argv[]) {
 		std::cout << maybe_kanban_board.error() << '\n';
 		return 1;
 	}
-	//std::cout << kanban_markdown::format(maybe_kanban_board.value());
+
+	std::ofstream out(exe_dir.string() + "/aaa.txt");
+	std::cout << kanban_markdown::markdown_format(maybe_kanban_board.value());
+	out << kanban_markdown::markdown_format(maybe_kanban_board.value());
+	out.close();
 
 	return 0;
 }

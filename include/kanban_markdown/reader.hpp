@@ -52,12 +52,19 @@ namespace kanban_markdown {
 		std::unordered_map<std::string, LabelDetail> label_details;
 	};
 
+	struct Attachment {
+		std::string name;
+		std::string url;
+	};
+
 	struct TaskDetail {
 		std::string name;
 		std::vector<std::string> description;
 		std::vector<std::string> labels;
-		std::vector<std::string> attachments;
-		std::vector<std::string> checklist;
+		std::vector<Attachment> attachments;
+		std::vector<KanbanChecklistItem> checklist;
+
+		Attachment* currentAttachment;
 	};
 
 	struct BoardSection {
@@ -85,7 +92,7 @@ namespace kanban_markdown {
 		BoardListSection board_section;
 
 		unsigned int list_item_level = 0;
-		unsigned int sub_list_item_count = 0;
+		unsigned int sub_list_item_count = 0; //
 
 		bool currently_reading_link = false;
 	};
@@ -226,8 +233,10 @@ namespace kanban_markdown {
 			if (kanban_parser->state == KanbanState::Board) {
 				if (kanban_parser->board_section.task_read_state == TaskReadState::Attachments) {
 					TaskDetail& task_detail = kanban_parser->board_section.current_board->task_details[kanban_parser->board_section.current_board->current_task_name];
-					std::string attachment(a_detail->href.text, a_detail->href.size);
+					Attachment attachment;
+					attachment.url = std::string(a_detail->href.text, a_detail->href.size);
 					task_detail.attachments.push_back(attachment);
+					task_detail.currentAttachment = &task_detail.attachments.back();
 				}
 			}
 			//std::cout << "[Link]\n";
@@ -348,7 +357,9 @@ namespace kanban_markdown {
 		{
 			std::cout << "Attachments: " << text_content << '\n';
 			if (kanban_parser->currently_reading_link) {
-				kanban_parser->board_section.current_board->task_details[kanban_parser->board_section.current_board->current_task_name].attachments.push_back(text_content);
+				auto& current_board = kanban_parser->board_section.current_board;
+				Attachment* current_attachment = current_board->task_details[current_board->current_task_name].currentAttachment;
+				current_attachment->name = text_content;
 			}
 			break;
 		}
@@ -366,7 +377,10 @@ namespace kanban_markdown {
 			else {
 				std::cerr << "Invalid checklist item: " << text_content << '\n';
 			}
-			kanban_parser->board_section.current_board->task_details[kanban_parser->board_section.current_board->current_task_name].checklist.push_back(text_content.substr(4));
+			KanbanChecklistItem checkbox;
+			checkbox.checked = is_checked;
+			checkbox.name = text_content.substr(4);
+			kanban_parser->board_section.current_board->task_details[kanban_parser->board_section.current_board->current_task_name].checklist.push_back(checkbox);
 			break;
 		}
 		}
@@ -496,8 +510,12 @@ namespace kanban_markdown {
 						kanban_board.labels[label] = kanban_label;
 					}
 				}
-				//kanban_task.attachments = task_detail.attachments;
-				//kanban_task.checklist = task_detail.checklist;
+				for (Attachment& attachment : task_detail.attachments) {
+					kanban_task->attachments.push_back({ attachment.name, attachment.url });
+				}
+				for (KanbanChecklistItem& checkbox : task_detail.checklist) {
+					kanban_task->checklist.push_back(checkbox);
+				}
 				kanban_list.tasks.insert({ task_name, kanban_task });
 			}
 			kanban_board.list.insert({ board_section.name , kanban_list });
