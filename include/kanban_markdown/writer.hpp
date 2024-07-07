@@ -71,7 +71,7 @@ namespace kanban_markdown {
 				);
 				std::string description_string = "  - **Description**:  ";
 				for (std::string description_line : kanban_task->description) {
-					description_string += "\n" + description_line + "  ";
+					description_string += "\n  " + description_line + "  ";
 				}
 				markdown_file += description_string + constants::END_OF_MARKDOWN_LINE;
 				markdown_file += "  - **Labels**:" + constants::END_OF_MARKDOWN_LINE;

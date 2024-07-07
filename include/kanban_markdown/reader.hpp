@@ -319,7 +319,7 @@ namespace kanban_markdown {
 		}
 	}
 
-	void parseTaskDetails(KanbanParser* kanban_parser, const std::string& text_content) {
+	void parseTaskDetails(KanbanParser* kanban_parser, std::string text_content) {
 		bool is_task_property = false;
 		switch (hash(text_content)) {
 		case hash("Description"):
@@ -341,7 +341,21 @@ namespace kanban_markdown {
 		}
 		if (!is_task_property && kanban_parser->board_section.task_read_state == TaskReadState::Description) {
 			BoardSection* current_board = kanban_parser->board_section.current_board;
-			current_board->task_details[kanban_parser->board_section.current_board->current_task_name].description.push_back(text_content);
+			TaskDetail& tail_detail = current_board->task_details[kanban_parser->board_section.current_board->current_task_name];
+			if (tail_detail.description.empty()) {
+				text_content = ltrim(text_content);
+				if (text_content.find(":") == 0)
+				{
+					text_content = text_content.substr(1);
+				}
+				text_content = ltrim(text_content);
+				if (!text_content.empty()) {
+					tail_detail.description.push_back(text_content);
+				}
+			}
+			else {
+				tail_detail.description.push_back(text_content);
+			}
 		}
 	}
 
@@ -349,13 +363,11 @@ namespace kanban_markdown {
 		switch (kanban_parser->board_section.task_read_state) {
 		case TaskReadState::Labels:
 		{
-			std::cout << "Labels: " << text_content << '\n';
 			kanban_parser->board_section.current_board->task_details[kanban_parser->board_section.current_board->current_task_name].labels.push_back(text_content);
 			break;
 		}
 		case TaskReadState::Attachments:
 		{
-			std::cout << "Attachments: " << text_content << '\n';
 			if (kanban_parser->currently_reading_link) {
 				auto& current_board = kanban_parser->board_section.current_board;
 				Attachment* current_attachment = current_board->task_details[current_board->current_task_name].currentAttachment;
@@ -365,7 +377,6 @@ namespace kanban_markdown {
 		}
 		case TaskReadState::Checklist:
 		{
-			std::cout << "Checklist: " << text_content << '\n';
 			bool is_checked = false;
 			std::string checkbox_characters = text_content.substr(0, 4);
 			if (checkbox_characters == "[ ] ") {
