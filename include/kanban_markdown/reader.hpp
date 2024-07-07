@@ -80,6 +80,7 @@ namespace kanban_markdown {
 	};
 
 	struct KanbanParser {
+		std::vector<unsigned int> previous_headers;
 		unsigned int header_level = 0;
 		KanbanState state = KanbanState::None;
 
@@ -130,6 +131,7 @@ namespace kanban_markdown {
 		case MD_BLOCK_H:
 		{
 			MD_BLOCK_H_DETAIL* header_detail = static_cast<MD_BLOCK_H_DETAIL*>(detail);
+			kanban_parser->previous_headers.push_back(kanban_parser->header_level);
 			kanban_parser->header_level = header_detail->level;
 			std::cout << "[Header - Open] " << header_detail->level << "\n";
 			break;
@@ -181,7 +183,8 @@ namespace kanban_markdown {
 		case MD_BLOCK_H:
 		{
 			MD_BLOCK_H_DETAIL* header_detail = static_cast<MD_BLOCK_H_DETAIL*>(detail);
-			kanban_parser->header_level = 0;
+			kanban_parser->header_level = kanban_parser->previous_headers.back();
+			kanban_parser->previous_headers.pop_back();
 			break;
 		}
 		case MD_BLOCK_P:
@@ -194,7 +197,7 @@ namespace kanban_markdown {
 			//std::cout << "[Unordered List]\n";
 			//std::cout << "[List Item - Close]\n";
 			if (kanban_parser->list_item_level == 0) {
-				kanban_parser->state = KanbanState::None;
+				kanban_parser->state = KanbanState::Board;
 			}
 			break;
 		}
@@ -407,6 +410,10 @@ namespace kanban_markdown {
 		switch (kanban_parser->list_item_level) {
 		case 0:
 		{
+			// Check if it is not a main header
+			if (kanban_parser->header_level <= 2) {
+				return;
+			}
 			BoardSection board_section;
 			board_section.name = text_content;
 			kanban_parser->board_section.boards.push_back(board_section);
