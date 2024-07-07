@@ -39,63 +39,18 @@ namespace kanban_markdown {
 		bool currently_reading_link = false;
 	};
 
-	const char* ws = " \t\n\r\f\v";
-
-	// trim from end of string (right)
-	inline std::string& rtrim(std::string& s, const char* t = ws)
-	{
-		s.erase(s.find_last_not_of(t) + 1);
-		return s;
-	}
-
-	// trim from beginning of string (left)
-	inline std::string& ltrim(std::string& s, const char* t = ws)
-	{
-		s.erase(0, s.find_first_not_of(t));
-		return s;
-	}
-
-	// trim from both ends of string (right then left)
-	inline std::string& trim(std::string& s, const char* t = ws)
-	{
-		return ltrim(rtrim(s, t), t);
-	}
-
 	int enter_block_callback(MD_BLOCKTYPE type, void* detail, void* userdata) {
 		KanbanParser* kanban_parser = static_cast<KanbanParser*>(userdata);
 		switch (type) {
-		case MD_BLOCK_DOC:
-		{
-			//std::cout << "[Document Start]\n";
-			break;
-		}
 		case MD_BLOCK_H:
 		{
 			MD_BLOCK_H_DETAIL* header_detail = static_cast<MD_BLOCK_H_DETAIL*>(detail);
 			kanban_parser->previous_headers.push_back(kanban_parser->header_level);
 			kanban_parser->header_level = header_detail->level;
-			std::cout << "[Header - Open] " << header_detail->level << "\n";
-			break;
-		}
-		case MD_BLOCK_P:
-		{
-			//std::cout << "[Paragraph]\n";
-			break;
-		}
-		case MD_BLOCK_UL:
-		{
-			MD_BLOCK_UL_DETAIL* ul_detail = static_cast<MD_BLOCK_UL_DETAIL*>(detail);
-			//std::cout << "[Unordered List]\n";
-			break;
-		}
-		case MD_BLOCK_OL:
-		{
-			//std::cout << "[Ordered List]\n";
 			break;
 		}
 		case MD_BLOCK_LI:
 		{
-			//std::cout << "[List Item - Open]\n";
 			if (kanban_parser->list_item_level == 1) {
 				kanban_parser->sub_list_item_count++;
 			}
@@ -104,23 +59,15 @@ namespace kanban_markdown {
 		}
 		default:
 		{
-			//std::cout << "Unknown Type: " << type << "\n";
 			break;
 		}
 		}
 		return 0;
 	}
 
-
-	// Callback for leaving block elements
 	int leave_block_callback(MD_BLOCKTYPE type, void* detail, void* userdata) {
 		KanbanParser* kanban_parser = static_cast<KanbanParser*>(userdata);
 		switch (type) {
-		case MD_BLOCK_DOC:
-		{
-			//std::cout << "[Document End]\n";
-			break;
-		}
 		case MD_BLOCK_H:
 		{
 			MD_BLOCK_H_DETAIL* header_detail = static_cast<MD_BLOCK_H_DETAIL*>(detail);
@@ -128,28 +75,15 @@ namespace kanban_markdown {
 			kanban_parser->previous_headers.pop_back();
 			break;
 		}
-		case MD_BLOCK_P:
-		{
-			//std::cout << "[Paragraph]\n";
-			break;
-		}
 		case MD_BLOCK_UL:
 		{
-			//std::cout << "[Unordered List]\n";
-			//std::cout << "[List Item - Close]\n";
 			if (kanban_parser->list_item_level == 0) {
 				kanban_parser->state = KanbanState::Board;
 			}
 			break;
 		}
-		case MD_BLOCK_OL:
-		{
-			//std::cout << "[Ordered List]\n";
-			break;
-		}
 		case MD_BLOCK_LI:
 		{
-			//std::cout << "[List Item - Close]\n";
 			if (kanban_parser->list_item_level == 1) {
 				kanban_parser->sub_list_item_count = 0;
 			}
@@ -158,14 +92,12 @@ namespace kanban_markdown {
 		}
 		default:
 		{
-			//std::cout << "Unknown Type: " << type << "\n";
 			break;
 		}
 		}
 		return 0;
 	}
 
-	// Callback for processing span elements
 	int enter_span_callback(MD_SPANTYPE type, void* detail, void* userdata) {
 		KanbanParser* kanban_parser = static_cast<KanbanParser*>(userdata);
 		switch (type) {
@@ -183,7 +115,6 @@ namespace kanban_markdown {
 					task_detail.currentAttachment = &task_detail.attachments.back();
 				}
 			}
-			//std::cout << "[Link]\n";
 			break;
 		}
 		default:
@@ -194,7 +125,6 @@ namespace kanban_markdown {
 		return 0;
 	}
 
-	// Callback for leaving span elements
 	int leave_span_callback(MD_SPANTYPE type, void* detail, void* userdata) {
 		KanbanParser* kanban_parser = static_cast<KanbanParser*>(userdata);
 		switch (type) {
@@ -404,7 +334,6 @@ namespace kanban_markdown {
 		}
 	}
 
-	// Callback for processing text
 	int text_callback(MD_TEXTTYPE type, const MD_CHAR* text, MD_SIZE size, void* userdata) {
 		KanbanParser* kanban_parser = static_cast<KanbanParser*>(userdata);
 		std::string text_content(text, size);
@@ -445,14 +374,17 @@ namespace kanban_markdown {
 		if (result != 0) {
 			std::cerr << "Error parsing Markdown text." << std::endl;
 		}
+
 		KanbanBoard kanban_board;
 		kanban_board.name = kanban_parser.kanban_board_name;
 		kanban_board.description = kanban_parser.kanban_board_description;
+
 		for (auto& [label_name, label_detail] : kanban_parser.label_section.label_details) {
 			std::shared_ptr<KanbanLabel> kanban_label = std::make_shared<KanbanLabel>();
 			kanban_label->name = label_name;
 			kanban_board.labels.insert({ label_name, kanban_label });
 		}
+
 		for (BoardSection board_section : kanban_parser.board_section.boards) {
 			KanbanList kanban_list;
 			kanban_list.name = board_section.name;
