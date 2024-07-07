@@ -61,12 +61,6 @@ namespace kanban_markdown {
 	};
 
 	struct BoardSection {
-		BoardSection() {
-			/*magic_enum::enum_for_each<TaskReadState>([](auto val) {
-				constexpr TaskReadState task_read_state = val;
-				task_detail[task_read_state] = TaskDetail();
-				});*/
-		}
 		std::string name;
 		std::string current_task_name;
 		std::unordered_map<std::string, TaskDetail> task_details;
@@ -76,7 +70,6 @@ namespace kanban_markdown {
 		std::vector<BoardSection> boards;
 		BoardSection* current_board = nullptr;
 		TaskReadState task_read_state = TaskReadState::None;
-		bool reading_task_detail = false;
 	};
 
 	struct KanbanParser {
@@ -93,6 +86,8 @@ namespace kanban_markdown {
 
 		unsigned int list_item_level = 0;
 		unsigned int sub_list_item_count = 0;
+
+		bool currently_reading_link = false;
 	};
 
 	const char* ws = " \t\n\r\f\v";
@@ -207,9 +202,6 @@ namespace kanban_markdown {
 			if (kanban_parser->list_item_level == 1) {
 				kanban_parser->sub_list_item_count = 0;
 			}
-			if (kanban_parser->state == KanbanState::Board) {
-				kanban_parser->board_section.reading_task_detail = false;
-			}
 			kanban_parser->list_item_level--;
 			break;
 		}
@@ -226,24 +218,19 @@ namespace kanban_markdown {
 	int enter_span_callback(MD_SPANTYPE type, void* detail, void* userdata) {
 		KanbanParser* kanban_parser = static_cast<KanbanParser*>(userdata);
 		switch (type) {
-		case MD_SPAN_EM:
-		{
-			//std::cout << "[Emphasis]\n";
-			break;
-		}
-		case MD_SPAN_STRONG:
-		{
-			//std::cout << "[Strong]\n";
-			break;
-		}
 		case MD_SPAN_A:
 		{
+			kanban_parser->currently_reading_link = true;
+			MD_SPAN_A_DETAIL* a_detail = static_cast<MD_SPAN_A_DETAIL*>(detail);
+
+			if (kanban_parser->state == KanbanState::Board) {
+				if (kanban_parser->board_section.task_read_state == TaskReadState::Attachments) {
+					TaskDetail& task_detail = kanban_parser->board_section.current_board->task_details[kanban_parser->board_section.current_board->current_task_name];
+					std::string attachment(a_detail->href.text, a_detail->href.size);
+					task_detail.attachments.push_back(attachment);
+				}
+			}
 			//std::cout << "[Link]\n";
-			break;
-		}
-		case MD_SPAN_IMG:
-		{
-			//std::cout << "[Image]\n";
 			break;
 		}
 		default:
@@ -257,7 +244,17 @@ namespace kanban_markdown {
 	// Callback for leaving span elements
 	int leave_span_callback(MD_SPANTYPE type, void* detail, void* userdata) {
 		KanbanParser* kanban_parser = static_cast<KanbanParser*>(userdata);
-		//std::cout << "Leaving span type: " << type << std::endl;
+		switch (type) {
+		case MD_SPAN_A:
+		{
+			kanban_parser->currently_reading_link = false;
+			break;
+		}
+		default:
+		{
+			break;
+		}
+		}
 		return 0;
 	}
 
@@ -350,7 +347,9 @@ namespace kanban_markdown {
 		case TaskReadState::Attachments:
 		{
 			std::cout << "Attachments: " << text_content << '\n';
-			kanban_parser->board_section.current_board->task_details[kanban_parser->board_section.current_board->current_task_name].attachments.push_back(text_content);
+			if (kanban_parser->currently_reading_link) {
+				kanban_parser->board_section.current_board->task_details[kanban_parser->board_section.current_board->current_task_name].attachments.push_back(text_content);
+			}
 			break;
 		}
 		case TaskReadState::Checklist:
