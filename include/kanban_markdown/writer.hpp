@@ -63,8 +63,8 @@ namespace kanban_markdown {
 				fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 			);
 			for (auto& [kanban_task_name, kanban_task] : kanban_list.tasks) {
-				const std::string kanban_task_name = kanban_task->name;
-				markdown_file += fmt::format(R"(- [ ] <span id="kanban_md-task-{id}">{name}</span>{eol})",
+				markdown_file += fmt::format(R"(- [{checked}] <span id="kanban_md-task-{id}">{name}</span>{eol})",
+					fmt::arg("checked", kanban_task->checked ? 'x' : ' '),
 					fmt::arg("id", string_to_id(kanban_task_name)),
 					fmt::arg("name", kanban_task_name),
 					fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
@@ -96,7 +96,8 @@ namespace kanban_markdown {
 				markdown_file += "  - **Checklist**:" + constants::END_OF_MARKDOWN_LINE;
 				for (KanbanChecklistItem kanban_checklist_item : kanban_task->checklist) {
 					markdown_file += fmt::format(
-						"    - [ ] {name}{eol}",
+						"    - [{checked}] {name}{eol}",
+						fmt::arg("checked", kanban_checklist_item.checked ? 'x' : ' '),
 						fmt::arg("name", kanban_checklist_item.name),
 						fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 					);
