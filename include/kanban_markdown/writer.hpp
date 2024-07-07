@@ -47,7 +47,7 @@ namespace kanban_markdown {
 			for (std::shared_ptr<KanbanTask> kanban_task : kanban_label->tasks) {
 				const std::string kanban_task_name = kanban_task->name;
 				markdown_file += fmt::format(
-					R"(  - [{name}](#user-content-{id}){eol})",
+					R"(  - [{name}](#user-content-kanban_md-task-{id}){eol})",
 					fmt::arg("id", string_to_id(kanban_task_name)),
 					fmt::arg("name", kanban_task_name),
 					fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
@@ -78,7 +78,7 @@ namespace kanban_markdown {
 				for (std::shared_ptr<KanbanLabel> kanban_label : kanban_task->labels) {
 					const std::string kanban_label_name = kanban_label->name;
 					markdown_file += fmt::format(
-						"    - [{name}](#user-content-{id}){eol}",
+						"    - [{name}](#user-content-kanban_md-label-{id}){eol}",
 						fmt::arg("id", string_to_id(kanban_label_name)),
 						fmt::arg("name", kanban_label_name),
 						fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)

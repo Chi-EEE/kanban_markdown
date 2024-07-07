@@ -6,8 +6,8 @@ This is used as the main template
 
 ## Labels:  
 - <span id="kanban_md-label-bug_report">Bug Report</span>  
-  - [Task](#user-content-task)  
-  - [Huge Bug](#user-content-huge_bug)  
+  - [Task](#user-content-kanban_md-task-task)  
+  - [Huge Bug](#user-content-kanban_md-task-huge_bug)  
 
 ## Board:  
 
@@ -20,20 +20,20 @@ This is used as the main template
   skadmasdfdfsdf  
   asdfnjasd    
   - **Labels**:  
-    - [Bug Report](#user-content-bug_report)  
+    - [Bug Report](#user-content-kanban_md-label-bug_report)  
   - **Attachments**:  
     - [Test_Image](test_image.txt)  
   - **Checklist**:  
-    - [true] aaa  
+    - [x] aaa  
 - [ ] <span id="kanban_md-task-huge_bug">Huge Bug</span>  
   - **Description**:  
   sadbfdhubsidfghhausgbifdsiohjaisufjia dfjidsafasdjhksdafbasdnjkls hfnasdkfjladsfndas asndnfjkasdnjkfnaskfnasd    
   - **Labels**:  
-    - [Bug Report](#user-content-bug_report)  
+    - [Bug Report](#user-content-kanban_md-label-bug_report)  
   - **Attachments**:  
     - [Test_Image](test_image.txt)  
   - **Checklist**:  
-    - [true] aaa  
+    - [x] aaa  
 
 ### Doing:  
 
