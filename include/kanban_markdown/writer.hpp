@@ -68,7 +68,7 @@ namespace kanban_markdown {
 				for (std::shared_ptr<KanbanLabel> kanban_label : kanban_task->labels) {
 					const std::string kanban_label_name = kanban_label->name;
 					markdown_file += fmt::format(
-						"    - [{name}]({github}{kanban_md}-label-{id}){eol}",
+						"    - [{name}](#{github}{kanban_md}-label-{id}){eol}",
 						fmt::arg("github", kanban_writer_flags.github ? constants::github_added_tag : ""),
 						fmt::arg("kanban_md", constants::kanban_md),
 						fmt::arg("id", string_to_id(kanban_label_name)),
