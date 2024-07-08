@@ -1,7 +1,7 @@
 #pragma once
 
 namespace kanban_markdown::internal {
-	std::string string_to_id(const std::string& string)
+	std::string kanban_markdown_string_to_id(const std::string& string)
 	{
 		std::string id;
 		for (int i = 0; i < string.size(); i++)
@@ -20,7 +20,7 @@ namespace kanban_markdown::internal {
 		return id;
 	}
 
-	static constexpr uint32_t hash(const std::string_view s) noexcept
+	static constexpr inline uint32_t kanban_markdown_hash(const std::string_view s) noexcept
 	{
 		uint32_t hash = 5381;
 
@@ -33,23 +33,23 @@ namespace kanban_markdown::internal {
 	const char* ws = " \t\n\r\f\v";
 
 	// trim from end of string (right)
-	inline std::string& rtrim(std::string& s, const char* t = ws)
+	inline std::string& kanban_markdown_rtrim(std::string& s, const char* t = ws)
 	{
 		s.erase(s.find_last_not_of(t) + 1);
 		return s;
 	}
 
 	// trim from beginning of string (left)
-	inline std::string& ltrim(std::string& s, const char* t = ws)
+	inline std::string& kanban_markdown_ltrim(std::string& s, const char* t = ws)
 	{
 		s.erase(0, s.find_first_not_of(t));
 		return s;
 	}
 
 	// trim from both ends of string (right then left)
-	inline std::string& trim(std::string& s, const char* t = ws)
+	inline std::string& kanban_markdown_trim(std::string& s, const char* t = ws)
 	{
-		return ltrim(rtrim(s, t), t);
+		return kanban_markdown_ltrim(kanban_markdown_rtrim(s, t), t);
 	}
 
 	enum class KanbanState {

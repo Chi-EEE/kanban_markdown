@@ -195,20 +195,20 @@ namespace kanban_markdown {
 
 	void parseTaskDetails(KanbanParser* kanban_parser, std::string text_content) {
 		bool is_task_property = false;
-		switch (hash(text_content)) {
-		case hash("Description"):
+		switch (kanban_markdown_hash(text_content)) {
+		case kanban_markdown_hash("Description"):
 			kanban_parser->board_section.task_read_state = TaskReadState::Description;
 			is_task_property = true;
 			break;
-		case hash("Labels"):
+		case kanban_markdown_hash("Labels"):
 			kanban_parser->board_section.task_read_state = TaskReadState::Labels;
 			is_task_property = true;
 			break;
-		case hash("Attachments"):
+		case kanban_markdown_hash("Attachments"):
 			kanban_parser->board_section.task_read_state = TaskReadState::Attachments;
 			is_task_property = true;
 			break;
-		case hash("Checklist"):
+		case kanban_markdown_hash("Checklist"):
 			kanban_parser->board_section.task_read_state = TaskReadState::Checklist;
 			is_task_property = true;
 			break;
@@ -217,18 +217,18 @@ namespace kanban_markdown {
 			BoardSection* current_board = kanban_parser->board_section.current_board;
 			TaskDetail& tail_detail = current_board->task_details[current_board->current_task_name];
 			if (tail_detail.description.empty()) {
-				text_content = ltrim(text_content);
+				text_content = kanban_markdown_ltrim(text_content);
 				if (text_content.find(":") == 0)
 				{
 					text_content = text_content.substr(1);
 				}
-				text_content = trim(text_content);
+				text_content = kanban_markdown_trim(text_content);
 				if (!text_content.empty()) {
 					tail_detail.description.push_back(text_content);
 				}
 			}
 			else {
-				text_content = trim(text_content);
+				text_content = kanban_markdown_trim(text_content);
 				if (!text_content.empty()) {
 					tail_detail.description.push_back(text_content);
 				}

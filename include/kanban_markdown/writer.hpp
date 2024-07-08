@@ -27,7 +27,7 @@ namespace kanban_markdown {
 			markdown_file += fmt::format(
 				R"(- <span id="{kanban_md}-label-{id}">{name}</span>{eol})",
 				fmt::arg("kanban_md", constants::kanban_md),
-				fmt::arg("id", string_to_id(kanban_label_name)),
+				fmt::arg("id", kanban_markdown_string_to_id(kanban_label_name)),
 				fmt::arg("name", kanban_label_name),
 				fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 			);
@@ -37,7 +37,7 @@ namespace kanban_markdown {
 					R"(  - [{name}](#{github}{kanban_md}-task-{id}){eol})",
 					fmt::arg("github", kanban_writer_flags.github ? constants::github_added_tag : ""),
 					fmt::arg("kanban_md", constants::kanban_md),
-					fmt::arg("id", string_to_id(kanban_task_name)),
+					fmt::arg("id", kanban_markdown_string_to_id(kanban_task_name)),
 					fmt::arg("name", kanban_task_name),
 					fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 				);
@@ -55,7 +55,7 @@ namespace kanban_markdown {
 				markdown_file += fmt::format(R"(- [{checked}] <span id="{kanban_md}-task-{id}">{name}</span>{eol})",
 					fmt::arg("checked", kanban_task->checked ? 'x' : ' '),
 					fmt::arg("kanban_md", constants::kanban_md),
-					fmt::arg("id", string_to_id(kanban_task_name)),
+					fmt::arg("id", kanban_markdown_string_to_id(kanban_task_name)),
 					fmt::arg("name", kanban_task_name),
 					fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 				);
@@ -71,7 +71,7 @@ namespace kanban_markdown {
 						"    - [{name}](#{github}{kanban_md}-label-{id}){eol}",
 						fmt::arg("github", kanban_writer_flags.github ? constants::github_added_tag : ""),
 						fmt::arg("kanban_md", constants::kanban_md),
-						fmt::arg("id", string_to_id(kanban_label_name)),
+						fmt::arg("id", kanban_markdown_string_to_id(kanban_label_name)),
 						fmt::arg("name", kanban_label_name),
 						fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 					);

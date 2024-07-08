@@ -19,27 +19,20 @@ function activate(context) {
 	console.log('Congratulations, your extension "kanban-markdown" is now active!');
 
 	// Check if server exists
-	const serverPath = vscode.Uri.joinPath(context.extensionUri, 'kanban-markdown_server.exe');
-	if (!fs.existsSync(serverPath.fsPath)) {
+	const server_path = vscode.Uri.joinPath(context.extensionUri, 'server', 'kanban-markdown_server.exe');
+	if (!fs.existsSync(server_path.fsPath)) {
 		console.log("Server not found");
 		return;
 	}
 
-	var kanban_markdown_server = spawn(serverPath.fsPath);
+	var kanban_markdown_server = spawn(server_path.fsPath);
 	kanban_markdown_server.stdout.on('data', function (data) {
 		console.log('stdout: ' + data.toString());
 	});
 
-	kanban_markdown_server.stderr.on('data', function (data) {
-		console.log('stderr: ' + data.toString());
-	});
-
-	// Wait for the server to start
-	setTimeout(() => {
-		kanban_markdown_server.stdin.write("here you go");
-		console.log("wrote to stdin");
-	}, 1000);
-
+	kanban_markdown_server.stdin.cork();
+	kanban_markdown_server.stdin.write("console.log('Hello from PhantomJS')\n");
+	kanban_markdown_server.stdin.uncork();
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with  registerCommand

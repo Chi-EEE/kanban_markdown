@@ -42,6 +42,10 @@ target("kanban-markdown_server")
 
     add_files("server/*.cpp")
 
+    after_build(function (target) 
+        os.cp(path.join(target:targetdir(), "kanban-markdown_server.exe"), path.join("$(scriptdir)", "extension", "server", "kanban-markdown_server.exe"))
+    end)
+
     set_targetdir("$(buildir)/$(plat)/$(arch)/$(mode)/server")
 
     add_deps("kanban-markdown", {public = true})
