@@ -9,6 +9,7 @@ end
 
 add_requires("fmt", "re2", "md4c", "tl_expected", "ordered_map")
 add_requires("argparse")
+add_requires("yyjson")
 
 target("kanban-markdown")
     set_kind("$(kind)")
@@ -30,6 +31,18 @@ target("kanban-markdown_cli")
     add_files("cli/*.cpp")
 
     set_targetdir("$(buildir)/$(plat)/$(arch)/$(mode)/cli")
+
+    add_deps("kanban-markdown", {public = true})
+target_end()
+
+target("kanban-markdown_server")
+    set_kind("binary")
+    set_languages("cxx17")
+    add_packages("yyjson")
+
+    add_files("server/*.cpp")
+
+    set_targetdir("$(buildir)/$(plat)/$(arch)/$(mode)/server")
 
     add_deps("kanban-markdown", {public = true})
 target_end()
