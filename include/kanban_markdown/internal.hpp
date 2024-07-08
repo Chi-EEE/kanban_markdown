@@ -82,6 +82,7 @@ namespace kanban_markdown::internal {
 	};
 
 	struct TaskDetail {
+		bool checked = false;
 		std::string name;
 		std::vector<std::string> description;
 		std::vector<std::string> labels;
@@ -94,6 +95,7 @@ namespace kanban_markdown::internal {
 	struct BoardSection {
 		std::string name;
 		std::string current_task_name;
+		bool current_stored_checked = false;
 		tsl::ordered_map<std::string, TaskDetail> task_details;
 	};
 

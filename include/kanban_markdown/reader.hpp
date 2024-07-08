@@ -215,7 +215,7 @@ namespace kanban_markdown {
 		}
 		if (!is_task_property && kanban_parser->board_section.task_read_state == TaskReadState::Description) {
 			BoardSection* current_board = kanban_parser->board_section.current_board;
-			TaskDetail& tail_detail = current_board->task_details[kanban_parser->board_section.current_board->current_task_name];
+			TaskDetail& tail_detail = current_board->task_details[current_board->current_task_name];
 			if (tail_detail.description.empty()) {
 				text_content = ltrim(text_content);
 				if (text_content.find(":") == 0)
@@ -240,13 +240,14 @@ namespace kanban_markdown {
 		switch (kanban_parser->board_section.task_read_state) {
 		case TaskReadState::Labels:
 		{
-			kanban_parser->board_section.current_board->task_details[kanban_parser->board_section.current_board->current_task_name].labels.push_back(text_content);
+			BoardSection* current_board = kanban_parser->board_section.current_board;
+			current_board->task_details[current_board->current_task_name].labels.push_back(text_content);
 			break;
 		}
 		case TaskReadState::Attachments:
 		{
 			if (kanban_parser->currently_reading_link) {
-				auto& current_board = kanban_parser->board_section.current_board;
+				BoardSection* current_board = kanban_parser->board_section.current_board;
 				Attachment* current_attachment = current_board->task_details[current_board->current_task_name].currentAttachment;
 				current_attachment->name = text_content;
 			}
@@ -268,7 +269,8 @@ namespace kanban_markdown {
 			KanbanChecklistItem checkbox;
 			checkbox.checked = is_checked;
 			checkbox.name = text_content.substr(4);
-			kanban_parser->board_section.current_board->task_details[kanban_parser->board_section.current_board->current_task_name].checklist.push_back(checkbox);
+			BoardSection* current_board = kanban_parser->board_section.current_board;
+			current_board->task_details[current_board->current_task_name].checklist.push_back(checkbox);
 			break;
 		}
 		}
@@ -276,6 +278,18 @@ namespace kanban_markdown {
 
 	void parseBoardSection(KanbanParser* kanban_parser, const std::string& text_content) {
 		if (text_content == "[ ] " || text_content == "[x] ") {
+			bool is_checked = false;
+			std::string checkbox_characters = text_content.substr(0, 4);
+			if (checkbox_characters == "[ ] ") {
+				is_checked = false;
+			}
+			else if (checkbox_characters == "[x] ") {
+				is_checked = true;
+			}
+			else {
+				std::cerr << "Invalid checklist item: " << text_content << '\n';
+			}
+			kanban_parser->board_section.current_board->current_stored_checked = is_checked;
 			return;
 		}
 		switch (kanban_parser->list_item_level) {
@@ -293,8 +307,12 @@ namespace kanban_markdown {
 		}
 		case 1:
 		{
-			kanban_parser->board_section.current_board->current_task_name = text_content;
-			kanban_parser->board_section.current_board->task_details[text_content] = TaskDetail();
+			BoardSection* current_board = kanban_parser->board_section.current_board;
+			current_board->current_task_name = text_content;
+			TaskDetail task_detail;
+			task_detail.name = text_content;
+			task_detail.checked = current_board->current_stored_checked;
+			current_board->task_details[current_board->current_task_name] = task_detail;
 			break;
 		}
 		case 2:
@@ -390,6 +408,7 @@ namespace kanban_markdown {
 			kanban_list.name = board_section.name;
 			for (auto& [task_name, task_detail] : board_section.task_details) {
 				std::shared_ptr<KanbanTask> kanban_task = std::make_shared<KanbanTask>();
+				kanban_task->checked = task_detail.checked;
 				kanban_task->name = task_name;
 				kanban_task->description = task_detail.description;
 				for (const std::string& label : task_detail.labels) {
