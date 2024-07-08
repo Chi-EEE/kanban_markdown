@@ -2,6 +2,7 @@
 #include <yyjson.h>
 
 int main() {
+	std::cout << "Hello, World!" << std::endl;
 	std::string input;
 	while (true)
 	{

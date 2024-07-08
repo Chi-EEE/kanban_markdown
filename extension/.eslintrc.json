@@ -13,6 +13,10 @@
 		},
 		"sourceType": "module"
 	},
+	"ignorePatterns": [
+		"node_modules/",
+		"dist/"
+	],
 	"rules": {
 		"no-const-assign": "warn",
 		"no-this-before-super": "warn",
