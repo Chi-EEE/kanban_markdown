@@ -37,11 +37,12 @@ body {
     display: flex;
     align-items: flex-start;
     margin-top: 60px;
-    /* Adjust margin to account for fixed title bar */
+
     padding-left: 20px;
     padding-right: 20px;
+
     width: 100%;
-    height: 100%;
+    height: calc(100% - 60px);
     overflow-x: scroll;
 }
 
