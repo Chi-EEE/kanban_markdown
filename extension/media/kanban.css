@@ -78,6 +78,7 @@ body {
 
 .card {
     background-color: #22272B;
+    width: calc(300px - 20px);
     /* Changed background color */
     border-radius: 3px;
     padding: 10px;
@@ -131,9 +132,7 @@ body {
     font-size: 14px;
     margin-top: 10px;
 
-    min-width: 300px;
-    width: 300px;
-    max-width: 300px;
+    width: 100%;
 }
 
 .add-card:hover {
