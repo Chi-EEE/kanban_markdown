@@ -25,6 +25,12 @@ $(document).ready(function () {
             $addListButton.show();
         });
 
+        $listTitle.on('keypress', function (e) {
+            if (e.which === 13) { // Enter key
+                $listTitle.trigger('blur');
+            }
+        });
+
         const $cards = $('<div>')
             .addClass('cards')
             .sortable({
@@ -67,6 +73,12 @@ $(document).ready(function () {
                         $cardTitleInput.prop('readonly', true);
                     }
                     $addCardButton.show();
+                });
+
+                $cardTitleInput.on('keypress', function (e) {
+                    if (e.which === 13) { // Enter key
+                        $cardTitleInput.trigger('blur');
+                    }
                 });
 
                 const $cardMenuButton = $('<button>')
