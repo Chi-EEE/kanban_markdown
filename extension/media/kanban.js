@@ -204,4 +204,9 @@ $(document).ready(function () {
         $kanbanTitle.show();
         $editTitleInput.hide();
     });
+
+    $('#board').sortable({
+        items: '> .list',
+        tolerance: 'pointer'
+    });
 });
