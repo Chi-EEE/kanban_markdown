@@ -9,7 +9,7 @@ body {
     height: 100vh;
     color: #B6C2CF;
 
-    overflow-x: hidden;
+    overflow-x: scroll;
     padding-bottom: 20px;
 }
 
@@ -44,6 +44,7 @@ body {
     width: 100%;
     height: calc(100% - 60px);
     overflow-x: scroll;
+    white-space: nowrap;
 }
 
 .list {
