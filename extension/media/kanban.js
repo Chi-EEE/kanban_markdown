@@ -18,25 +18,12 @@ $(document).ready(function () {
             isListTitleChanged = true;
         });
 
-        $listTitle.on('blur', function () {
-            if (!isListTitleChanged) {
-                $newList.remove();
-            }
-            $addListButton.show();
-        });
-
-        $listTitle.on('keypress', function (e) {
-            if (e.which === 13) { // Enter key
-                $listTitle.trigger('blur');
-            }
-        });
-
         const $cards = $('<div>')
             .addClass('cards')
             .sortable({
                 connectWith: '.cards',
                 tolerance: 'pointer'
-            });;
+            }).hide();
 
         const $addCardButton = $('<button>')
             .addClass('add-card')
@@ -117,7 +104,22 @@ $(document).ready(function () {
                 $card.append($cardTitleInput, $cardMenuButton, $cardMenuActions);
                 $cards.append($card);
                 $cardTitleInput.trigger('focus');
-            });
+            }).hide();
+
+        $listTitle.on('blur', function () {
+            if (!isListTitleChanged) {
+                $newList.remove();
+            }
+            $addListButton.show();
+            $addCardButton.show()
+            $cards.show();
+        });
+
+        $listTitle.on('keypress', function (e) {
+            if (e.which === 13) { // Enter key
+                $listTitle.trigger('blur');
+            }
+        });
 
         const $listActionsButton = $('<button>')
             .addClass('list-actions')

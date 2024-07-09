@@ -75,12 +75,6 @@ class KanbanMarkdownEditorProvider {
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(
             this.context.extensionUri, 'media', 'kanban.js'));
     
-        const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(
-            this.context.extensionUri, 'media', 'reset.css'));
-    
-        const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(
-            this.context.extensionUri, 'media', 'vscode.css'));
-    
         const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(
             this.context.extensionUri, 'media', 'kanban.css'));
     
@@ -101,8 +95,6 @@ class KanbanMarkdownEditorProvider {
     
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-                <link href="${styleResetUri}" rel="stylesheet" />
-                <link href="${styleVSCodeUri}" rel="stylesheet" />
                 <link href="${styleMainUri}" rel="stylesheet" />
     
                 <title>Kanban Board</title>
