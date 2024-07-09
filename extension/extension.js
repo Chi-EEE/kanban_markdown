@@ -1,4 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
+
+const { KanbanMarkdownEditorProvider } = require('./src/KanbanMarkdownEditor');
+
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
 
@@ -9,10 +12,12 @@ const fs = require('fs');
 var spawn = require('child_process').spawn;
 
 
+
 /**
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
+	context.subscriptions.push(KanbanMarkdownEditorProvider.register(context));
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
