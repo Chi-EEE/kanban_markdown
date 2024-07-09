@@ -1,9 +1,13 @@
 $(document).ready(function () {
     // Add List button click event
-    $('#add-list').on("click", function () {
+    const $addListButton = $('#add-list');
+    $addListButton.on("click", function () {
+        $addListButton.hide();
+
         const $board = $('#board');
 
         const $newList = $('<div>').addClass('list');
+        const listId = 'list-' + ($board.find('.list').length + 1); // Generate unique list ID
 
         const $listTitle = $('<input>')
             .addClass('list-title')
@@ -18,14 +22,21 @@ $(document).ready(function () {
             if (!isListTitleChanged) {
                 $newList.remove();
             }
+            $addListButton.show();
         });
 
-        const $cards = $('<div>').addClass('cards');
+        const $cards = $('<div>')
+            .addClass('cards')
+            .sortable({
+                connectWith: '.cards',
+                tolerance: 'pointer'
+            });;
 
         const $addCardButton = $('<button>')
             .addClass('add-card')
             .text('Add another card +')
             .on('click', function () {
+                $addCardButton.hide();
                 const $card = $('<div>').addClass('card');
 
                 $card.on('click', function () {
@@ -55,6 +66,7 @@ $(document).ready(function () {
                     } else {
                         $cardTitleInput.prop('readonly', true);
                     }
+                    $addCardButton.show();
                 });
 
                 const $cardMenuButton = $('<button>')
@@ -118,9 +130,14 @@ $(document).ready(function () {
 
         $listActionsMenu.append($removeListButton);
 
+        $newList.attr('id', listId);
         $newList.append($listTitle, $listActionsButton, $listActionsMenu, $cards, $addCardButton);
         $board.children('#add-list').before($newList);
         $listTitle.trigger('focus');
+        $cards.sortable({
+            connectWith: '.cards',
+            tolerance: 'pointer'
+        });
     });
 
     // Background color picker
@@ -172,7 +189,7 @@ $(document).ready(function () {
     const $kanbanTitle = $('#kanban-title');
     const $editTitleInput = $('#edit-title-input');
 
-    $kanbanTitle.on("click",function () {
+    $kanbanTitle.on("click", function () {
         $kanbanTitle.hide();
         $editTitleInput.show().val($kanbanTitle.text().trim()).focus();
     });

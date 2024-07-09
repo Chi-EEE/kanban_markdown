@@ -65,6 +65,7 @@ body {
 }
 
 .cards {
+    min-height: 8px;
     flex-grow: 1;
 }
 
@@ -104,6 +105,10 @@ body {
     cursor: pointer;
     font-size: 14px;
     margin-top: 10px;
+
+    min-width: 300px;
+    width: 300px;
+    max-width: 300px;
 }
 
 .add-card:hover,
