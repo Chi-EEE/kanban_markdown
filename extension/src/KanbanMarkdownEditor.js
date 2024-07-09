@@ -135,7 +135,8 @@ class KanbanMarkdownEditorProvider {
                     </div>
                 </div>
 
-                
+                <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous" nonce="${nonce}"></script>
+
                 <script nonce="${nonce}" src="${scriptUri}"></script>
                 </body>
             </html>`;
