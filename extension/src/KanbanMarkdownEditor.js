@@ -74,19 +74,19 @@ class KanbanMarkdownEditorProvider {
         // Local path to script and css for the webview
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(
             this.context.extensionUri, 'media', 'kanban.js'));
-
+    
         const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(
             this.context.extensionUri, 'media', 'reset.css'));
-
+    
         const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(
             this.context.extensionUri, 'media', 'vscode.css'));
-
+    
         const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(
             this.context.extensionUri, 'media', 'kanban.css'));
-
+    
         // Use a nonce to whitelist which scripts can be run
         const nonce = getNonce();
-
+    
         return /* html */`
             <!DOCTYPE html>
             <html lang="en">
@@ -108,24 +108,38 @@ class KanbanMarkdownEditorProvider {
                 <title>Kanban Board</title>
             </head>
             <body>
-                <div id="board">
-                    <div class="list">
-                        <input class="list-title" placeholder="Enter list title" />
-                        <div class="cards">
-                            <div class="card">
-                                <input class="card-title" placeholder="Enter card title" />
-                            </div>
-                        </div>
-                        <button class="add-card">Add another card</button>
+                <div id="title-bar">
+                    <div id="editable-title">
+                        <h1 id="kanban-title">Kanban Board</h1>
+                        <input type="text" id="edit-title-input" />
                     </div>
-                    <button id="add-list">Add another list</button>
+                    <input type="color" id="background-color-picker" value="#ffffff">
+                </div>
+
+                <div id="board">
+                    <button id="add-list">Add another list +</button>
                 </div>
                 
+                <div id="card-modal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <h2>Edit Card</h2>
+                        <div class="modal-body">
+                            <label for="edit-card-title">Title</label>
+                            <input type="text" id="edit-card-title" placeholder="Enter card title" />
+
+                            <label for="edit-card-description">Description</label>
+                            <textarea id="edit-card-description" placeholder="Enter card description"></textarea>
+                        </div>
+                        <button id="save-card">Save</button>
+                    </div>
+                </div>
+
+                
                 <script nonce="${nonce}" src="${scriptUri}"></script>
-            </body>
+                </body>
             </html>`;
     }
-
 }
 
 module.exports = {
