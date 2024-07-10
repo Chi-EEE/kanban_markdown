@@ -1,5 +1,7 @@
 $(document).ready(function () {
-    // Add List button click event
+    // @ts-ignore
+    const vscode = acquireVsCodeApi();
+
     const $addListButton = $('#add-list');
     $addListButton.on("click", function () {
         $addListButton.hide();
@@ -109,6 +111,12 @@ $(document).ready(function () {
         $listTitle.on('blur', function () {
             if (!isListTitleChanged) {
                 $newList.remove();
+            } else {
+                vscode.postMessage({
+                    command: 'addList',
+                    listId: listId,
+                    listTitle: $listTitle.val()
+                });
             }
             $addListButton.show();
             $addCardButton.show()

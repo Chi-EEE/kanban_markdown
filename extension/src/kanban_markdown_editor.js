@@ -1,6 +1,7 @@
 const { getNonce } = require('./util');
 
 const vscode = require('vscode');
+const { KanbanMarkdownServer } = require('./kanban_markdown_server');
 
 /**
  * @implements {vscode.CustomTextEditorProvider}
@@ -38,6 +39,8 @@ class KanbanMarkdownEditorProvider {
      * @param {vscode.CancellationToken} token 
      */
     resolveCustomTextEditor(document, webviewPanel, token) {
+        this.server = new KanbanMarkdownServer(this.context);
+
         webviewPanel.webview.options = {
             enableScripts: true,
         };
@@ -59,10 +62,31 @@ class KanbanMarkdownEditorProvider {
 
         // Make sure we get rid of the listener when our editor is closed.
         webviewPanel.onDidDispose(() => {
+            this.server.close();
             changeDocumentSubscription.dispose();
         });
+        
+		webviewPanel.webview.onDidReceiveMessage(e => {
+			switch (e.type) {
+				case 'addList':
+					this.addList(document);
+					return;
+			}
+		});
 
         updateWebview();
+    }
+
+    /**
+     * @private
+     * @param {vscode.TextDocument} document 
+     * @param {any} e
+     */
+    addList(document, e) {
+        this.server.sendRequest(JSON.stringify({
+            type: 'addList',
+            listName: e.listName,
+        }));
     }
 
     /**
