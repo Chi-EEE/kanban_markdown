@@ -12,6 +12,8 @@ add_requires("yyjson", "yaml-cpp")
 
 add_requires("argparse")
 
+add_requires("cosmocc")
+
 target("kanban-markdown")
     set_kind("$(kind)")
     set_languages("cxx17")
@@ -44,6 +46,7 @@ target_end()
 target("kanban-markdown_server")
     set_kind("binary")
     set_languages("cxx17")
+    set_toolchains("@cosmocc")
 
     add_files("server/*.cpp")
 

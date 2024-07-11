@@ -7,6 +7,8 @@
 #include <asap/asap.h>
 #include <tsl/ordered_map.h>
 
+#include "internal.hpp"
+
 namespace kanban_markdown {
 	struct KanbanAttachment
 	{
@@ -113,7 +115,7 @@ namespace kanban_markdown {
 	struct KanbanBoard
 	{
 		bool operator==(const KanbanBoard& other) const {
-			if (created.timestamp() != other.created.timestamp() || last_updated.timestamp() != other.last_updated.timestamp() || name != other.name || description != other.description || labels.size() != other.labels.size() || list.size() != other.list.size()) {
+			if (created.timestamp() != other.created.timestamp() || last_modified.timestamp() != other.last_modified.timestamp() || name != other.name || description != other.description || labels.size() != other.labels.size() || list.size() != other.list.size()) {
 				return false;
 			}
 			for (auto it = labels.begin(); it != labels.end(); ++it) {
@@ -133,8 +135,9 @@ namespace kanban_markdown {
 			return !(*this == other);
 		}
 
-		asap::datetime created;
-		asap::datetime last_updated;
+		asap::datetime created = kanban_markdown::internal::now_utc();
+		asap::datetime last_modified = kanban_markdown::internal::now_utc();
+		unsigned int version = 0;
 		std::string name;
 		std::string description;
 		tsl::ordered_map<std::string, std::shared_ptr<KanbanLabel>> labels;

@@ -19,6 +19,8 @@
 
 #include "kanban.hpp"
 #include "constants.hpp"
+
+#include "reader/internal.hpp"
 #include "internal.hpp"
 
 namespace kanban_markdown {
@@ -34,7 +36,9 @@ namespace kanban_markdown {
 			std::string kanban_board_description;
 
 			asap::datetime created;
-			asap::datetime last_updated;
+			asap::datetime last_modified;
+
+			unsigned int version = 0;
 
 			LabelSection label_section;
 			BoardListSection board_section;
@@ -385,7 +389,7 @@ namespace kanban_markdown {
 	inline KanbanBoard createKanbanBoard(KanbanParser& kanban_parser) {
 		KanbanBoard kanban_board;
 		kanban_board.created = kanban_parser.created;
-		kanban_board.last_updated = kanban_parser.last_updated;
+		kanban_board.last_modified = kanban_parser.last_modified;
 
 		kanban_board.name = kanban_parser.kanban_board_name;
 		kanban_board.description = kanban_parser.kanban_board_description;
@@ -454,9 +458,10 @@ namespace kanban_markdown {
 			if (created.empty()) {
 				return tl::make_unexpected("Invalid Markdown file. Created property is empty.");
 			}
+			const int version = config["Version"].as<unsigned int>();
 
-			const std::string last_updated = config["Last Updated"].as<std::string>();
-			if (last_updated.empty()) {
+			const std::string last_modified = config["Last Modified"].as<std::string>();
+			if (last_modified.empty()) {
 				return tl::make_unexpected("Invalid Markdown file. Last Updated property is empty.");
 			}
 
@@ -465,13 +470,15 @@ namespace kanban_markdown {
 				return tl::make_unexpected("Invalid Markdown file. Created property has invalid seconds.");
 			}
 
-			asap::datetime last_updated_datetime(last_updated, "%Y-%m-%d %H:%M:%S");
-			if (last_updated_datetime.timestamp() == 0) {
+			asap::datetime last_modified_datetime(last_modified, "%Y-%m-%d %H:%M:%S");
+			if (last_modified_datetime.timestamp() == 0) {
 				return tl::make_unexpected("Invalid Markdown file. Created property has invalid seconds.");
 			}
 
 			kanban_parser.created = created_datetime;
-			kanban_parser.last_updated = last_updated_datetime;
+			kanban_parser.last_modified = last_modified_datetime;
+
+			kanban_parser.version = version;
 
 			md_string = md_string.substr(end_of_properties + 3);
 		}

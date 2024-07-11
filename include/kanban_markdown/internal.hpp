@@ -52,59 +52,6 @@ namespace kanban_markdown::internal {
 		return kanban_markdown_ltrim(kanban_markdown_rtrim(s, t), t);
 	}
 
-	enum class KanbanState {
-		None = 0,
-		Labels,
-		Board,
-	};
-
-	enum class TaskReadState {
-		None = 0,
-		Description,
-		Labels,
-		Attachments,
-		Checklist,
-	};
-
-	struct LabelDetail {
-		std::string name;
-		std::vector<std::string> list_items;
-	};
-
-	struct LabelSection {
-		std::string current_label_name;
-		tsl::ordered_map<std::string, LabelDetail> label_details;
-	};
-
-	struct Attachment {
-		std::string name;
-		std::string url;
-	};
-
-	struct TaskDetail {
-		bool checked = false;
-		std::string name;
-		std::vector<std::string> description;
-		std::vector<std::string> labels;
-		std::vector<Attachment> attachments;
-		std::vector<KanbanChecklistItem> checklist;
-
-		Attachment* currentAttachment;
-	};
-
-	struct BoardSection {
-		std::string name;
-		std::string current_task_name;
-		bool current_stored_checked = false;
-		tsl::ordered_map<std::string, TaskDetail> task_details;
-	};
-
-	struct BoardListSection {
-		std::vector<BoardSection> boards;
-		BoardSection* current_board = nullptr;
-		TaskReadState task_read_state = TaskReadState::None;
-	};
-
 	inline asap::datetime now_utc() {
 		auto now = std::chrono::system_clock::now();
 		std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
@@ -112,8 +59,7 @@ namespace kanban_markdown::internal {
 		std::ostringstream oss;
 		oss << std::put_time(utc_tm, "%Y-%m-%d %H:%M:%S");
 		std::string utc_time_str = oss.str();
-		asap::datetime now_utc(utc_time_str, "%Y-%m-%d %H:%M:%S UTC");
+		asap::datetime now_utc(utc_time_str, "%Y-%m-%d %H:%M:%S");
 		return now_utc;
 	}
-
 }

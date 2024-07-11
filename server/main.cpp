@@ -359,7 +359,8 @@ int main() {
 				else {
 					KanbanTuple& kanban_tuple_ = kanban_tuple.value();
 					with_kanban_tuple(kanban_tuple_, root, type_str);
-					kanban_tuple_.kanban_board.last_updated = kanban_markdown::internal::now_utc();
+					kanban_tuple_.kanban_board.version += 1;
+					kanban_tuple_.kanban_board.last_modified = kanban_markdown::internal::now_utc();
 					std::ofstream md_file;
 					md_file.open(kanban_tuple_.file_path);
 					md_file << kanban_markdown::markdown_format(kanban_tuple_.kanban_board);

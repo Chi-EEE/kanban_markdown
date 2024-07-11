@@ -23,8 +23,9 @@ namespace kanban_markdown {
 #pragma region Properties
 		markdown_file += "---" + constants::END_OF_MARKDOWN_LINE;
 		YAML::Node properties;
+		properties["Version"] = kanban_board.version;
 		properties["Created"] = kanban_board.created.str("%Y-%m-%d %H:%M:%S UTC");
-		properties["Last Updated"] = kanban_board.created.str("%Y-%m-%d %H:%M:%S UTC");
+		properties["Last Modified"] = kanban_board.last_modified.str("%Y-%m-%d %H:%M:%S UTC");
 		std::ostringstream oss;
 		oss << properties;
 		markdown_file += oss.str() + '\n';
@@ -131,7 +132,7 @@ namespace kanban_markdown {
 		yyjson_mut_doc_set_root(doc, root);
 
 		yyjson_mut_obj_add_str(doc, root, "created", kanban_board.created.str("%Y-%m-%d %H:%M:%S UTC").c_str());
-		yyjson_mut_obj_add_str(doc, root, "last_updated", kanban_board.last_updated.str("%Y-%m-%d %H:%M:%S UTC").c_str());
+		yyjson_mut_obj_add_str(doc, root, "last_modified", kanban_board.last_modified.str("%Y-%m-%d %H:%M:%S UTC").c_str());
 
 		yyjson_mut_obj_add_str(doc, root, "name", kanban_board.name.c_str());
 		yyjson_mut_obj_add_str(doc, root, "description", kanban_board.description.c_str());
