@@ -63,10 +63,10 @@ namespace kanban_markdown {
 		markdown_file += '\n';
 		for (auto& [kanban_list_name, kanban_list] : kanban_board.list) {
 			markdown_file += fmt::format("### {name}{eol}",
-				fmt::arg("name", kanban_list.name),
+				fmt::arg("name", kanban_list->name),
 				fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 			);
-			for (auto& [kanban_task_name, kanban_task] : kanban_list.tasks) {
+			for (auto& [kanban_task_name, kanban_task] : kanban_list->tasks) {
 				markdown_file += fmt::format(R"(- [{checked}] <span id="{kanban_md}-task-{id}">{name}</span>{eol})",
 					fmt::arg("checked", kanban_task->checked ? 'x' : ' '),
 					fmt::arg("kanban_md", constants::kanban_md),
@@ -169,10 +169,10 @@ namespace kanban_markdown {
 		yyjson_mut_val* lists = yyjson_mut_arr(doc);
 		for (auto& [kanban_list_name, kanban_list] : kanban_board.list) {
 			yyjson_mut_val* list = yyjson_mut_obj(doc);
-			yyjson_mut_obj_add_str(doc, list, "name", kanban_list.name.c_str());
+			yyjson_mut_obj_add_str(doc, list, "name", kanban_list->name.c_str());
 
 			yyjson_mut_val* tasks = yyjson_mut_arr(doc);
-			for (auto& [kanban_task_name, kanban_task] : kanban_list.tasks) {
+			for (auto& [kanban_task_name, kanban_task] : kanban_list->tasks) {
 				yyjson_mut_val* task = yyjson_mut_obj(doc);
 				yyjson_mut_obj_add_str(doc, task, "name", kanban_task->name.c_str());
 				yyjson_mut_obj_add_bool(doc, task, "checked", kanban_task->checked);

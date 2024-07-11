@@ -11,6 +11,7 @@
 
 #include "internal.hpp"
 
+#include "commands/create.hpp"
 #include "commands/update.hpp"
 
 namespace server
@@ -77,7 +78,6 @@ namespace server
 						else
 						{
 							KanbanTuple& kanban_tuple_ = kanban_tuple.value();
-							// TODO:
 							bool modified = withKanbanTuple(kanban_tuple_, root, type_str);
 							if (modified) {
 								kanban_tuple_.kanban_board.version += 1;
@@ -162,6 +162,12 @@ namespace server
 				try {
 					switch (hash(action_str))
 					{
+					case hash("create"): {
+						commands::create(kanban_tuple_, command);
+						modified = true;
+						success = true;
+						break;
+					}
 					case hash("update"):
 					{
 						commands::update(kanban_tuple_, command);

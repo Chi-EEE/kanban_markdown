@@ -441,15 +441,18 @@ namespace kanban_markdown {
 		}
 
 		for (BoardSection board_section : kanban_parser.board_section.boards) {
-			KanbanList kanban_list;
-			kanban_list.name = board_section.name;
+			std::shared_ptr<KanbanList> kanban_list = std::make_shared<KanbanList>();
+			kanban_list->name = board_section.name;
 			for (auto& [task_name, task_detail] : board_section.task_details) {
 				std::shared_ptr<KanbanTask> kanban_task = std::make_shared<KanbanTask>();
 				kanban_task->checked = task_detail.checked;
 				kanban_task->name = task_name;
 				kanban_task->description = task_detail.description;
 				for (const std::string& label : task_detail.labels) {
-					kanban_task->labels.insert({ label, std::make_shared<KanbanLabel>(KanbanLabel{ label }) });
+					if (!kanban_task->labels.contains(label)) {
+						kanban_task->labels.insert({ label, std::make_shared<KanbanLabel>(KanbanLabel{ label }) });
+					}
+					kanban_task->labels[label]->tasks.insert({ task_name, kanban_task });
 				}
 				for (const KanbanAttachment& attachment : task_detail.attachments) {
 					kanban_task->attachments.insert({ attachment.name, std::make_shared<KanbanAttachment>(attachment) });
@@ -457,19 +460,9 @@ namespace kanban_markdown {
 				for (const KanbanChecklistItem& checkbox : task_detail.checklist) {
 					kanban_task->checklist.insert({ checkbox.name, std::make_shared<KanbanChecklistItem>(checkbox) });
 				}
-				kanban_list.tasks.insert({ task_name, kanban_task });
+				kanban_list->tasks.insert({ task_name, kanban_task });
 			}
 			kanban_board.list.insert({ board_section.name , kanban_list });
-		}
-		for (auto& [label_name, label_detail] : kanban_parser.label_section.label_details) {
-			std::shared_ptr<KanbanLabel> kanban_label = kanban_board.labels[label_name];
-			for (BoardSection board_section : kanban_parser.board_section.boards) {
-				for (auto& [task_name, task_detail] : board_section.task_details) {
-					for (const std::string& label : task_detail.labels) {
-						kanban_label->tasks.insert({ task_name, kanban_board.list[board_section.name].tasks[task_name] });
-					}
-				}
-			}
 		}
 		return kanban_board;
 	}

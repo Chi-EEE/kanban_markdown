@@ -156,6 +156,6 @@ namespace kanban_markdown {
 		std::string name;
 		std::string description;
 		tsl::ordered_map<std::string, std::shared_ptr<KanbanLabel>> labels;
-		tsl::ordered_map<std::string, KanbanList> list;
+		tsl::ordered_map<std::string, std::shared_ptr<KanbanList>> list;
 	};
 }

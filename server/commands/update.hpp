@@ -1,5 +1,6 @@
 #pragma once
 
+#include <fmt/format.h>
 #include <re2/re2.h>
 
 namespace server::commands
@@ -8,7 +9,7 @@ namespace server::commands
 		void parsePath_1(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value);
 
 		void parsePath_1_list(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::string vector_index_name);
-		void parsePath_2_tasks(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, kanban_markdown::KanbanList& kanban_list, std::string list_vector_index_name);
+		void parsePath_2_tasks(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name);
 		void parsePath_3_labels(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name);
 		void parsePath_3_attachments(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name);
 		void parsePath_3_checklist(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name);
@@ -38,22 +39,22 @@ namespace server::commands
 				break;
 			}
 			default:
-				throw std::runtime_error("Invalid path: There are no fields inside KanbanBoard with " + first);
+				throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanBoard named "{}")", first));
 			}
 		}
 
 		void parsePath_1_list(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::string vector_index_name) {
 			if (!kanban_tuple.kanban_board.list.contains(vector_index_name)) {
-				throw std::runtime_error("Invalid path: There are no fields inside KanbanBoard.list with " + vector_index_name);
+				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanBoard.list named "{}")", vector_index_name));
 			}
-			kanban_markdown::KanbanList kanban_list = kanban_tuple.kanban_board.list[vector_index_name];
+			std::shared_ptr<kanban_markdown::KanbanList> kanban_list = kanban_tuple.kanban_board.list[vector_index_name];
 			std::string second = split_result[1];
 			switch (hash(second))
 			{
 			case hash("name"):
 			{
-				kanban_list.name = yyjson_get_string_object(value);
-				kanban_tuple.kanban_board.list[kanban_list.name] = kanban_list;
+				kanban_list->name = yyjson_get_string_object(value);
+				kanban_tuple.kanban_board.list[kanban_list->name] = kanban_list;
 				kanban_tuple.kanban_board.list.erase(vector_index_name);
 				break;
 			}
@@ -73,7 +74,7 @@ namespace server::commands
 					break;
 				}
 				default:
-					throw std::runtime_error("Invalid path: There are no fields inside KanbanList with " + second);
+					throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanList named "{}")", second));
 				}
 
 				break;
@@ -81,19 +82,19 @@ namespace server::commands
 			}
 		}
 
-		void parsePath_2_tasks(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, kanban_markdown::KanbanList& kanban_list, std::string list_vector_index_name) {
-			if (!kanban_list.tasks.contains(list_vector_index_name)) {
-				throw std::runtime_error("Invalid path: There are no fields inside KanbanList.tasks with " + list_vector_index_name);
+		void parsePath_2_tasks(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name) {
+			if (!kanban_list->tasks.contains(list_vector_index_name)) {
+				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanList.tasks named "{}")", list_vector_index_name));
 			}
-			std::shared_ptr<kanban_markdown::KanbanTask> task = kanban_list.tasks[list_vector_index_name];
+			std::shared_ptr<kanban_markdown::KanbanTask> task = kanban_list->tasks[list_vector_index_name];
 			std::string third = split_result[2];
 			switch (hash(third))
 			{
 			case hash("name"):
 			{
 				task->name = yyjson_get_string_object(value);
-				kanban_list.tasks[task->name] = task;
-				kanban_list.tasks.erase(list_vector_index_name);
+				kanban_list->tasks[task->name] = task;
+				kanban_list->tasks.erase(list_vector_index_name);
 				break;
 			}
 			case hash("description"):
@@ -130,7 +131,7 @@ namespace server::commands
 					break;
 				}
 				default:
-					throw std::runtime_error("Invalid path: There are no fields inside KanbanTask with " + third);
+					throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanTask named "{}")", third));
 				}
 
 				break;
@@ -140,7 +141,7 @@ namespace server::commands
 
 		void parsePath_3_labels(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name) {
 			if (!task->labels.contains(task_vector_index_name)) {
-				throw std::runtime_error("Invalid path: There are no fields inside KanbanTask.labels with " + task_vector_index_name);
+				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanTask.labels named "{}")", task_vector_index_name));
 			}
 			std::string fourth = split_result[3];
 			switch (hash(fourth))
@@ -158,13 +159,13 @@ namespace server::commands
 				break;
 			}
 			default:
-				throw std::runtime_error("Invalid path: There are no fields inside KanbanLabel with " + fourth);
+				throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanLabel named "{}")", fourth));
 			}
 		}
 
 		void parsePath_3_attachments(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name) {
 			if (!task->attachments.contains(task_vector_index_name)) {
-				throw std::runtime_error("Invalid path: There are no fields inside KanbanTask.attachments with " + task_vector_index_name);
+				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanTask.attachments named "{}")", task_vector_index_name));
 			}
 			std::string fourth = split_result[3];
 			switch (hash(fourth))
@@ -183,13 +184,13 @@ namespace server::commands
 				break;
 			}
 			default:
-				throw std::runtime_error("Invalid path: There are no fields inside KanbanAttachment with " + fourth);
+				throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanAttachment named "{}")", fourth));
 			}
 		}
 
 		void parsePath_3_checklist(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name) {
 			if (!task->checklist.contains(task_vector_index_name)) {
-				throw std::runtime_error("Invalid path: There are no fields inside KanbanTask.checklist with " + task_vector_index_name);
+				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanTask.checklist named "{}")", task_vector_index_name));
 			}
 			std::string fourth = split_result[3];
 			switch (hash(fourth))
@@ -208,13 +209,13 @@ namespace server::commands
 				break;
 			}
 			default:
-				throw std::runtime_error("Invalid path: There are no fields inside KanbanChecklistItem with " + fourth);
+				throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanChecklistItem named "{}")", fourth));
 			}
 		}
 
 		void parsePath_1_labels(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::string vector_index_name) {
 			if (!kanban_tuple.kanban_board.labels.contains(vector_index_name)) {
-				throw std::runtime_error("Invalid path: There are no fields inside KanbanBoard.labels with " + vector_index_name);
+				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanBoard.labels named "{}")", vector_index_name));
 			}
 			std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = kanban_tuple.kanban_board.labels[vector_index_name];
 			std::string second = split_result[1];
@@ -232,7 +233,7 @@ namespace server::commands
 				break;
 			}
 			default:
-				throw std::runtime_error("Invalid path: There are no fields inside KanbanLabel with " + second);
+				throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanLabel named "{}")", second));
 			}
 		}
 	}
@@ -267,7 +268,7 @@ namespace server::commands
 				kanban_tuple.kanban_board.description = yyjson_get_string_object(value);
 				break;
 			default:
-				throw std::runtime_error("Invalid path: There are no fields with " + first);
+				throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanBoard named "{}")", first));
 			}
 		}
 		else {
