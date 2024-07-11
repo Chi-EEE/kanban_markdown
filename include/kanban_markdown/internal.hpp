@@ -104,4 +104,16 @@ namespace kanban_markdown::internal {
 		BoardSection* current_board = nullptr;
 		TaskReadState task_read_state = TaskReadState::None;
 	};
+
+	inline asap::datetime now_utc() {
+		auto now = std::chrono::system_clock::now();
+		std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
+		std::tm* utc_tm = std::gmtime(&now_time_t);
+		std::ostringstream oss;
+		oss << std::put_time(utc_tm, "%Y-%m-%d %H:%M:%S");
+		std::string utc_time_str = oss.str();
+		asap::datetime now_utc(utc_time_str, "%Y-%m-%d %H:%M:%S UTC");
+		return now_utc;
+	}
+
 }

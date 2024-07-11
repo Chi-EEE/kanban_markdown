@@ -7,15 +7,21 @@ else
     set_runtimes("MT")
 end
 
-add_requires("fmt", "re2", "md4c", "tl_expected", "ordered_map")
+add_requires("asap", "fmt", "md4c", "tl_expected", "ordered_map")
+add_requires("yyjson", "yaml-cpp")
+
 add_requires("argparse")
-add_requires("yyjson")
 
 target("kanban-markdown")
     set_kind("$(kind)")
     set_languages("cxx17")
 
-    add_packages("fmt", "re2", "md4c", "tl_expected", "ordered_map", {public = true})
+    if is_plat("windows") then
+        add_cxxflags("/utf-8", {public = true})
+    end
+
+    add_packages("asap", "fmt", "md4c", "tl_expected", "ordered_map", {public = true})
+    add_packages("yyjson", "yaml-cpp", {public = true})
 
     add_headerfiles("include/(**.hpp)")
     add_includedirs("include", {public = true})
@@ -38,7 +44,6 @@ target_end()
 target("kanban-markdown_server")
     set_kind("binary")
     set_languages("cxx17")
-    add_packages("yyjson")
 
     add_files("server/*.cpp")
 
