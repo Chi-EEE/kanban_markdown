@@ -82,18 +82,11 @@ namespace server
 							if (modified) {
 								kanban_tuple_.kanban_board.version += 1;
 								kanban_tuple_.kanban_board.last_modified = kanban_markdown::internal::now_utc();
+								std::ofstream md_file;
+								md_file.open(kanban_tuple_.file_path);
+								md_file << kanban_markdown::markdown_format(kanban_tuple_.kanban_board);
+								md_file.close();
 							}
-							std::ofstream md_file;
-							md_file.open(kanban_tuple_.file_path);
-							md_file << kanban_markdown::markdown_format(kanban_tuple_.kanban_board);
-							md_file.close();
-							yyjson_mut_doc* doc = yyjson_mut_doc_new(NULL);
-							yyjson_mut_val* root = yyjson_mut_obj(doc);
-							yyjson_mut_doc_set_root(doc, root);
-							yyjson_mut_obj_add_bool(doc, root, "success", true);
-							const char* json = yyjson_mut_write(doc, 0, NULL);
-							printf("%s\n", json);
-							free((void*)json);
 						}
 						break;
 					}
@@ -122,8 +115,7 @@ namespace server
 			{
 			case hash("commands"):
 			{
-				this->commands(kanban_tuple_, root);
-				break;
+				return this->commands(kanban_tuple_, root);
 			}
 			default:
 			{
@@ -134,17 +126,31 @@ namespace server
 			return false;
 		}
 
-		void commands(KanbanTuple& kanban_tuple_, yyjson_val* root) {
+		bool commands(KanbanTuple& kanban_tuple_, yyjson_val* root) {
 			yyjson_val* commands = yyjson_obj_get(root, "commands");
 			if (!commands || !yyjson_is_arr(commands)) {
-				// TODO: return error
-				//printf("No commands found or commands is not an array.\n");
-				return;
+				yyjson_mut_doc* doc = yyjson_mut_doc_new(NULL);
+				yyjson_mut_val* root = yyjson_mut_obj(doc);
+				yyjson_mut_doc_set_root(doc, root);
+				yyjson_mut_obj_add_bool(doc, root, "success", false);
+				const char* json = yyjson_mut_write(doc, 0, NULL);
+				printf("%s\n", json);
+				free((void*)json);
+				return false;
 			}
+			yyjson_mut_doc* new_doc = yyjson_mut_doc_new(NULL);
+			yyjson_mut_val* new_root = yyjson_mut_obj(new_doc);
+			yyjson_mut_doc_set_root(new_doc, new_root);
+			yyjson_mut_val* commands_array = yyjson_mut_arr(new_doc);
+			yyjson_mut_obj_add_val(new_doc, new_root, "commands", commands_array);
+
+			bool modified = false;
+
 			yyjson_val* command;
 			size_t idx, max;
 			yyjson_arr_foreach(commands, idx, max, command) {
 				if (!yyjson_is_obj(command)) continue;
+				yyjson_mut_val* command_obj = yyjson_mut_obj(new_doc);
 
 				yyjson_val* action = yyjson_obj_get(command, "action");
 				if (action == NULL)
@@ -152,17 +158,33 @@ namespace server
 					throw std::runtime_error("Unable to find action");
 				}
 				std::string action_str = yyjson_get_string_object(action);
-				switch (hash(action_str))
-				{
-				case hash("update"):
-				{
-					commands::update(kanban_tuple_, command);
-					break;
+				bool success = false;
+				try {
+					switch (hash(action_str))
+					{
+					case hash("update"):
+					{
+						commands::update(kanban_tuple_, command);
+						modified = true;
+						success = true;
+						break;
+					}
+					default:
+						break;
+					}
+
 				}
-				default:
-					break;
+				catch (const std::exception& e) {
+					yyjson_mut_obj_add_str(new_doc, command_obj, "error", e.what());
 				}
+				yyjson_mut_obj_add_bool(new_doc, command_obj, "success", success);
+				yyjson_mut_arr_append(commands_array, command_obj);
 			}
+
+			const char* json = yyjson_mut_write(new_doc, 0, NULL);
+			printf("%s\n", json);
+			free((void*)json);
+			return modified;
 		}
 
 		static tl::expected<KanbanTuple, std::string> parse(yyjson_val* root)
