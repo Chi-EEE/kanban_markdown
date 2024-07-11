@@ -12,4 +12,7 @@ namespace kanban_markdown::constants {
 	const std::string github_added_tag = "user-content-";
 
 	const std::string kanban_md = "kanban_md";
+
+	const std::string default_board_name = "Untitled Board";
+	const std::string default_description = "No description available.";
 }

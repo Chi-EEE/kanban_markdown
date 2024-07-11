@@ -29,8 +29,8 @@ namespace kanban_markdown {
 #pragma endregion
 		markdown_file += '\n';
 #pragma region Header and Description
-		markdown_file += constants::first_header + kanban_board.name + constants::END_OF_MARKDOWN_LINE;
-		markdown_file += kanban_board.description + constants::END_OF_MARKDOWN_LINE;
+		markdown_file += constants::first_header + (!kanban_board.name.empty() ? kanban_board.name : constants::default_board_name) + constants::END_OF_MARKDOWN_LINE;
+		markdown_file += (!kanban_board.description.empty() ? kanban_board.description : constants::default_description) + constants::END_OF_MARKDOWN_LINE;
 #pragma endregion
 		markdown_file += '\n';
 #pragma region Labels:

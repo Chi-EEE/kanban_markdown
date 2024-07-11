@@ -30,17 +30,18 @@ namespace kanban_markdown {
 			unsigned int header_level = 0;
 			KanbanState state = KanbanState::None;
 
+			bool read_properties = false;
+
+			asap::datetime created;
+			asap::datetime last_modified;
+			unsigned int version = 0;
+			std::string checksum;
+
 			std::string kanban_board_name;
 			bool read_kanban_board_name = false;
 
 			std::string kanban_board_description;
-
-			asap::datetime created;
-			asap::datetime last_modified;
-
-			unsigned int version = 0;
-
-			std::string checksum;
+			bool read_kanban_board_description = false;
 
 			LabelSection label_section;
 			BoardListSection board_section;
@@ -120,7 +121,12 @@ namespace kanban_markdown {
 
 				if (kanban_parser->state == KanbanState::Board) {
 					if (kanban_parser->board_section.task_read_state == TaskReadState::Attachments) {
-						TaskDetail& task_detail = kanban_parser->board_section.current_board->task_details[kanban_parser->board_section.current_board->current_task_name];
+						BoardSection* current_board = kanban_parser->board_section.current_board;
+						if (current_board == nullptr) {
+							std::cerr << "Current board is null." << '\n';
+							return 0;
+						}
+						TaskDetail& task_detail = current_board->task_details[current_board->current_task_name];
 						Attachment attachment;
 						attachment.url = std::string(a_detail->href.text, a_detail->href.size);
 						task_detail.attachments.push_back(attachment);
@@ -153,13 +159,17 @@ namespace kanban_markdown {
 			return 0;
 		}
 
-		void parseHeader(KanbanParser* kanban_parser, const std::string& text_content) {
+		void parseHeader(KanbanParser* kanban_parser, std::string text_content) {
 			switch (kanban_parser->header_level) {
 			case 0:
 			{
-				if (kanban_parser->read_kanban_board_name && kanban_parser->kanban_board_description.empty())
+				if (!kanban_parser->read_kanban_board_description && kanban_parser->read_kanban_board_name && kanban_parser->kanban_board_description.empty())
 				{
+					if (text_content == constants::default_description) {
+						text_content = "";
+					}
 					kanban_parser->kanban_board_description = text_content;
+					kanban_parser->read_kanban_board_description = true;
 				}
 				break;
 			}
@@ -167,6 +177,9 @@ namespace kanban_markdown {
 			{
 				if (!kanban_parser->read_kanban_board_name)
 				{
+					if (text_content == constants::default_board_name) {
+						text_content = "";
+					}
 					kanban_parser->kanban_board_name = text_content;
 					kanban_parser->read_kanban_board_name = true;
 				}
@@ -227,10 +240,14 @@ namespace kanban_markdown {
 			}
 			if (!is_task_property && kanban_parser->board_section.task_read_state == TaskReadState::Description) {
 				BoardSection* current_board = kanban_parser->board_section.current_board;
+				if (current_board == nullptr) {
+					std::cerr << "Current board is null." << '\n';
+					return;
+				}
 				TaskDetail& tail_detail = current_board->task_details[current_board->current_task_name];
 				if (tail_detail.description.empty()) {
 					text_content = kanban_markdown_ltrim(text_content);
-					if (text_content.find(":") == 0)
+					if (text_content.find(":") == 0) // TODO: Fix this
 					{
 						text_content = text_content.substr(1);
 					}
@@ -253,6 +270,10 @@ namespace kanban_markdown {
 			case TaskReadState::Labels:
 			{
 				BoardSection* current_board = kanban_parser->board_section.current_board;
+				if (current_board == nullptr) {
+					std::cerr << "Current board is null." << '\n';
+					return;
+				}
 				current_board->task_details[current_board->current_task_name].labels.push_back(text_content);
 				break;
 			}
@@ -260,6 +281,10 @@ namespace kanban_markdown {
 			{
 				if (kanban_parser->currently_reading_link) {
 					BoardSection* current_board = kanban_parser->board_section.current_board;
+					if (current_board == nullptr) {
+						std::cerr << "Current board is null." << '\n';
+						return;
+					}
 					Attachment* current_attachment = current_board->task_details[current_board->current_task_name].currentAttachment;
 					current_attachment->name = text_content;
 				}
@@ -282,6 +307,10 @@ namespace kanban_markdown {
 				checkbox.checked = is_checked;
 				checkbox.name = text_content.substr(4);
 				BoardSection* current_board = kanban_parser->board_section.current_board;
+				if (current_board == nullptr) {
+					std::cerr << "Current board is null." << '\n';
+					return;
+				}
 				current_board->task_details[current_board->current_task_name].checklist.push_back(checkbox);
 				break;
 			}
@@ -301,7 +330,12 @@ namespace kanban_markdown {
 				else {
 					std::cerr << "Invalid checklist item: " << text_content << '\n';
 				}
-				kanban_parser->board_section.current_board->current_stored_checked = is_checked;
+				BoardSection* current_board = kanban_parser->board_section.current_board;
+				if (current_board == nullptr) {
+					std::cerr << "Current board is null." << '\n';
+					return;
+				}
+				current_board->current_stored_checked = is_checked;
 				return;
 			}
 			switch (kanban_parser->list_item_level) {
@@ -320,6 +354,10 @@ namespace kanban_markdown {
 			case 1:
 			{
 				BoardSection* current_board = kanban_parser->board_section.current_board;
+				if (current_board == nullptr) {
+					std::cerr << "Current board is null." << '\n';
+					return;
+				}
 				current_board->current_task_name = text_content;
 				TaskDetail task_detail;
 				task_detail.name = text_content;
@@ -497,6 +535,7 @@ namespace kanban_markdown {
 			kanban_parser.last_modified = now;
 			kanban_parser.version = 0;
 		}
+		kanban_parser.read_properties = true;
 
 		MD_PARSER parser;
 		parser.abi_version = 0;
