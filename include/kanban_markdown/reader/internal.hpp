@@ -30,20 +30,15 @@ namespace kanban_markdown::internal {
 		tsl::ordered_map<std::string, LabelDetail> label_details;
 	};
 
-	struct Attachment {
-		std::string name;
-		std::string url;
-	};
-
 	struct TaskDetail {
 		bool checked = false;
 		std::string name;
 		std::vector<std::string> description;
 		std::vector<std::string> labels;
-		std::vector<Attachment> attachments;
+		std::vector<KanbanAttachment> attachments;
 		std::vector<KanbanChecklistItem> checklist;
 
-		Attachment* currentAttachment;
+		KanbanAttachment* currentAttachment;
 	};
 
 	struct BoardSection {

@@ -44,7 +44,7 @@ namespace kanban_markdown {
 				fmt::arg("name", kanban_label_name),
 				fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 			);
-			for (std::shared_ptr<KanbanTask> kanban_task : kanban_label->tasks) {
+			for (auto& [kanban_task_name, kanban_task] : kanban_label->tasks) {
 				const std::string kanban_task_name = kanban_task->name;
 				markdown_file += fmt::format(
 					R"(  - [{name}](#{github}{kanban_md}-task-{id}){eol})",
@@ -80,7 +80,7 @@ namespace kanban_markdown {
 				}
 				markdown_file += description_string + constants::END_OF_MARKDOWN_LINE;
 				markdown_file += "  - **Labels**:" + constants::END_OF_MARKDOWN_LINE;
-				for (std::shared_ptr<KanbanLabel> kanban_label : kanban_task->labels) {
+				for (auto& [kanban_label_name, kanban_label] : kanban_task->labels) {
 					const std::string kanban_label_name = kanban_label->name;
 					markdown_file += fmt::format(
 						"    - [{name}](#{github}{kanban_md}-label-{id}){eol}",
@@ -92,20 +92,20 @@ namespace kanban_markdown {
 					);
 				}
 				markdown_file += "  - **Attachments**:" + constants::END_OF_MARKDOWN_LINE;
-				for (KanbanAttachment kanban_attachment : kanban_task->attachments) {
+				for (auto& [kanban_attachment_name, kanban_attachment] : kanban_task->attachments) {
 					markdown_file += fmt::format(
 						"    - [{name}]({url}){eol}",
-						fmt::arg("name", kanban_attachment.name),
-						fmt::arg("url", kanban_attachment.url),
+						fmt::arg("name", kanban_attachment->name),
+						fmt::arg("url", kanban_attachment->url),
 						fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 					);
 				}
 				markdown_file += "  - **Checklist**:" + constants::END_OF_MARKDOWN_LINE;
-				for (KanbanChecklistItem kanban_checklist_item : kanban_task->checklist) {
+				for (auto& [kanban_checklist_item_name, kanban_checklist_item] : kanban_task->checklist) {
 					markdown_file += fmt::format(
 						"    - [{checked}] {name}{eol}",
-						fmt::arg("checked", kanban_checklist_item.checked ? 'x' : ' '),
-						fmt::arg("name", kanban_checklist_item.name),
+						fmt::arg("checked", kanban_checklist_item->checked ? 'x' : ' '),
+						fmt::arg("name", kanban_checklist_item->name),
 						fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 					);
 				}
@@ -156,7 +156,7 @@ namespace kanban_markdown {
 			yyjson_mut_obj_add_str(doc, label, "name", kanban_label->name.c_str());
 
 			yyjson_mut_val* tasks = yyjson_mut_arr(doc);
-			for (std::shared_ptr<KanbanTask> kanban_task : kanban_label->tasks) {
+			for (auto& [kanban_task_name, kanban_task] : kanban_label->tasks) {
 				yyjson_mut_val* task = yyjson_mut_obj(doc);
 				yyjson_mut_obj_add_str(doc, task, "name", kanban_task->name.c_str());
 				yyjson_mut_arr_add_val(tasks, task);
@@ -184,7 +184,7 @@ namespace kanban_markdown {
 				yyjson_mut_obj_add_val(doc, task, "description", description);
 
 				yyjson_mut_val* task_labels = yyjson_mut_arr(doc);
-				for (std::shared_ptr<KanbanLabel> kanban_label : kanban_task->labels) {
+				for (auto& [kanban_label_name, kanban_label] : kanban_task->labels) {
 					yyjson_mut_val* task_label = yyjson_mut_obj(doc);
 					yyjson_mut_obj_add_str(doc, task_label, "name", kanban_label->name.c_str());
 					yyjson_mut_arr_add_val(task_labels, task_label);
@@ -192,19 +192,19 @@ namespace kanban_markdown {
 				yyjson_mut_obj_add_val(doc, task, "labels", task_labels);
 
 				yyjson_mut_val* attachments = yyjson_mut_arr(doc);
-				for (KanbanAttachment kanban_attachment : kanban_task->attachments) {
+				for (auto& [kanban_attachment_name, kanban_attachment] : kanban_task->attachments) {
 					yyjson_mut_val* attachment = yyjson_mut_obj(doc);
-					yyjson_mut_obj_add_str(doc, attachment, "name", kanban_attachment.name.c_str());
-					yyjson_mut_obj_add_str(doc, attachment, "url", kanban_attachment.url.c_str());
+					yyjson_mut_obj_add_str(doc, attachment, "name", kanban_attachment->name.c_str());
+					yyjson_mut_obj_add_str(doc, attachment, "url", kanban_attachment->url.c_str());
 					yyjson_mut_arr_add_val(attachments, attachment);
 				}
 				yyjson_mut_obj_add_val(doc, task, "attachments", attachments);
 
 				yyjson_mut_val* checklist = yyjson_mut_arr(doc);
-				for (KanbanChecklistItem kanban_checklist_item : kanban_task->checklist) {
+				for (auto& [kanban_checklist_item_name, kanban_checklist_item] : kanban_task->checklist) {
 					yyjson_mut_val* checklist_item = yyjson_mut_obj(doc);
-					yyjson_mut_obj_add_str(doc, checklist_item, "name", kanban_checklist_item.name.c_str());
-					yyjson_mut_obj_add_bool(doc, checklist_item, "checked", kanban_checklist_item.checked);
+					yyjson_mut_obj_add_str(doc, checklist_item, "name", kanban_checklist_item->name.c_str());
+					yyjson_mut_obj_add_bool(doc, checklist_item, "checked", kanban_checklist_item->checked);
 					yyjson_mut_arr_add_val(checklist, checklist_item);
 				}
 				yyjson_mut_obj_add_val(doc, task, "checklist", checklist);

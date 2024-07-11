@@ -13,7 +13,7 @@ namespace kanban_markdown {
 	struct KanbanAttachment
 	{
 		bool operator==(const KanbanAttachment& other) const {
-			return name == other.name && url == other.url;
+			return this->name == other.name && this->url == other.url;
 		}
 
 		bool operator!=(const KanbanAttachment& other) const {
@@ -27,7 +27,7 @@ namespace kanban_markdown {
 	struct KanbanChecklistItem
 	{
 		bool operator==(const KanbanChecklistItem& other) const {
-			return checked == other.checked && name == other.name;
+			return this->checked == other.checked && this->name == other.name;
 		}
 
 		bool operator!=(const KanbanChecklistItem& other) const {
@@ -43,7 +43,7 @@ namespace kanban_markdown {
 	struct KanbanLabel
 	{
 		bool operator==(const KanbanLabel& other) const {
-			if (name != other.name) {
+			if (this->name != other.name) {
 				return false;
 			}
 			return true;
@@ -54,22 +54,35 @@ namespace kanban_markdown {
 		}
 
 		std::string name;
-		std::vector<std::shared_ptr<KanbanTask>> tasks;
+		tsl::ordered_map<std::string, std::shared_ptr<KanbanTask>> tasks;
 	};
 
 	struct KanbanTask
 	{
 		bool operator==(const KanbanTask& other) const {
-			if (checked != other.checked || name != other.name || description.size() != other.description.size() || labels.size() != other.labels.size() || attachments.size() != other.attachments.size() || checklist.size() != other.checklist.size()) {
+			if (this->checked != other.checked || this->name != other.name || this->description.size() != other.description.size() || this->labels.size() != other.labels.size() || this->attachments.size() != other.attachments.size() || this->checklist.size() != other.checklist.size()) {
 				return false;
 			}
-			for (size_t i = 0; i < description.size(); i++) {
-				if (description[i] != other.description[i]) {
+			for (size_t i = 0; i < this->description.size(); i++) {
+				if (this->description[i] != other.description[i]) {
 					return false;
 				}
 			}
-			for (size_t i = 0; i < labels.size(); i++) {
-				if (*labels[i] != *other.labels[i]) {
+			for (auto& [label_name, label] : this->labels) {
+				auto& otherLabel = other.labels.at(label_name);
+				if (*label != *otherLabel) {
+					return false;
+				}
+			}
+			for (auto& [attachment_name, attachment] : this->attachments) {
+				auto& otherAttachment = other.attachments.at(attachment_name);
+				if (*attachment != *otherAttachment) {
+					return false;
+				}
+			}
+			for (auto& [checklist_item_name, checklist_item] : this->checklist) {
+				auto& otherChecklistItem = other.checklist.at(checklist_item_name);
+				if (*checklist_item != *otherChecklistItem) {
 					return false;
 				}
 			}
@@ -83,19 +96,19 @@ namespace kanban_markdown {
 		bool checked = false;
 		std::string name;
 		std::vector<std::string> description;
-		std::vector<std::shared_ptr<KanbanLabel>> labels;
-		std::vector<KanbanAttachment> attachments;
-		std::vector<KanbanChecklistItem> checklist;
+		tsl::ordered_map<std::string, std::shared_ptr<KanbanLabel>> labels;
+		tsl::ordered_map<std::string, std::shared_ptr<KanbanAttachment>> attachments;
+		tsl::ordered_map<std::string, std::shared_ptr<KanbanChecklistItem>> checklist;
 	};
 
 	struct KanbanList
 	{
 		bool operator==(const KanbanList& other) const {
-			if (name != other.name || tasks.size() != other.tasks.size()) {
+			if (this->name != other.name || this->tasks.size() != other.tasks.size()) {
 				return false;
 			}
 			// Go through both maps and compare the tasks
-			for (auto& [task_name, task] : tasks) {
+			for (auto& [task_name, task] : this->tasks) {
 				auto& otherTask = other.tasks.at(task_name);
 				if (*task != *otherTask) {
 					return false;
@@ -115,15 +128,15 @@ namespace kanban_markdown {
 	struct KanbanBoard
 	{
 		bool operator==(const KanbanBoard& other) const {
-			if (created.timestamp() != other.created.timestamp() || last_modified.timestamp() != other.last_modified.timestamp() || name != other.name || description != other.description || labels.size() != other.labels.size() || list.size() != other.list.size()) {
+			if (this->created.timestamp() != other.created.timestamp() || this->last_modified.timestamp() != other.last_modified.timestamp() || this->name != other.name || this->description != other.description || this->labels.size() != other.labels.size() || this->list.size() != other.list.size()) {
 				return false;
 			}
-			for (auto it = labels.begin(); it != labels.end(); ++it) {
+			for (auto it = this->labels.begin(); it != this->labels.end(); ++it) {
 				if (*it->second != *other.labels.at(it->first)) {
 					return false;
 				}
 			}
-			for (auto it = list.begin(); it != list.end(); ++it) {
+			for (auto it = this->list.begin(); it != this->list.end(); ++it) {
 				if (it->second != other.list.at(it->first)) {
 					return false;
 				}

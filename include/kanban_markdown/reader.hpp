@@ -127,7 +127,7 @@ namespace kanban_markdown {
 							return 0;
 						}
 						TaskDetail& task_detail = current_board->task_details[current_board->current_task_name];
-						Attachment attachment;
+						KanbanAttachment attachment;
 						attachment.url = std::string(a_detail->href.text, a_detail->href.size);
 						task_detail.attachments.push_back(attachment);
 						task_detail.currentAttachment = &task_detail.attachments.back();
@@ -285,7 +285,7 @@ namespace kanban_markdown {
 						std::cerr << "Current board is null." << '\n';
 						return;
 					}
-					Attachment* current_attachment = current_board->task_details[current_board->current_task_name].currentAttachment;
+					KanbanAttachment* current_attachment = current_board->task_details[current_board->current_task_name].currentAttachment;
 					current_attachment->name = text_content;
 				}
 				break;
@@ -449,22 +449,13 @@ namespace kanban_markdown {
 				kanban_task->name = task_name;
 				kanban_task->description = task_detail.description;
 				for (const std::string& label : task_detail.labels) {
-					auto& kanban_label_pair = kanban_board.labels.find(label);
-					if (kanban_label_pair != kanban_board.labels.end()) {
-						kanban_task->labels.push_back(kanban_label_pair->second);
-					}
-					else {
-						auto kanban_label = std::make_shared<KanbanLabel>();
-						kanban_label->name = label;
-						kanban_label->tasks.push_back(kanban_task);
-						kanban_board.labels[label] = kanban_label;
-					}
+					kanban_task->labels.insert({ label, std::make_shared<KanbanLabel>(KanbanLabel{ label }) });
 				}
-				for (const Attachment& attachment : task_detail.attachments) {
-					kanban_task->attachments.push_back({ attachment.name, attachment.url });
+				for (const KanbanAttachment& attachment : task_detail.attachments) {
+					kanban_task->attachments.insert({ attachment.name, std::make_shared<KanbanAttachment>(attachment) });
 				}
 				for (const KanbanChecklistItem& checkbox : task_detail.checklist) {
-					kanban_task->checklist.push_back(checkbox);
+					kanban_task->checklist.insert({ checkbox.name, std::make_shared<KanbanChecklistItem>(checkbox) });
 				}
 				kanban_list.tasks.insert({ task_name, kanban_task });
 			}
@@ -475,7 +466,7 @@ namespace kanban_markdown {
 			for (BoardSection board_section : kanban_parser.board_section.boards) {
 				for (auto& [task_name, task_detail] : board_section.task_details) {
 					for (const std::string& label : task_detail.labels) {
-						kanban_label->tasks.push_back(kanban_board.list[board_section.name].tasks[task_name]);
+						kanban_label->tasks.insert({ task_name, kanban_board.list[board_section.name].tasks[task_name] });
 					}
 				}
 			}

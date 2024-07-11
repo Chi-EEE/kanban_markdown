@@ -12,7 +12,7 @@ add_requires("picosha2", "yyjson", "yaml-cpp")
 
 add_requires("argparse")
 
-add_requires("cosmocc")
+add_requires("re2", "cosmocc")
 
 target("kanban-markdown")
     set_kind("$(kind)")
@@ -47,6 +47,7 @@ target("kanban-markdown_server")
     set_kind("binary")
     set_languages("cxx17")
     set_toolchains("@cosmocc")
+    add_packages("re2")
 
     add_headerfiles("server/(**.hpp)")
     add_files("server/*.cpp")

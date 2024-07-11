@@ -77,9 +77,12 @@ namespace server
 						else
 						{
 							KanbanTuple& kanban_tuple_ = kanban_tuple.value();
-							//with_kanban_tuple(kanban_tuple_, root, type_str);
-							kanban_tuple_.kanban_board.version += 1;
-							kanban_tuple_.kanban_board.last_modified = kanban_markdown::internal::now_utc();
+							// TODO:
+							bool modified = withKanbanTuple(kanban_tuple_, root, type_str);
+							if (modified) {
+								kanban_tuple_.kanban_board.version += 1;
+								kanban_tuple_.kanban_board.last_modified = kanban_markdown::internal::now_utc();
+							}
 							std::ofstream md_file;
 							md_file.open(kanban_tuple_.file_path);
 							md_file << kanban_markdown::markdown_format(kanban_tuple_.kanban_board);
@@ -110,6 +113,54 @@ namespace server
 				if (doc != NULL)
 				{
 					yyjson_doc_free(doc);
+				}
+			}
+		}
+
+		bool withKanbanTuple(KanbanTuple& kanban_tuple_, yyjson_val* root, std::string type_str) {
+			switch (hash(type_str))
+			{
+			case hash("commands"):
+			{
+				this->commands(kanban_tuple_, root);
+				break;
+			}
+			default:
+			{
+				throw std::runtime_error("Unknown command");
+			}
+			}
+			// TODO: return true if modified
+			return false;
+		}
+
+		void commands(KanbanTuple& kanban_tuple_, yyjson_val* root) {
+			yyjson_val* commands = yyjson_obj_get(root, "commands");
+			if (!commands || !yyjson_is_arr(commands)) {
+				// TODO: return error
+				//printf("No commands found or commands is not an array.\n");
+				return;
+			}
+			yyjson_val* command;
+			size_t idx, max;
+			yyjson_arr_foreach(commands, idx, max, command) {
+				if (!yyjson_is_obj(command)) continue;
+
+				yyjson_val* action = yyjson_obj_get(command, "action");
+				if (action == NULL)
+				{
+					throw std::runtime_error("Unable to find action");
+				}
+				std::string action_str = yyjson_get_string_object(action);
+				switch (hash(action_str))
+				{
+				case hash("update"):
+				{
+					commands::update(kanban_tuple_, command);
+					break;
+				}
+				default:
+					break;
 				}
 			}
 		}
