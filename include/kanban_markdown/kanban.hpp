@@ -138,6 +138,8 @@ namespace kanban_markdown {
 		asap::datetime created;
 		asap::datetime last_modified;
 		unsigned int version;
+		std::string checksum;
+
 		std::string name;
 		std::string description;
 		tsl::ordered_map<std::string, std::shared_ptr<KanbanLabel>> labels;

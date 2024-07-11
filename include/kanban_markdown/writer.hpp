@@ -142,8 +142,10 @@ namespace kanban_markdown {
 		yyjson_mut_val* root = yyjson_mut_obj(doc);
 		yyjson_mut_doc_set_root(doc, root);
 
-		yyjson_mut_obj_add_str(doc, root, "created", kanban_board.created.str("%Y-%m-%d %H:%M:%S UTC").c_str());
-		yyjson_mut_obj_add_str(doc, root, "last_modified", kanban_board.last_modified.str("%Y-%m-%d %H:%M:%S UTC").c_str());
+		yyjson_mut_obj_add_uint(doc, root, "created", kanban_board.created.timestamp());
+		yyjson_mut_obj_add_uint(doc, root, "last_modified", kanban_board.last_modified.timestamp());
+		yyjson_mut_obj_add_uint(doc, root, "version", kanban_board.version);
+		yyjson_mut_obj_add_str(doc, root, "checksum", kanban_board.checksum.c_str());
 
 		yyjson_mut_obj_add_str(doc, root, "name", kanban_board.name.c_str());
 		yyjson_mut_obj_add_str(doc, root, "description", kanban_board.description.c_str());
