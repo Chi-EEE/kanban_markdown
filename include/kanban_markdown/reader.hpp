@@ -40,6 +40,8 @@ namespace kanban_markdown {
 
 			unsigned int version = 0;
 
+			std::string checksum;
+
 			LabelSection label_section;
 			BoardListSection board_section;
 
@@ -446,39 +448,46 @@ namespace kanban_markdown {
 	inline tl::expected<KanbanBoard, std::string> parse(std::string md_string) {
 		KanbanParser kanban_parser;
 
-		bool has_properties = md_string.substr(0, 3) == "---";
+		bool has_properties = md_string.substr(0, 4) == "---\n";
 		if (has_properties) {
-			std::size_t end_of_properties = md_string.find("---", 3);
+			std::size_t end_of_properties = md_string.find("---\n", 4);
 			if (end_of_properties == std::string::npos) {
 				return tl::make_unexpected("Invalid Markdown file. Properties are not closed.");
 			}
-			std::string properties = md_string.substr(3, end_of_properties - 3);
+			std::string properties = md_string.substr(3, end_of_properties - 4);
 			YAML::Node config = YAML::Load(properties);
 			const std::string created = config["Created"].as<std::string>();
 			if (created.empty()) {
-				return tl::make_unexpected("Invalid Markdown file. Created property is empty.");
+				return tl::make_unexpected("Invalid Markdown file. [Created] property is empty.");
 			}
 			const int version = config["Version"].as<unsigned int>();
 
 			const std::string last_modified = config["Last Modified"].as<std::string>();
 			if (last_modified.empty()) {
-				return tl::make_unexpected("Invalid Markdown file. Last Updated property is empty.");
+				return tl::make_unexpected("Invalid Markdown file. [Last Modified] property is empty.");
+			}
+
+			const std::string checksum = config["Checksum"].as<std::string>();
+			if (checksum.empty()) {
+				return tl::make_unexpected("Invalid Markdown file. [Checksum] property is empty.");
 			}
 
 			asap::datetime created_datetime(created, "%Y-%m-%d %H:%M:%S");
 			if (created_datetime.timestamp() == 0) {
-				return tl::make_unexpected("Invalid Markdown file. Created property has invalid seconds.");
+				return tl::make_unexpected("Invalid Markdown file. [Created] property has invalid seconds.");
 			}
 
 			asap::datetime last_modified_datetime(last_modified, "%Y-%m-%d %H:%M:%S");
 			if (last_modified_datetime.timestamp() == 0) {
-				return tl::make_unexpected("Invalid Markdown file. Created property has invalid seconds.");
+				return tl::make_unexpected("Invalid Markdown file. [Last Modified] property has invalid seconds.");
 			}
 
 			kanban_parser.created = created_datetime;
 			kanban_parser.last_modified = last_modified_datetime;
 
 			kanban_parser.version = version;
+
+			kanban_parser.checksum = checksum;
 
 			md_string = md_string.substr(end_of_properties + 3);
 		}

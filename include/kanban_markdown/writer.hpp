@@ -9,6 +9,8 @@
 #include <yaml-cpp/yaml.h>
 #include <yyjson.h>
 
+#include <picosha2.h>
+
 #include "kanban.hpp"
 #include "constants.hpp"
 #include "internal.hpp"
@@ -20,17 +22,6 @@ namespace kanban_markdown {
 
 	inline std::string markdown_format(KanbanBoard kanban_board, KanbanWriterFlags kanban_writer_flags = KanbanWriterFlags()) {
 		std::string markdown_file;
-#pragma region Properties
-		markdown_file += "---" + constants::END_OF_MARKDOWN_LINE;
-		YAML::Node properties;
-		properties["Version"] = kanban_board.version;
-		properties["Created"] = kanban_board.created.str("%Y-%m-%d %H:%M:%S UTC");
-		properties["Last Modified"] = kanban_board.last_modified.str("%Y-%m-%d %H:%M:%S UTC");
-		std::ostringstream oss;
-		oss << properties;
-		markdown_file += oss.str() + '\n';
-		markdown_file += "---" + constants::END_OF_MARKDOWN_LINE;
-#pragma endregion
 		markdown_file += '\n';
 #pragma region Note
 		markdown_file += "> [!NOTE]" + constants::END_OF_MARKDOWN_LINE;
@@ -123,6 +114,26 @@ namespace kanban_markdown {
 		}
 #pragma endregion
 		markdown_file += '\n';
+#pragma region Properties
+		std::string properties_string;
+		properties_string += "---\n";
+		YAML::Node properties;
+		properties["Version"] = kanban_board.version;
+		properties["Created"] = kanban_board.created.str("%Y-%m-%d %H:%M:%S UTC");
+		properties["Last Modified"] = kanban_board.last_modified.str("%Y-%m-%d %H:%M:%S UTC");
+
+		// Get the checksum of the file without the properties
+		std::vector<unsigned char> hash(picosha2::k_digest_size);
+		picosha2::hash256(markdown_file.begin(), markdown_file.end(), hash.begin(), hash.end());
+		std::string hex_str = picosha2::bytes_to_hex_string(hash.begin(), hash.end());
+		properties["Checksum"] = hex_str;
+
+		std::ostringstream oss;
+		oss << properties;
+		properties_string += oss.str() + '\n';
+		properties_string += "---\n";
+		markdown_file = properties_string + markdown_file;
+#pragma endregion
 		return markdown_file;
 	}
 
