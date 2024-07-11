@@ -48,6 +48,7 @@ target("kanban-markdown_server")
     set_languages("cxx17")
     set_toolchains("@cosmocc")
 
+    add_headerfiles("server/(**.hpp)")
     add_files("server/*.cpp")
 
     after_build(function (target) 
