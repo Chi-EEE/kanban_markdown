@@ -44,7 +44,7 @@ namespace kanban_markdown {
 			BoardListSection board_section;
 
 			unsigned int list_item_level = 0;
-			unsigned int sub_list_item_count = 0; //
+			unsigned int sub_list_item_count = 0;
 
 			bool currently_reading_link = false;
 		};
@@ -481,6 +481,12 @@ namespace kanban_markdown {
 			kanban_parser.version = version;
 
 			md_string = md_string.substr(end_of_properties + 3);
+		}
+		else {
+			auto now = kanban_markdown::internal::now_utc();
+			kanban_parser.created = now;
+			kanban_parser.last_modified = now;
+			kanban_parser.version = 0;
 		}
 
 		MD_PARSER parser;

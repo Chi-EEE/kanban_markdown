@@ -135,9 +135,9 @@ namespace kanban_markdown {
 			return !(*this == other);
 		}
 
-		asap::datetime created = kanban_markdown::internal::now_utc();
-		asap::datetime last_modified = kanban_markdown::internal::now_utc();
-		unsigned int version = 0;
+		asap::datetime created;
+		asap::datetime last_modified;
+		unsigned int version;
 		std::string name;
 		std::string description;
 		tsl::ordered_map<std::string, std::shared_ptr<KanbanLabel>> labels;
