@@ -41,6 +41,22 @@ class KanbanMarkdownEditorProvider {
     resolveCustomTextEditor(document, webviewPanel, token) {
         this.server = new KanbanMarkdownServer(this.context);
 
+        console.log('Kanban Markdown Editor: ', document.uri.fsPath)
+
+        this.server.onMessage(data => {
+            const message = JSON.parse(data);
+            console.log(message);
+        });
+
+        this.server.sendRequest(JSON.stringify({
+            type: 'parse',
+            file: document.uri.fsPath,
+        }));
+
+        this.server.sendRequest(JSON.stringify({
+            type: 'list',
+        }));
+
         webviewPanel.webview.options = {
             enableScripts: true,
         };
@@ -65,14 +81,14 @@ class KanbanMarkdownEditorProvider {
             this.server.close();
             changeDocumentSubscription.dispose();
         });
-        
-		webviewPanel.webview.onDidReceiveMessage(e => {
-			switch (e.type) {
-				case 'addList':
-					this.addList(document);
-					return;
-			}
-		});
+
+        webviewPanel.webview.onDidReceiveMessage(e => {
+            switch (e.type) {
+                case 'addList':
+                    this.addList(document);
+                    return;
+            }
+        });
 
         updateWebview();
     }
@@ -98,13 +114,13 @@ class KanbanMarkdownEditorProvider {
         // Local path to script and css for the webview
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(
             this.context.extensionUri, 'media', 'kanban.js'));
-    
+
         const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(
             this.context.extensionUri, 'media', 'kanban.css'));
-    
+
         // Use a nonce to whitelist which scripts can be run
         const nonce = getNonce();
-    
+
         return /* html */`
             <!DOCTYPE html>
             <html lang="en">

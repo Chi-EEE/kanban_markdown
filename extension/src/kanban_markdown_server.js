@@ -16,15 +16,7 @@ class KanbanMarkdownServer {
             return;
         }
 
-        var server = spawn(server_path.fsPath);
-        if (!server.connected) {
-            console.log("Failed to start server");
-            return;
-        }
-
-        server.stdout.on('data', function (data) {
-            console.log('stdout: ' + data.toString());
-        });
+        const server = spawn(server_path.fsPath);
 
         this.server = server;
     }
