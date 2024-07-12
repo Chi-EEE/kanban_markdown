@@ -137,11 +137,7 @@ namespace kanban_markdown {
 		return markdown_file;
 	}
 
-	std::string json_format(KanbanBoard kanban_board) {
-		yyjson_mut_doc* doc = yyjson_mut_doc_new(nullptr);
-		yyjson_mut_val* root = yyjson_mut_obj(doc);
-		yyjson_mut_doc_set_root(doc, root);
-
+	inline void json(KanbanBoard kanban_board, yyjson_mut_doc* doc, yyjson_mut_val* root) {
 		yyjson_mut_obj_add_uint(doc, root, "created", kanban_board.created.timestamp());
 		yyjson_mut_obj_add_uint(doc, root, "last_modified", kanban_board.last_modified.timestamp());
 		yyjson_mut_obj_add_uint(doc, root, "version", kanban_board.version);
@@ -215,6 +211,14 @@ namespace kanban_markdown {
 			yyjson_mut_arr_add_val(lists, list);
 		}
 		yyjson_mut_obj_add_val(doc, root, "lists", lists);
+	}
+
+	inline std::string json_format(KanbanBoard kanban_board) {
+		yyjson_mut_doc* doc = yyjson_mut_doc_new(nullptr);
+		yyjson_mut_val* root = yyjson_mut_obj(doc);
+		yyjson_mut_doc_set_root(doc, root);
+
+		kanban_markdown::json(kanban_board, doc, root);
 
 		const char* json = yyjson_mut_write(doc, 0, nullptr);
 		std::string result(json);

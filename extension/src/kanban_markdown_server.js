@@ -1,7 +1,12 @@
 const fs = require('fs');
-const spawn = require('child_process').spawn;
-
+const { spawn } = require('child_process');
 const vscode = require('vscode');
+
+function uuidv4() {
+    return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
+        (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
+    );
+}
 
 class KanbanMarkdownServer {
     /**
@@ -9,6 +14,8 @@ class KanbanMarkdownServer {
      */
     constructor(context) {
         this.context = context;
+        this.requestMap = new Map();
+
         // Check if server exists
         const server_path = vscode.Uri.joinPath(this.context.extensionUri, 'server', 'kanban-markdown_server.exe');
         if (!fs.existsSync(server_path.fsPath)) {
@@ -19,32 +26,43 @@ class KanbanMarkdownServer {
         const server = spawn(server_path.fsPath);
 
         this.server = server;
+
+        this.server.stdout.on('data', (data) => {
+            data = data.toString();
+            for (let line of data.split('\n')) {
+                if (line === '') {
+                    continue;
+                }
+                try {
+                    const response = JSON.parse(line);
+
+                    if (this.requestMap.has(response.id)) {
+                        this.requestMap.get(response.id)(response);
+                        this.requestMap.delete(response.id);
+                    } else {
+                        console.error('Response not found:', response);
+                    }
+                } catch (error) {
+                    console.error('Failed to process response:', error);
+                }
+            }
+        });
     }
 
     /**
      * 
-     * @param {*} request 
+     * @param {any} request 
      */
     sendRequest(request) {
-        this.server.stdin.cork();
-        this.server.stdin.write(request.toString() + '\n');
-        this.server.stdin.uncork();
-    }
+        const id = uuidv4();
+        request.id = id;
+        return new Promise((resolve, reject) => {
+            this.requestMap.set(id, resolve);
 
-    /**
-     * Message Callback.
-     *
-     * @callback MessageCallback
-     * @param {string} data
-     */
-
-    /**
-     * 
-     * @param {MessageCallback} callback 
-     */
-    onMessage(callback) {
-        this.server.stdout.on('data', function (data) {
-            callback(data.toString());
+            let data = JSON.stringify(request);
+            this.server.stdin.cork();
+            this.server.stdin.write(data + '\n');
+            this.server.stdin.uncork();
         });
     }
 
@@ -58,4 +76,4 @@ class KanbanMarkdownServer {
 
 module.exports = {
     KanbanMarkdownServer
-}
+};

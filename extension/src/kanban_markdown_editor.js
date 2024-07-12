@@ -43,19 +43,16 @@ class KanbanMarkdownEditorProvider {
 
         console.log('Kanban Markdown Editor: ', document.uri.fsPath)
 
-        this.server.onMessage(data => {
-            const message = JSON.parse(data);
-            console.log(message);
-        });
-
-        this.server.sendRequest(JSON.stringify({
+        this.server.sendRequest({
             type: 'parse',
             file: document.uri.fsPath,
-        }));
+        });
 
-        this.server.sendRequest(JSON.stringify({
-            type: 'list',
-        }));
+        this.server.sendRequest({
+            type: 'get',
+        }).then(data => {
+            console.log(data);
+        });
 
         webviewPanel.webview.options = {
             enableScripts: true,
@@ -82,27 +79,15 @@ class KanbanMarkdownEditorProvider {
             changeDocumentSubscription.dispose();
         });
 
-        webviewPanel.webview.onDidReceiveMessage(e => {
-            switch (e.type) {
-                case 'addList':
-                    this.addList(document);
-                    return;
-            }
-        });
+        // webviewPanel.webview.onDidReceiveMessage(e => {
+        //     switch (e.type) {
+        //         case 'addList':
+        //             this.addList(document);
+        //             return;
+        //     }
+        // });
 
         updateWebview();
-    }
-
-    /**
-     * @private
-     * @param {vscode.TextDocument} document 
-     * @param {any} e
-     */
-    addList(document, e) {
-        this.server.sendRequest(JSON.stringify({
-            type: 'addList',
-            listName: e.listName,
-        }));
     }
 
     /**
