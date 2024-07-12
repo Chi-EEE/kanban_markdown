@@ -115,16 +115,14 @@ namespace server
 			switch (hash(type_str))
 			{
 			case hash("commands"):
-			{
 				return this->commands(kanban_tuple_, root);
-			}
+			case hash("get"):
+				std::cout << kanban_markdown::json_format(kanban_tuple_.kanban_board) << "\n";
+				return false;
 			default:
-			{
 				throw std::runtime_error("Unknown command");
+				return false;
 			}
-			}
-			// TODO: return true if modified
-			return false;
 		}
 
 		bool commands(KanbanTuple& kanban_tuple_, yyjson_val* root) {
@@ -166,11 +164,6 @@ namespace server
 					case hash("create"): {
 						commands::command_create(kanban_tuple_, command);
 						modified = true;
-						success = true;
-						break;
-					}
-					case hash("read"):
-					{
 						success = true;
 						break;
 					}
