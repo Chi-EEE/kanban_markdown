@@ -9,39 +9,43 @@ namespace server::commands
 {
 	namespace internal_create
 	{
-		void parsePath_1(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value);
+		void parsePath_1(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value);
 
-		void parsePath_1_list(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value, std::string vector_index_name);
-		void parsePath_2_tasks(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name);
+		void parsePath_1_list(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::string vector_index_name);
+		void parsePath_2_tasks(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name);
 
-		void parsePath_1(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value)
+		void parsePath_1(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value)
 		{
 			std::string first = split_result[0];
 
 			switch (hash(first))
 			{
+			case hash("name"):
+				throw std::runtime_error("Invalid path: The first field must be a vector name");
+			case hash("description"):
+				throw std::runtime_error("Invalid path: The first field must be a vector name");
 			case hash("labels"):
 			{
-				yyjson_val *name = yyjson_obj_get(value, "name");
+				yyjson_val* name = yyjson_obj_get(value, "name");
 				if (name == NULL)
 				{
 					throw std::runtime_error("Unable to find name");
 				}
 				std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = std::make_shared<kanban_markdown::KanbanLabel>();
 				kanban_label->name = yyjson_get_string_object(name);
-				kanban_tuple.kanban_board.labels.insert({kanban_label->name, kanban_label});
+				kanban_tuple.kanban_board.labels.insert({ kanban_label->name, kanban_label });
 				break;
 			}
 			case hash("list"):
 			{
-				yyjson_val *name = yyjson_obj_get(value, "name");
+				yyjson_val* name = yyjson_obj_get(value, "name");
 				if (name == NULL)
 				{
 					throw std::runtime_error("Unable to find name");
 				}
 				std::shared_ptr<kanban_markdown::KanbanList> kanban_list = std::make_shared<kanban_markdown::KanbanList>();
 				kanban_list->name = yyjson_get_string_object(name);
-				kanban_tuple.kanban_board.list.insert({kanban_list->name, kanban_list});
+				kanban_tuple.kanban_board.list.insert({ kanban_list->name, kanban_list });
 				break;
 			}
 			default:
@@ -71,7 +75,7 @@ namespace server::commands
 			}
 		}
 
-		void parsePath_1_list(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value, std::string vector_index_name)
+		void parsePath_1_list(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::string vector_index_name)
 		{
 			if (!kanban_tuple.kanban_board.list.contains(vector_index_name))
 			{
@@ -84,31 +88,31 @@ namespace server::commands
 			{
 			case hash("tasks"):
 			{
-				yyjson_val *name = yyjson_obj_get(value, "name");
+				yyjson_val* name = yyjson_obj_get(value, "name");
 				if (name == NULL)
 				{
 					throw std::runtime_error("Unable to find name");
 				}
 
-				yyjson_val *description = yyjson_obj_get(value, "description");
+				yyjson_val* description = yyjson_obj_get(value, "description");
 				if (description == NULL)
 				{
 					throw std::runtime_error("Unable to find description");
 				}
 
-				yyjson_val *labels = yyjson_obj_get(value, "labels");
+				yyjson_val* labels = yyjson_obj_get(value, "labels");
 				if (labels == NULL)
 				{
 					throw std::runtime_error("Unable to find labels");
 				}
 
-				yyjson_val *attachments = yyjson_obj_get(value, "attachments");
+				yyjson_val* attachments = yyjson_obj_get(value, "attachments");
 				if (attachments == NULL)
 				{
 					throw std::runtime_error("Unable to find attachments");
 				}
 
-				yyjson_val *checklist = yyjson_obj_get(value, "checklist");
+				yyjson_val* checklist = yyjson_obj_get(value, "checklist");
 				if (checklist == NULL)
 				{
 					throw std::runtime_error("Unable to find checklist");
@@ -119,7 +123,7 @@ namespace server::commands
 				kanban_task->description = split(yyjson_get_string_object(description), "\n");
 
 				size_t idx, max;
-				yyjson_val *label;
+				yyjson_val* label;
 				yyjson_arr_foreach(labels, idx, max, label)
 				{
 					std::string label_name = yyjson_get_string_object(yyjson_obj_get(label, "name"));
@@ -127,13 +131,14 @@ namespace server::commands
 					{
 						std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = std::make_shared<kanban_markdown::KanbanLabel>();
 						kanban_label->name = label_name;
-						kanban_tuple.kanban_board.labels.insert({label_name, kanban_label});
+						kanban_tuple.kanban_board.labels.insert({ label_name, kanban_label });
 					}
 					std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = kanban_tuple.kanban_board.labels[label_name];
 					kanban_task->labels[label_name] = kanban_label;
+					kanban_label->tasks.insert({ kanban_task->name, kanban_task });
 				}
 
-				yyjson_val *attachment;
+				yyjson_val* attachment;
 				yyjson_arr_foreach(attachments, idx, max, attachment)
 				{
 					std::string attachment_name = yyjson_get_string_object(yyjson_obj_get(attachment, "name"));
@@ -144,7 +149,7 @@ namespace server::commands
 					kanban_task->attachments[attachment_name] = kanban_attachment;
 				}
 
-				yyjson_val *checklist_item;
+				yyjson_val* checklist_item;
 				yyjson_arr_foreach(checklist, idx, max, checklist_item)
 				{
 					std::string checklist_item_name = yyjson_get_string_object(yyjson_obj_get(checklist_item, "name"));
@@ -155,7 +160,7 @@ namespace server::commands
 					kanban_task->checklist[checklist_item_name] = kanban_checklist_item;
 				}
 
-				kanban_list->tasks.insert({kanban_task->name, kanban_task});
+				kanban_list->tasks.insert({ kanban_task->name, kanban_task });
 				break;
 			}
 			default:
@@ -183,7 +188,7 @@ namespace server::commands
 			}
 		}
 
-		void parsePath_2_tasks(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name)
+		void parsePath_2_tasks(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name)
 		{
 			if (!kanban_list->tasks.contains(list_vector_index_name))
 			{
@@ -195,7 +200,7 @@ namespace server::commands
 			{
 			case hash("labels"):
 			{
-				yyjson_val *name = yyjson_obj_get(value, "name");
+				yyjson_val* name = yyjson_obj_get(value, "name");
 				if (name == NULL)
 				{
 					throw std::runtime_error("Unable to find name");
@@ -205,20 +210,21 @@ namespace server::commands
 				{
 					std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = std::make_shared<kanban_markdown::KanbanLabel>();
 					kanban_label->name = label_name;
-					kanban_tuple.kanban_board.labels.insert({label_name, kanban_label});
+					kanban_tuple.kanban_board.labels.insert({ label_name, kanban_label });
 				}
 				std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = kanban_tuple.kanban_board.labels[label_name];
 				task->labels[label_name] = kanban_label;
+				kanban_label->tasks.insert({ task->name, task });
 				break;
 			}
 			case hash("attachments"):
 			{
-				yyjson_val *name = yyjson_obj_get(value, "name");
+				yyjson_val* name = yyjson_obj_get(value, "name");
 				if (name == NULL)
 				{
 					throw std::runtime_error("Unable to find name");
 				}
-				yyjson_val *url = yyjson_obj_get(value, "url");
+				yyjson_val* url = yyjson_obj_get(value, "url");
 				if (url == NULL)
 				{
 					throw std::runtime_error("Unable to find url");
@@ -233,12 +239,12 @@ namespace server::commands
 			}
 			case hash("checklist"):
 			{
-				yyjson_val *name = yyjson_obj_get(value, "name");
+				yyjson_val* name = yyjson_obj_get(value, "name");
 				if (name == NULL)
 				{
 					throw std::runtime_error("Unable to find name");
 				}
-				yyjson_val *checked = yyjson_obj_get(value, "checked");
+				yyjson_val* checked = yyjson_obj_get(value, "checked");
 				if (checked == NULL)
 				{
 					throw std::runtime_error("Unable to find checked");
@@ -256,14 +262,14 @@ namespace server::commands
 			}
 		}
 	}
-	void command_create(KanbanTuple &kanban_tuple, yyjson_val *command)
+	void command_create(KanbanTuple& kanban_tuple, yyjson_val* command)
 	{
-		yyjson_val *path = yyjson_obj_get(command, "path");
+		yyjson_val* path = yyjson_obj_get(command, "path");
 		if (path == NULL)
 		{
 			throw std::runtime_error("Unable to find path");
 		}
-		yyjson_val *value = yyjson_obj_get(command, "value");
+		yyjson_val* value = yyjson_obj_get(command, "value");
 		if (value == NULL)
 		{
 			throw std::runtime_error("Unable to find value");
@@ -276,9 +282,6 @@ namespace server::commands
 			throw std::runtime_error("Invalid path: There are no fields");
 		}
 
-		if (split_result.size() >= 2)
-		{
-			internal_create::parsePath_1(kanban_tuple, split_result, value);
-		}
+		internal_create::parsePath_1(kanban_tuple, split_result, value);
 	}
 }

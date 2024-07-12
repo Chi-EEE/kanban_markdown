@@ -379,6 +379,11 @@ namespace kanban_markdown {
 		}
 
 		void parseSection(KanbanParser* kanban_parser, const std::string& text_content) {
+			// Check if it is not a main header
+			if (kanban_parser->header_level == 1 || kanban_parser->header_level == 2) {
+				parseHeader(kanban_parser, text_content);
+				return;
+			}
 			switch (kanban_parser->state) {
 			case KanbanState::None:
 			{
@@ -430,6 +435,8 @@ namespace kanban_markdown {
 		KanbanBoard kanban_board;
 		kanban_board.created = kanban_parser.created;
 		kanban_board.last_modified = kanban_parser.last_modified;
+		kanban_board.version = kanban_parser.version;
+		kanban_board.checksum = kanban_parser.checksum;
 
 		kanban_board.name = kanban_parser.kanban_board_name;
 		kanban_board.description = kanban_parser.kanban_board_description;
@@ -449,10 +456,11 @@ namespace kanban_markdown {
 				kanban_task->name = task_name;
 				kanban_task->description = task_detail.description;
 				for (const std::string& label : task_detail.labels) {
-					if (!kanban_task->labels.contains(label)) {
-						kanban_task->labels.insert({ label, std::make_shared<KanbanLabel>(KanbanLabel{ label }) });
+					if (!kanban_board.labels.contains(label)) {
+						kanban_board.labels.insert({ label, std::make_shared<KanbanLabel>(KanbanLabel{ label }) });
 					}
-					kanban_task->labels[label]->tasks.insert({ task_name, kanban_task });
+					kanban_board.labels[label]->tasks.insert({ task_name, kanban_task });
+					kanban_task->labels.insert({ label, kanban_board.labels[label] });
 				}
 				for (const KanbanAttachment& attachment : task_detail.attachments) {
 					kanban_task->attachments.insert({ attachment.name, std::make_shared<KanbanAttachment>(attachment) });
@@ -494,12 +502,12 @@ namespace kanban_markdown {
 				return tl::make_unexpected("Invalid Markdown file. [Checksum] property is empty.");
 			}
 
-			asap::datetime created_datetime(created, "%Y-%m-%d %H:%M:%S");
+			asap::datetime created_datetime(created, "%Y-%m-%d %H:%M:%S UTC");
 			if (created_datetime.timestamp() == 0) {
 				return tl::make_unexpected("Invalid Markdown file. [Created] property has invalid seconds.");
 			}
 
-			asap::datetime last_modified_datetime(last_modified, "%Y-%m-%d %H:%M:%S");
+			asap::datetime last_modified_datetime(last_modified, "%Y-%m-%d %H:%M:%S UTC");
 			if (last_modified_datetime.timestamp() == 0) {
 				return tl::make_unexpected("Invalid Markdown file. [Last Modified] property has invalid seconds.");
 			}
@@ -537,6 +545,7 @@ namespace kanban_markdown {
 			std::cerr << "Error parsing Markdown text." << std::endl;
 		}
 
-		return createKanbanBoard(kanban_parser);
+		KanbanBoard kanban_board = createKanbanBoard(kanban_parser);
+		return kanban_board;
 	}
 }

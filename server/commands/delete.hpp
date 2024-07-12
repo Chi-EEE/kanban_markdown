@@ -9,62 +9,47 @@ namespace server::commands
 {
 	namespace internal_delete
 	{
-		void parsePath_1(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result);
+		void parsePath_1(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result);
 
-		void parsePath_1_list(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, std::string vector_index_name);
-		void parsePath_2_tasks(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name);
-		void parsePath_3_labels(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name);
-		void parsePath_3_attachments(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name);
-		void parsePath_3_checklist(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name);
+		void parsePath_1_list(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, std::string vector_index_name);
+		void parsePath_2_tasks(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name);
+		void parsePath_3_labels(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name);
+		void parsePath_3_attachments(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name);
+		void parsePath_3_checklist(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name);
 
-		void parsePath_1_labels(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, std::string vector_index_name);
+		void parsePath_1_labels(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, std::string vector_index_name);
 
-		void parsePath_1(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result)
+		void parsePath_1(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result)
 		{
 			std::string first = split_result[0];
 
-			switch (hash(first))
+			static re2::RE2 path_pattern(R"((\w+)\[(.+)\])");
+			std::string vector_name;
+			std::string vector_index_name;
+
+			if (!RE2::PartialMatch(first, path_pattern, &vector_name, &vector_index_name))
 			{
-			case hash("name"):
-				throw std::runtime_error("Invalid path: KanbanBoard.name is a key and cannot be deleted");
-			case hash("description"):
-				throw std::runtime_error("Invalid path: KanbanBoard.description is a key and cannot be deleted");
+				throw std::runtime_error("Invalid path: The first field must be a vector name with an index");
+			}
+
+			switch (hash(vector_name))
+			{
 			case hash("list"):
-				throw std::runtime_error("Invalid path: KanbanBoard.list is a key and cannot be deleted");
-			case hash("labels"):
-				throw std::runtime_error("Invalid path: KanbanBoard.labels is a key and cannot be deleted");
-			default:
 			{
-				static re2::RE2 path_pattern(R"((\w+)\[(.+)\])");
-				std::string vector_name;
-				std::string vector_index_name;
-
-				if (!RE2::PartialMatch(first, path_pattern, &vector_name, &vector_index_name))
-				{
-					throw std::runtime_error("Invalid path: The first field must be a vector name with an index");
-				}
-
-				switch (hash(vector_name))
-				{
-				case hash("list"):
-				{
-					parsePath_1_list(kanban_tuple, split_result, vector_index_name);
-					break;
-				}
-				case hash("labels"):
-				{
-					parsePath_1_labels(kanban_tuple, split_result, vector_index_name);
-					break;
-				}
-				default:
-					throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanBoard named "{}")", first));
-				}
+				parsePath_1_list(kanban_tuple, split_result, vector_index_name);
 				break;
 			}
+			case hash("labels"):
+			{
+				parsePath_1_labels(kanban_tuple, split_result, vector_index_name);
+				break;
+			}
+			default:
+				throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanBoard named "{}")", first));
 			}
 		}
 
-		void parsePath_1_list(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, std::string vector_index_name)
+		void parsePath_1_list(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, std::string vector_index_name)
 		{
 			if (!kanban_tuple.kanban_board.list.contains(vector_index_name))
 			{
@@ -108,7 +93,7 @@ namespace server::commands
 			}
 		}
 
-		void parsePath_2_tasks(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name)
+		void parsePath_2_tasks(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name)
 		{
 			if (!kanban_list->tasks.contains(list_vector_index_name))
 			{
@@ -167,7 +152,7 @@ namespace server::commands
 			}
 		}
 
-		void parsePath_3_labels(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name)
+		void parsePath_3_labels(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name)
 		{
 			if (!task->labels.contains(task_vector_index_name))
 			{
@@ -190,7 +175,7 @@ namespace server::commands
 			}
 		}
 
-		void parsePath_3_attachments(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name)
+		void parsePath_3_attachments(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name)
 		{
 			if (!task->attachments.contains(task_vector_index_name))
 			{
@@ -215,7 +200,7 @@ namespace server::commands
 			}
 		}
 
-		void parsePath_3_checklist(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name)
+		void parsePath_3_checklist(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name)
 		{
 			if (!task->checklist.contains(task_vector_index_name))
 			{
@@ -240,7 +225,7 @@ namespace server::commands
 			}
 		}
 
-		void parsePath_1_labels(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, std::string vector_index_name)
+		void parsePath_1_labels(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, std::string vector_index_name)
 		{
 			if (!kanban_tuple.kanban_board.labels.contains(vector_index_name))
 			{
@@ -257,9 +242,9 @@ namespace server::commands
 			}
 		}
 	}
-	void command_delete(KanbanTuple &kanban_tuple, yyjson_val *command)
+	void command_delete(KanbanTuple& kanban_tuple, yyjson_val* command)
 	{
-		yyjson_val *path = yyjson_obj_get(command, "path");
+		yyjson_val* path = yyjson_obj_get(command, "path");
 		if (path == NULL)
 		{
 			throw std::runtime_error("Unable to find path");
@@ -272,22 +257,20 @@ namespace server::commands
 			throw std::runtime_error("Invalid path: There are no fields");
 		}
 
-		if (split_result.size() == 1)
+		std::string first = split_result[0];
+		switch (hash(first))
 		{
-			std::string first = split_result[0];
-			switch (hash(first))
-			{
-			case hash("name"):
-				throw std::runtime_error("Invalid path: KanbanBoard.name is a key and cannot be deleted");
-			case hash("description"):
-				throw std::runtime_error("Invalid path: KanbanBoard.description is a key and cannot be deleted");
-			default:
-				throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanBoard named "{}")", first));
-			}
-		}
-		else
-		{
+		case hash("name"):
+			throw std::runtime_error("Invalid path: KanbanBoard.name is a key and cannot be deleted");
+		case hash("description"):
+			throw std::runtime_error("Invalid path: KanbanBoard.description is a key and cannot be deleted");
+		case hash("list"):
+			throw std::runtime_error("Invalid path: KanbanBoard.list is a key and cannot be deleted");
+		case hash("labels"):
+			throw std::runtime_error("Invalid path: KanbanBoard.labels is a key and cannot be deleted");
+		default:
 			internal_delete::parsePath_1(kanban_tuple, split_result);
+			break;
 		}
 	}
 }
