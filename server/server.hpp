@@ -13,6 +13,7 @@
 
 #include "commands/create.hpp"
 #include "commands/update.hpp"
+#include "commands/delete.hpp"
 
 namespace server
 {
@@ -163,14 +164,26 @@ namespace server
 					switch (hash(action_str))
 					{
 					case hash("create"): {
-						commands::create(kanban_tuple_, command);
+						commands::command_create(kanban_tuple_, command);
 						modified = true;
+						success = true;
+						break;
+					}
+					case hash("read"):
+					{
 						success = true;
 						break;
 					}
 					case hash("update"):
 					{
-						commands::update(kanban_tuple_, command);
+						commands::command_update(kanban_tuple_, command);
+						modified = true;
+						success = true;
+						break;
+					}
+					case hash("delete"):
+					{
+						commands::command_delete(kanban_tuple_, command);
 						modified = true;
 						success = true;
 						break;
