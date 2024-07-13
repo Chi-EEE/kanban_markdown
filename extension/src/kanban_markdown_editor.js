@@ -48,28 +48,26 @@ class KanbanMarkdownEditorProvider {
             file: document.uri.fsPath,
         });
 
-        this.server.sendRequest({
-            type: 'get',
-        }).then(data => {
-            console.log(data);
-        });
-
         webviewPanel.webview.options = {
             enableScripts: true,
         };
 
         webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
-        function updateWebview() {
+        function updateWebview(data) {
             webviewPanel.webview.postMessage({
                 type: 'update',
-                text: document.getText(),
+                text: data,
             });
         }
 
         const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument(e => {
             if (e.document.uri.toString() === document.uri.toString()) {
-                updateWebview();
+                this.server.sendRequest({
+                    type: 'get',
+                }).then(data => {
+                    updateWebview(data);
+                });
             }
         });
 
@@ -87,7 +85,11 @@ class KanbanMarkdownEditorProvider {
         //     }
         // });
 
-        updateWebview();
+        this.server.sendRequest({
+            type: 'get',
+        }).then(data => {
+            updateWebview(data);
+        });
     }
 
     /**

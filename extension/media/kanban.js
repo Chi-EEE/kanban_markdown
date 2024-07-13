@@ -1,6 +1,46 @@
+/**
+ * @typedef {Object} KanbanBoard
+ * @property {number} created - The timestamp when the kanban board was created.
+ * @property {number} last_modified - The timestamp when the kanban board was last modified.
+ * @property {number} version - The version of the kanban board.
+ * @property {string} checksum - The checksum for the kanban board.
+ * @property {string} name - The name of the kanban board.
+ * @property {string} description - The description of the kanban board.
+ * @property {Label[]} labels - The labels associated with the kanban board.
+ * @property {List[]} lists - The lists on the kanban board.
+ */
+
+/**
+ * @typedef {Object} Label
+ * @property {string} name - The name of the label.
+ * @property {Task[]} tasks - The tasks associated with the label.
+ */
+
+/**
+ * @typedef {Object} List
+ * @property {string} name - The name of the list.
+ * @property {Task[]} tasks - The tasks within the list.
+ */
+
+/**
+ * @typedef {Object} Task
+ * @property {string} name - The name of the task.
+ * @property {boolean} [checked] - The status of the task (checked or not). Optional.
+ * @property {string[]} [description] - The description of the task. Optional.
+ * @property {Label[]} [labels] - The labels associated with the task. Optional.
+ * @property {any[]} [attachments] - The attachments of the task. Optional.
+ * @property {any[]} [checklist] - The checklist items of the task. Optional.
+ */
+
 $(document).ready(function () {
     // @ts-ignore
     const vscode = acquireVsCodeApi();
+
+    window.addEventListener('message', event => {
+        const message = event.data.text;
+        /** @type {KanbanBoard} */
+        const kanban_board = message.kanban_board;
+    });
 
     const $addListButton = $('#add-list');
     $addListButton.on("click", function () {
