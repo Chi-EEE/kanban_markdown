@@ -1,6 +1,7 @@
 const { getNonce } = require('./util');
 
 const vscode = require('vscode');
+const { unraw } = require('unraw');
 const { KanbanMarkdownServer } = require('./kanban_markdown_server');
 
 /**
@@ -65,6 +66,7 @@ class KanbanMarkdownEditorProvider {
             if (e.document.uri.toString() === document.uri.toString()) {
                 this.server.sendRequest({
                     type: 'get',
+                    format: 'json',
                 }).then(data => {
                     updateWebview(data);
                 });
@@ -77,16 +79,17 @@ class KanbanMarkdownEditorProvider {
             changeDocumentSubscription.dispose();
         });
 
-        // webviewPanel.webview.onDidReceiveMessage(e => {
-        //     switch (e.type) {
-        //         case 'addList':
-        //             this.addList(document);
-        //             return;
-        //     }
-        // });
+        webviewPanel.webview.onDidReceiveMessage(e => {
+            switch (e.type) {
+                case 'update':
+                    this.update(document, e);
+                    return;
+            }
+        });
 
         this.server.sendRequest({
             type: 'get',
+            format: 'json',
         }).then(data => {
             updateWebview(data);
         });
@@ -129,7 +132,7 @@ class KanbanMarkdownEditorProvider {
             <body>
                 <div id="title-bar">
                     <div id="editable-title">
-                        <h1 id="kanban-title">Kanban Board</h1>
+                        <h1 id="kanban-title">Untitled Board</h1>
                         <input type="text" id="edit-title-input" />
                     </div>
                     <input type="color" id="background-color-picker" value="#ffffff">
@@ -160,6 +163,59 @@ class KanbanMarkdownEditorProvider {
                 <script nonce="${nonce}" src="${scriptUri}"></script>
                 </body>
             </html>`;
+    }
+
+    /**
+     * 
+     * @param {vscode.TextDocument} document 
+     * @param {*} e 
+     * @returns 
+     */
+    update(document, e) {
+        switch (e.path) {
+            case 'name':
+                this.server.sendRequest({
+                    type: 'commands',
+                    commands: [
+                        {
+                            action: "update",
+                            path: e.path,
+                            value: e.value
+                        }
+                    ]
+                }).then(() => {
+                    return this.server.sendRequest({
+                        type: 'get',
+                        format: 'markdown',
+                    });
+                }).then(data => {
+                    var markdown = data.markdown;
+                    markdown = unraw(markdown);
+                    this.updateTextDocument(document, markdown);
+                }).catch(error => {
+                    console.error("Error in processing requests:", error);
+                });
+                return;
+        }
+    }
+
+    /**
+     * @private
+     * @param {vscode.TextDocument} document 
+     * @param {string} markdown
+     * @returns 
+     */
+    updateTextDocument(document, markdown) {
+        const edit = new vscode.WorkspaceEdit();
+
+        // Just replace the entire document every time for this example extension.
+        // A more complete extension should compute minimal edits instead.
+        edit.replace(
+            document.uri,
+            new vscode.Range(0, 0, document.lineCount, 0),
+            markdown);
+
+        return vscode.workspace.applyEdit(edit);
     }
 }
 

@@ -37,15 +37,31 @@ $(document).ready(function () {
     const vscode = acquireVsCodeApi();
 
     window.addEventListener('message', event => {
-        /** @type {KanbanBoard} */
-        const kanban_board = event.data.text;
-        loadKanbanBoard(kanban_board);
+        const message = event.data;
+        switch (message.type) {
+            case 'update':
+                const kanban_board = message.text.json;
+                loadKanbanBoard(kanban_board);
+                vscode.setState({ json: kanban_board });
+                return;
+        }
     });
+
+    // Webviews are normally torn down when not visible and re-created when they become visible again.
+    // State lets us save information across these re-loads
+    const state = vscode.getState();
+    if (state) {
+        loadKanbanBoard(state.json);
+    }
 
     /**
      * @param {KanbanBoard} board 
      */
     function loadKanbanBoard(board) {
+        console.log(board);
+
+        $('#kanban-title').text(board.name);
+
         const $board = $('#board').empty();
 
         board.lists.forEach((list, index) => {
@@ -292,6 +308,11 @@ $(document).ready(function () {
             $editTitleInput.val($kanbanTitle.text().trim());
         } else {
             $kanbanTitle.text(newTitle);
+            vscode.postMessage({
+                type: 'update',
+                path: 'name',
+                value: newTitle
+            });
         }
         $kanbanTitle.show();
         $editTitleInput.hide();

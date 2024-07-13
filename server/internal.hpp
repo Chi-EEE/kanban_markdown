@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string_view>
+#include <iomanip>
 
 #include <yyjson.h>
 
@@ -9,41 +10,65 @@
 
 namespace server
 {
-    static constexpr inline uint32_t hash(const std::string_view s) noexcept
-    {
-        uint32_t hash = 5381;
+	static constexpr inline uint32_t hash(const std::string_view s) noexcept
+	{
+		uint32_t hash = 5381;
 
-        for (const char *c = s.data(); c < s.data() + s.size(); ++c)
-            hash = ((hash << 5) + hash) + (unsigned char)*c;
+		for (const char* c = s.data(); c < s.data() + s.size(); ++c)
+			hash = ((hash << 5) + hash) + (unsigned char)*c;
 
-        return hash;
-    }
-    
-    static std::vector<std::string> split(std::string s, std::string delimiter) {
-        size_t pos_start = 0, pos_end, delim_len = delimiter.length();
-        std::string token;
-        std::vector<std::string> res;
+		return hash;
+	}
 
-        while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos) {
-            token = s.substr(pos_start, pos_end - pos_start);
-            pos_start = pos_end + delim_len;
-            res.push_back(token);
-        }
+	static std::string escape_json(const std::string& s) {
+		std::ostringstream o;
+		for (auto c = s.cbegin(); c != s.cend(); c++) {
+			switch (*c) {
+			case '"': o << "\\\""; break;
+			case '\\': o << "\\\\"; break;
+			case '\b': o << "\\b"; break;
+			case '\f': o << "\\f"; break;
+			case '\n': o << "\\n"; break;
+			case '\r': o << "\\r"; break;
+			case '\t': o << "\\t"; break;
+			default:
+				if ('\x00' <= *c && *c <= '\x1f') {
+					o << "\\u"
+						<< std::hex << std::setw(4) << std::setfill('0') << static_cast<int>(*c);
+				}
+				else {
+					o << *c;
+				}
+			}
+		}
+		return o.str();
+	}
 
-        res.push_back(s.substr(pos_start));
-        return res;
-    }
+	static std::vector<std::string> split(std::string s, std::string delimiter) {
+		size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+		std::string token;
+		std::vector<std::string> res;
 
-    static inline std::string yyjson_get_string_object(yyjson_val *val)
-    {
-        const char *val_data = yyjson_get_str(val);
-        int val_size = yyjson_get_len(val);
-        return std::string(val_data, val_size);
-    }
+		while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos) {
+			token = s.substr(pos_start, pos_end - pos_start);
+			pos_start = pos_end + delim_len;
+			res.push_back(token);
+		}
 
-    struct KanbanTuple
-    {
-        std::string file_path;
-        kanban_markdown::KanbanBoard kanban_board;
-    };
+		res.push_back(s.substr(pos_start));
+		return res;
+	}
+
+	static inline std::string yyjson_get_string_object(yyjson_val* val)
+	{
+		const char* val_data = yyjson_get_str(val);
+		int val_size = yyjson_get_len(val);
+		return std::string(val_data, val_size);
+	}
+
+	struct KanbanTuple
+	{
+		std::string file_path;
+		kanban_markdown::KanbanBoard kanban_board;
+	};
 }

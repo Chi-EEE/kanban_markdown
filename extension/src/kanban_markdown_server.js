@@ -44,6 +44,7 @@ class KanbanMarkdownServer {
                     }
                 } catch (error) {
                     console.error('Failed to process response:', error);
+                    console.error('Response:', line);
                 }
             }
         });
