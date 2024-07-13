@@ -47,51 +47,52 @@ class KanbanMarkdownEditorProvider {
         this.server.sendRequest({
             type: 'parse',
             file: document.uri.fsPath,
-        });
+        }).then(() => {
 
-        webviewPanel.webview.options = {
-            enableScripts: true,
-        };
+            webviewPanel.webview.options = {
+                enableScripts: true,
+            };
 
-        webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+            webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
-        function updateWebview(data) {
-            webviewPanel.webview.postMessage({
-                type: 'update',
-                text: data,
-            });
-        }
-
-        const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument(e => {
-            if (e.document.uri.toString() === document.uri.toString()) {
-                this.server.sendRequest({
-                    type: 'get',
-                    format: 'json',
-                }).then(data => {
-                    updateWebview(data);
+            function updateWebview(data) {
+                webviewPanel.webview.postMessage({
+                    type: 'update',
+                    text: data,
                 });
             }
-        });
 
-        // Make sure we get rid of the listener when our editor is closed.
-        webviewPanel.onDidDispose(() => {
-            this.server.close();
-            changeDocumentSubscription.dispose();
-        });
+            const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument(e => {
+                if (e.document.uri.toString() === document.uri.toString()) {
+                    this.server.sendRequest({
+                        type: 'get',
+                        format: 'json',
+                    }).then(data => {
+                        updateWebview(data);
+                    });
+                }
+            });
 
-        webviewPanel.webview.onDidReceiveMessage(e => {
-            switch (e.type) {
-                case 'update':
-                    this.update(document, e);
-                    return;
-            }
-        });
+            // Make sure we get rid of the listener when our editor is closed.
+            webviewPanel.onDidDispose(() => {
+                this.server.close();
+                changeDocumentSubscription.dispose();
+            });
 
-        this.server.sendRequest({
-            type: 'get',
-            format: 'json',
-        }).then(data => {
-            updateWebview(data);
+            webviewPanel.webview.onDidReceiveMessage(e => {
+                switch (e.type) {
+                    case 'update':
+                        this.update(document, e);
+                        return;
+                }
+            });
+
+            this.server.sendRequest({
+                type: 'get',
+                format: 'json',
+            }).then(data => {
+                updateWebview(data);
+            });
         });
     }
 
@@ -135,7 +136,7 @@ class KanbanMarkdownEditorProvider {
                         <h1 id="kanban-title">Untitled Board</h1>
                         <input type="text" id="edit-title-input" />
                     </div>
-                    <input type="color" id="background-color-picker" value="#ffffff">
+                    <input type="color" id="background-color-picker" value="#A0A0A0">
                 </div>
 
                 <div id="board">

@@ -128,7 +128,7 @@ namespace kanban_markdown {
 	struct KanbanBoard
 	{
 		bool operator==(const KanbanBoard& other) const {
-			if (this->created.timestamp() != other.created.timestamp() || this->last_modified.timestamp() != other.last_modified.timestamp() || this->name != other.name || this->description != other.description || this->labels.size() != other.labels.size() || this->list.size() != other.list.size()) {
+			if (this->color != other.color || this->created.timestamp() != other.created.timestamp() || this->last_modified.timestamp() != other.last_modified.timestamp() || this->name != other.name || this->description != other.description || this->labels.size() != other.labels.size() || this->list.size() != other.list.size()) {
 				return false;
 			}
 			for (auto it = this->labels.begin(); it != this->labels.end(); ++it) {
@@ -148,6 +148,7 @@ namespace kanban_markdown {
 			return !(*this == other);
 		}
 
+		std::string color;
 		asap::datetime created;
 		asap::datetime last_modified;
 		unsigned int version;

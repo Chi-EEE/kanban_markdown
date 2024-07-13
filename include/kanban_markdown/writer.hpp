@@ -118,6 +118,7 @@ namespace kanban_markdown {
 		std::string properties_string;
 		properties_string += "---\n";
 		YAML::Node properties;
+		properties["Color"] = kanban_board.color;
 		properties["Version"] = kanban_board.version;
 		properties["Created"] = kanban_board.created.str("%Y-%m-%d %H:%M:%S UTC");
 		properties["Last Modified"] = kanban_board.last_modified.str("%Y-%m-%d %H:%M:%S UTC");
@@ -138,6 +139,7 @@ namespace kanban_markdown {
 	}
 
 	inline void json(KanbanBoard kanban_board, yyjson_mut_doc* doc, yyjson_mut_val* root) {
+		yyjson_mut_obj_add_str(doc, root, "color", kanban_board.color.c_str());
 		yyjson_mut_obj_add_uint(doc, root, "created", kanban_board.created.timestamp());
 		yyjson_mut_obj_add_uint(doc, root, "last_modified", kanban_board.last_modified.timestamp());
 		yyjson_mut_obj_add_uint(doc, root, "version", kanban_board.version);

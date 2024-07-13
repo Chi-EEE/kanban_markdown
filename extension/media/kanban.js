@@ -1,5 +1,6 @@
 /**
  * @typedef {Object} KanbanBoard
+ * @property {string} color - The color of the kanban board.
  * @property {number} created - The timestamp when the kanban board was created.
  * @property {number} last_modified - The timestamp when the kanban board was last modified.
  * @property {number} version - The version of the kanban board.
@@ -36,6 +37,29 @@ $(document).ready(function () {
     // @ts-ignore
     const vscode = acquireVsCodeApi();
 
+    /**
+     * @param {KanbanBoard} board 
+     */
+    function loadKanbanBoard(board) {
+        console.log(board);
+
+        $('background-color-picker').val(board.color);
+        $('body').css('background-color', board.color);
+
+        $('#kanban-title').text(board.name);
+
+        const $board = $('#board').empty();
+
+        board.lists.forEach((list, index) => {
+            const $newList = createListElement(list, index + 1);
+            $board.append($newList);
+        });
+
+        const $addListButton = $('<button>').attr('id', 'add-list').text('Add another list +');
+        $board.append($addListButton);
+        bindAddListButtonEvent($addListButton);
+    }
+
     window.addEventListener('message', event => {
         const message = event.data;
         switch (message.type) {
@@ -52,26 +76,6 @@ $(document).ready(function () {
     const state = vscode.getState();
     if (state) {
         loadKanbanBoard(state.json);
-    }
-
-    /**
-     * @param {KanbanBoard} board 
-     */
-    function loadKanbanBoard(board) {
-        console.log(board);
-
-        $('#kanban-title').text(board.name);
-
-        const $board = $('#board').empty();
-
-        board.lists.forEach((list, index) => {
-            const $newList = createListElement(list, index + 1);
-            $board.append($newList);
-        });
-
-        const $addListButton = $('<button>').attr('id', 'add-list').text('Add another list +');
-        $board.append($addListButton);
-        bindAddListButtonEvent($addListButton);
     }
 
     function createListElement(list, listIndex) {

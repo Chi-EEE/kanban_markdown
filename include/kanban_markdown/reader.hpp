@@ -32,6 +32,7 @@ namespace kanban_markdown {
 
 			bool read_properties = false;
 
+			std::string color;
 			asap::datetime created;
 			asap::datetime last_modified;
 			unsigned int version = 0;
@@ -433,6 +434,7 @@ namespace kanban_markdown {
 
 	inline KanbanBoard createKanbanBoard(KanbanParser& kanban_parser) {
 		KanbanBoard kanban_board;
+		kanban_board.color = kanban_parser.color;
 		kanban_board.created = kanban_parser.created;
 		kanban_board.last_modified = kanban_parser.last_modified;
 		kanban_board.version = kanban_parser.version;
@@ -486,6 +488,11 @@ namespace kanban_markdown {
 			}
 			std::string properties = md_string.substr(3, end_of_properties - 4);
 			YAML::Node config = YAML::Load(properties);
+			const std::string color = config["Color"].as<std::string>();
+			if (color.empty()) {
+				return tl::make_unexpected("Invalid Markdown file. [Color] property is empty.");
+			}
+
 			const std::string created = config["Created"].as<std::string>();
 			if (created.empty()) {
 				return tl::make_unexpected("Invalid Markdown file. [Created] property is empty.");
@@ -512,6 +519,7 @@ namespace kanban_markdown {
 				return tl::make_unexpected("Invalid Markdown file. [Last Modified] property has invalid seconds.");
 			}
 
+			kanban_parser.color = color;
 			kanban_parser.created = created_datetime;
 			kanban_parser.last_modified = last_modified_datetime;
 
@@ -523,6 +531,7 @@ namespace kanban_markdown {
 		}
 		else {
 			auto now = kanban_markdown::internal::now_utc();
+			kanban_parser.color = constants::default_color;
 			kanban_parser.created = now;
 			kanban_parser.last_modified = now;
 			kanban_parser.version = 0;
