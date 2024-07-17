@@ -61,7 +61,11 @@ namespace server::commands
 			{
 			case hash("name"):
 			{
-				kanban_list->name = yyjson_get_string_object(value);
+				const std::string new_name = yyjson_get_string_object(value);
+				if (kanban_list->name == new_name) {
+					return;
+				}
+				kanban_list->name = new_name;
 				kanban_tuple.kanban_board.list[kanban_list->name] = kanban_list;
 				kanban_tuple.kanban_board.list.erase(vector_index_name);
 				break;
@@ -293,6 +297,9 @@ namespace server::commands
 				break;
 			case hash("description"):
 				kanban_tuple.kanban_board.description = yyjson_get_string_object(value);
+				break;
+			case hash("color"):
+				kanban_tuple.kanban_board.color = yyjson_get_string_object(value);
 				break;
 			default:
 				throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanBoard named "{}")", first));

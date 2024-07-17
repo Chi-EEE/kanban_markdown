@@ -82,6 +82,12 @@ class KanbanMarkdownEditorProvider {
                     case 'update':
                         this.update(document, e);
                         return;
+                    case 'create':
+                        this.create(document, e);
+                        return;
+                    case 'delete':
+                        this.delete(document, e);
+                        return;
                 }
             });
 
@@ -171,31 +177,84 @@ class KanbanMarkdownEditorProvider {
      * @returns 
      */
     update(document, e) {
-        switch (e.path) {
-            case 'name':
-                this.server.sendRequest({
-                    type: 'commands',
-                    commands: [
-                        {
-                            action: "update",
-                            path: e.path,
-                            value: e.value
-                        }
-                    ]
-                }).then(() => {
-                    return this.server.sendRequest({
-                        type: 'get',
-                        format: 'markdown',
-                    });
-                }).then(data => {
-                    var markdown = Buffer.from(data.markdown, 'base64').toString('utf-8');
-                    console.log('Markdown:', markdown);
-                    this.updateTextDocument(document, markdown);
-                }).catch(error => {
-                    console.error("Error in processing requests:", error);
-                });
-                return;
-        }
+        this.server.sendRequest({
+            type: 'commands',
+            commands: [
+                {
+                    action: "update",
+                    path: e.path,
+                    value: e.value
+                }
+            ]
+        }).then(() => {
+            return this.server.sendRequest({
+                type: 'get',
+                format: 'markdown',
+            });
+        }).then(data => {
+            var markdown = Buffer.from(data.markdown, 'base64').toString('utf-8');
+            this.updateTextDocument(document, markdown);
+        }).catch(error => {
+            console.error("Error in processing requests:", error);
+        });
+    }
+
+    /**
+     * 
+     * @param {vscode.TextDocument} document 
+     * @param {*} e 
+     * @returns 
+     */
+    create(document, e) {
+        this.server.sendRequest({
+            type: 'commands',
+            commands: [
+                {
+                    action: "create",
+                    path: e.path,
+                    value: e.value
+                }
+            ]
+        }).then(() => {
+            return this.server.sendRequest({
+                type: 'get',
+                format: 'markdown',
+            });
+        }).then(data => {
+            var markdown = Buffer.from(data.markdown, 'base64').toString('utf-8');
+            this.updateTextDocument(document, markdown);
+        }).catch(error => {
+            console.error("Error in processing requests:", error);
+        });
+    }
+
+    /**
+     * 
+     * @param {vscode.TextDocument} document 
+     * @param {*} e 
+     * @returns 
+     */
+    delete(document, e) {
+        this.server.sendRequest({
+            type: 'commands',
+            commands: [
+                {
+                    action: "delete",
+                    path: e.path,
+                    value: e.value
+                }
+            ]
+        }).then(() => {
+            return this.server.sendRequest({
+                type: 'get',
+                format: 'markdown',
+            });
+        }).then(data => {
+            var markdown = Buffer.from(data.markdown, 'base64').toString('utf-8');
+            this.updateTextDocument(document, markdown);
+        }).catch(error => {
+            console.error("Error in processing requests:", error);
+        });
     }
 
     /**

@@ -1,14 +1,19 @@
 /**
  * @typedef {Object} KanbanBoard
+ * @property {string} name - The name of the kanban board.
+ * @property {Properties} properties - The properties of the kanban board.
+ * @property {string} description - The description of the kanban board.
+ * @property {Label[]} labels - The labels associated with the kanban board.
+ * @property {List[]} lists - The lists on the kanban board.
+ */
+
+/**
+ * @typedef {Object} Properties
  * @property {string} color - The color of the kanban board.
  * @property {number} created - The timestamp when the kanban board was created.
  * @property {number} last_modified - The timestamp when the kanban board was last modified.
  * @property {number} version - The version of the kanban board.
  * @property {string} checksum - The checksum for the kanban board.
- * @property {string} name - The name of the kanban board.
- * @property {string} description - The description of the kanban board.
- * @property {Label[]} labels - The labels associated with the kanban board.
- * @property {List[]} lists - The lists on the kanban board.
  */
 
 /**
@@ -41,10 +46,9 @@ $(document).ready(function () {
      * @param {KanbanBoard} board 
      */
     function loadKanbanBoard(board) {
-        console.log(board);
-
-        $('background-color-picker').val(board.color);
-        $('body').css('background-color', board.color);
+        const color = board.properties.color.replace("\u0000", "#");
+        $('#background-color-picker').val(color);
+        $('body').css('background-color', color);
 
         $('#kanban-title').text(board.name);
 
@@ -86,6 +90,23 @@ $(document).ready(function () {
             .attr('placeholder', 'Enter list title')
             .val(list.name);
 
+        let previousTitle = $listTitle.val();
+
+        $listTitle.on('blur', function () {
+            const newTitle = $(this).val().trim();
+            if (newTitle) {
+                vscode.postMessage({
+                    type: 'update',
+                    path: `list[${previousTitle}].name`,
+                    value: newTitle
+                });
+            }
+        });
+
+        $listTitle.on('keypress', function (e) {
+            if (e.which === 13) $(this).blur(); // Enter key
+        });
+
         const $cards = $('<div>').addClass('cards').sortable({
             connectWith: '.cards',
             tolerance: 'pointer'
@@ -96,8 +117,8 @@ $(document).ready(function () {
             $cards.append($card);
         });
 
-        const $addCardButton = createAddCardButton($cards);
-        const $listActionsButton = createListActionsButton($newList);
+        const $addCardButton = createAddCardButton($listTitle, $cards);
+        const $listActionsButton = createListActionsButton($listTitle, $newList);
 
         $newList.append($listTitle, $listActionsButton, $cards, $addCardButton);
         return $newList;
@@ -149,19 +170,19 @@ $(document).ready(function () {
         return $cardMenuActions;
     }
 
-    function createAddCardButton($cards) {
+    function createAddCardButton($listTitle, $cards) {
         return $('<button>')
             .addClass('add-card')
             .text('Add another card +')
             .on('click', function () {
                 $(this).hide();
-                const $card = createEditableCard();
+                const $card = createEditableCard($listTitle);
                 $cards.append($card);
                 $card.find('.card-title').trigger('focus');
             });
     }
 
-    function createEditableCard() {
+    function createEditableCard($listTitle) {
         const $card = $('<div>').addClass('card');
         const $cardTitleInput = $('<input>').addClass('card-title').attr('placeholder', 'Enter card title');
         let isCardTitleChanged = false;
@@ -172,6 +193,17 @@ $(document).ready(function () {
                 $card.remove();
             } else {
                 $(this).prop('readonly', true);
+                vscode.postMessage({
+                    type: 'create',
+                    path: `list[${$listTitle.val()}].tasks`,
+                    value: {
+                        name: $(this).val(),
+                        description: '',
+                        labels: [],
+                        attachments: [],
+                        checklist: [],
+                    }
+                });
             }
             $('.add-card').show();
         });
@@ -187,7 +219,13 @@ $(document).ready(function () {
         return $card;
     }
 
-    function createListActionsButton($newList) {
+    /**
+     * 
+     * @param {*} $listTitle 
+     * @param {*} $newList 
+     * @returns 
+     */
+    function createListActionsButton($listTitle, $newList) {
         const $listActionsButton = $('<button>')
             .addClass('list-actions')
             .text('⋮')
@@ -201,7 +239,14 @@ $(document).ready(function () {
         const $removeListButton = $('<button>')
             .addClass('remove-list')
             .text('Remove list')
-            .on('click', () => $newList.remove());
+            .on('click', () => {
+                console.log($newList)
+                vscode.postMessage({
+                    type: 'delete',
+                    path: `list[${$listTitle.val()}]`,
+                });
+                $newList.remove()
+            });
 
         $listActionsMenu.append($removeListButton);
         $listActionsButton.append($listActionsMenu);
@@ -228,6 +273,14 @@ $(document).ready(function () {
         $listTitle.on('blur', function () {
             if (!isListTitleChanged) {
                 $newList.remove();
+            } else {
+                vscode.postMessage({
+                    type: 'create',
+                    path: 'list',
+                    value: {
+                        name: $(this).val(),
+                    }
+                });
             }
             $('#add-list').show();
             $newList.find('.add-card').show();
@@ -243,8 +296,8 @@ $(document).ready(function () {
             tolerance: 'pointer'
         }).hide();
 
-        const $addCardButton = createAddCardButton($cards);
-        const $listActionsButton = createListActionsButton($newList);
+        const $addCardButton = createAddCardButton($listTitle, $cards);
+        const $listActionsButton = createListActionsButton($listTitle, $newList);
 
         $newList.append($listTitle, $listActionsButton, $cards, $addCardButton);
         return $newList;
@@ -267,7 +320,13 @@ $(document).ready(function () {
     }
 
     $('#background-color-picker').on('input', function (event) {
-        $('body').css('background-color', event.target.value);
+        const color = event.target.value;
+        $('body').css('background-color', color);
+        vscode.postMessage({
+            type: 'update',
+            path: 'color',
+            value: color
+        });
     });
 
     const $modal = $('#card-modal');
