@@ -57,6 +57,7 @@ class KanbanMarkdownServer {
     sendRequest(request) {
         const id = uuidv4();
         request.id = id;
+        console.log('Sending request:', JSON.stringify(request));
         return new Promise((resolve, reject) => {
             this.requestMap.set(id, resolve);
 

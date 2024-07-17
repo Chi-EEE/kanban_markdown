@@ -9,6 +9,8 @@
 
 #include <kanban_markdown/kanban_markdown.hpp>
 
+#include <tobiaslocker_base64/base64.hpp>
+
 #include "internal.hpp"
 
 #include "commands/create.hpp"
@@ -148,29 +150,31 @@ namespace server
 		}
 
 		static bool get_json(KanbanTuple& kanban_tuple_, std::string id_str) {
-			yyjson_mut_doc* new_doc = yyjson_mut_doc_new(NULL);
+			yyjson_mut_doc* new_doc = yyjson_mut_doc_new(nullptr);
 			yyjson_mut_val* new_root = yyjson_mut_obj(new_doc);
 			yyjson_mut_doc_set_root(new_doc, new_root);
 			yyjson_mut_obj_add_str(new_doc, new_root, "id", id_str.c_str());
 			yyjson_mut_val* kanban_board_object = yyjson_mut_obj(new_doc);
 			yyjson_mut_obj_add_val(new_doc, new_root, "json", kanban_board_object);
 			kanban_markdown::json(kanban_tuple_.kanban_board, new_doc, kanban_board_object);
-			const char* json = yyjson_mut_write(new_doc, 0, NULL);
+			const char* json = yyjson_mut_write(new_doc, 0, nullptr);
 			printf("%s\n", json);
 			free((void*)json);
+			yyjson_mut_doc_free(new_doc);
 			return false;
 		}
 
 		static bool get_markdown(KanbanTuple& kanban_tuple_, std::string id_str) {
-			yyjson_mut_doc* new_doc = yyjson_mut_doc_new(NULL);
+			yyjson_mut_doc* new_doc = yyjson_mut_doc_new(nullptr);
 			yyjson_mut_val* new_root = yyjson_mut_obj(new_doc);
 			yyjson_mut_doc_set_root(new_doc, new_root);
 			yyjson_mut_obj_add_str(new_doc, new_root, "id", id_str.c_str());
-			const std::string md_string = escape_json(kanban_markdown::markdown_format(kanban_tuple_.kanban_board));
-			yyjson_mut_obj_add_str(new_doc, new_root, "markdown", md_string.c_str());
+			const std::string md_base64_string = base64::to_base64(kanban_markdown::markdown_format(kanban_tuple_.kanban_board));
+			yyjson_mut_obj_add_str(new_doc, new_root, "markdown", md_base64_string.c_str());
 			const char* json = yyjson_mut_write(new_doc, 0, NULL);
 			printf("%s\n", json);
 			free((void*)json);
+			yyjson_mut_doc_free(new_doc);
 			return false;
 		}
 
@@ -185,6 +189,7 @@ namespace server
 				const char* json = yyjson_mut_write(doc, 0, NULL);
 				printf("%s\n", json);
 				free((void*)json);
+				yyjson_mut_doc_free(doc);
 				return false;
 			}
 			yyjson_mut_doc* new_doc = yyjson_mut_doc_new(NULL);
@@ -247,6 +252,7 @@ namespace server
 			const char* json = yyjson_mut_write(new_doc, 0, NULL);
 			printf("%s\n", json);
 			free((void*)json);
+			yyjson_mut_doc_free(new_doc);
 			return modified;
 		}
 

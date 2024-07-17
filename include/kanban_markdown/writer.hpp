@@ -139,80 +139,91 @@ namespace kanban_markdown {
 	}
 
 	inline void json(KanbanBoard kanban_board, yyjson_mut_doc* doc, yyjson_mut_val* root) {
-		yyjson_mut_obj_add_str(doc, root, "color", kanban_board.color.c_str());
-		yyjson_mut_obj_add_uint(doc, root, "created", kanban_board.created.timestamp());
-		yyjson_mut_obj_add_uint(doc, root, "last_modified", kanban_board.last_modified.timestamp());
-		yyjson_mut_obj_add_uint(doc, root, "version", kanban_board.version);
-		yyjson_mut_obj_add_str(doc, root, "checksum", kanban_board.checksum.c_str());
+		yyjson_mut_obj_add_str(doc, root, "name", kanban_board.name.empty() ? constants::default_board_name.c_str() : kanban_board.name.c_str());
+		yyjson_mut_obj_add_str(doc, root, "description", kanban_board.description.empty() ? constants::default_description.c_str() : kanban_board.description.c_str());
 
-		yyjson_mut_obj_add_str(doc, root, "name", kanban_board.name.c_str());
-		yyjson_mut_obj_add_str(doc, root, "description", kanban_board.description.c_str());
+		// Properties
+		yyjson_mut_val* properties_obj = yyjson_mut_obj(doc);
+		yyjson_mut_obj_add_str(doc, properties_obj, "color", kanban_board.color.c_str());
+		yyjson_mut_obj_add_uint(doc, properties_obj, "version", kanban_board.version);
+		yyjson_mut_obj_add_uint(doc, properties_obj, "created", kanban_board.created.timestamp());
+		yyjson_mut_obj_add_uint(doc, properties_obj, "last_modified", kanban_board.last_modified.timestamp());
+		yyjson_mut_obj_add_str(doc, properties_obj, "checksum", kanban_board.checksum.c_str());
 
-		yyjson_mut_val* labels = yyjson_mut_arr(doc);
-		for (auto& [kanban_label_name, kanban_label] : kanban_board.labels) {
-			yyjson_mut_val* label = yyjson_mut_obj(doc);
-			yyjson_mut_obj_add_str(doc, label, "name", kanban_label->name.c_str());
+		yyjson_mut_obj_add_val(doc, root, "properties", properties_obj);
 
-			yyjson_mut_val* tasks = yyjson_mut_arr(doc);
-			for (auto& [kanban_task_name, kanban_task] : kanban_label->tasks) {
-				yyjson_mut_val* task = yyjson_mut_obj(doc);
-				yyjson_mut_obj_add_str(doc, task, "name", kanban_task->name.c_str());
-				yyjson_mut_arr_add_val(tasks, task);
+		// Labels
+		yyjson_mut_val* labels_arr = yyjson_mut_arr(doc);
+		for (const auto& [kanban_label_name, kanban_label] : kanban_board.labels) {
+			yyjson_mut_val* label_obj = yyjson_mut_obj(doc);
+			yyjson_mut_obj_add_str(doc, label_obj, "name", kanban_label->name.c_str());
+
+			yyjson_mut_val* tasks_arr = yyjson_mut_arr(doc);
+			for (const auto& [kanban_task_name, kanban_task] : kanban_label->tasks) {
+				yyjson_mut_val* task_obj = yyjson_mut_obj(doc);
+				yyjson_mut_obj_add_str(doc, task_obj, "name", kanban_task->name.c_str());
+
+				yyjson_mut_arr_add_val(tasks_arr, task_obj);
 			}
-			yyjson_mut_obj_add_val(doc, label, "tasks", tasks);
-			yyjson_mut_arr_add_val(labels, label);
+			yyjson_mut_obj_add_val(doc, label_obj, "tasks", tasks_arr);
+			yyjson_mut_arr_add_val(labels_arr, label_obj);
 		}
-		yyjson_mut_obj_add_val(doc, root, "labels", labels);
+		yyjson_mut_obj_add_val(doc, root, "labels", labels_arr);
 
-		yyjson_mut_val* lists = yyjson_mut_arr(doc);
-		for (auto& [kanban_list_name, kanban_list] : kanban_board.list) {
-			yyjson_mut_val* list = yyjson_mut_obj(doc);
-			yyjson_mut_obj_add_str(doc, list, "name", kanban_list->name.c_str());
+		// Board lists
+		yyjson_mut_val* lists_arr = yyjson_mut_arr(doc);
+		for (const auto& [kanban_list_name, kanban_list] : kanban_board.list) {
+			yyjson_mut_val* list_obj = yyjson_mut_obj(doc);
+			yyjson_mut_obj_add_str(doc, list_obj, "name", kanban_list->name.c_str());
 
-			yyjson_mut_val* tasks = yyjson_mut_arr(doc);
-			for (auto& [kanban_task_name, kanban_task] : kanban_list->tasks) {
-				yyjson_mut_val* task = yyjson_mut_obj(doc);
-				yyjson_mut_obj_add_str(doc, task, "name", kanban_task->name.c_str());
-				yyjson_mut_obj_add_bool(doc, task, "checked", kanban_task->checked);
+			yyjson_mut_val* tasks_arr = yyjson_mut_arr(doc);
+			for (const auto& [kanban_task_name, kanban_task] : kanban_list->tasks) {
+				yyjson_mut_val* task_obj = yyjson_mut_obj(doc);
+				yyjson_mut_obj_add_str(doc, task_obj, "name", kanban_task->name.c_str());
+				yyjson_mut_obj_add_bool(doc, task_obj, "checked", kanban_task->checked);
 
-				yyjson_mut_val* description = yyjson_mut_arr(doc);
-				for (std::string description_line : kanban_task->description) {
-					yyjson_mut_arr_add_str(doc, description, description_line.c_str());
+				// Description
+				yyjson_mut_val* desc_arr = yyjson_mut_arr(doc);
+				for (const auto& desc_line : kanban_task->description) {
+					yyjson_mut_arr_add_str(doc, desc_arr, desc_line.c_str());
 				}
-				yyjson_mut_obj_add_val(doc, task, "description", description);
+				yyjson_mut_obj_add_val(doc, task_obj, "description", desc_arr);
 
-				yyjson_mut_val* task_labels = yyjson_mut_arr(doc);
-				for (auto& [kanban_label_name, kanban_label] : kanban_task->labels) {
-					yyjson_mut_val* task_label = yyjson_mut_obj(doc);
-					yyjson_mut_obj_add_str(doc, task_label, "name", kanban_label->name.c_str());
-					yyjson_mut_arr_add_val(task_labels, task_label);
+				// Labels
+				yyjson_mut_val* task_labels_arr = yyjson_mut_arr(doc);
+				for (const auto& [label_name, label] : kanban_task->labels) {
+					yyjson_mut_val* task_label_obj = yyjson_mut_obj(doc);
+					yyjson_mut_obj_add_str(doc, task_label_obj, "name", label->name.c_str());
+					yyjson_mut_arr_add_val(task_labels_arr, task_label_obj);
 				}
-				yyjson_mut_obj_add_val(doc, task, "labels", task_labels);
+				yyjson_mut_obj_add_val(doc, task_obj, "labels", task_labels_arr);
 
-				yyjson_mut_val* attachments = yyjson_mut_arr(doc);
-				for (auto& [kanban_attachment_name, kanban_attachment] : kanban_task->attachments) {
-					yyjson_mut_val* attachment = yyjson_mut_obj(doc);
-					yyjson_mut_obj_add_str(doc, attachment, "name", kanban_attachment->name.c_str());
-					yyjson_mut_obj_add_str(doc, attachment, "url", kanban_attachment->url.c_str());
-					yyjson_mut_arr_add_val(attachments, attachment);
+				// Attachments
+				yyjson_mut_val* attachments_arr = yyjson_mut_arr(doc);
+				for (const auto& [attachment_name, attachment] : kanban_task->attachments) {
+					yyjson_mut_val* attachment_obj = yyjson_mut_obj(doc);
+					yyjson_mut_obj_add_str(doc, attachment_obj, "name", attachment->name.c_str());
+					yyjson_mut_obj_add_str(doc, attachment_obj, "url", attachment->url.c_str());
+					yyjson_mut_arr_add_val(attachments_arr, attachment_obj);
 				}
-				yyjson_mut_obj_add_val(doc, task, "attachments", attachments);
+				yyjson_mut_obj_add_val(doc, task_obj, "attachments", attachments_arr);
 
-				yyjson_mut_val* checklist = yyjson_mut_arr(doc);
-				for (auto& [kanban_checklist_item_name, kanban_checklist_item] : kanban_task->checklist) {
-					yyjson_mut_val* checklist_item = yyjson_mut_obj(doc);
-					yyjson_mut_obj_add_str(doc, checklist_item, "name", kanban_checklist_item->name.c_str());
-					yyjson_mut_obj_add_bool(doc, checklist_item, "checked", kanban_checklist_item->checked);
-					yyjson_mut_arr_add_val(checklist, checklist_item);
+				// Checklist
+				yyjson_mut_val* checklist_arr = yyjson_mut_arr(doc);
+				for (const auto& [item_name, item] : kanban_task->checklist) {
+					yyjson_mut_val* checklist_item_obj = yyjson_mut_obj(doc);
+					yyjson_mut_obj_add_str(doc, checklist_item_obj, "name", item->name.c_str());
+					yyjson_mut_obj_add_bool(doc, checklist_item_obj, "checked", item->checked);
+					yyjson_mut_arr_add_val(checklist_arr, checklist_item_obj);
 				}
-				yyjson_mut_obj_add_val(doc, task, "checklist", checklist);
+				yyjson_mut_obj_add_val(doc, task_obj, "checklist", checklist_arr);
 
-				yyjson_mut_arr_add_val(tasks, task);
+				yyjson_mut_arr_add_val(tasks_arr, task_obj);
 			}
-			yyjson_mut_obj_add_val(doc, list, "tasks", tasks);
-			yyjson_mut_arr_add_val(lists, list);
+			yyjson_mut_obj_add_val(doc, list_obj, "tasks", tasks_arr);
+			yyjson_mut_arr_add_val(lists_arr, list_obj);
 		}
-		yyjson_mut_obj_add_val(doc, root, "lists", lists);
+		yyjson_mut_obj_add_val(doc, root, "lists", lists_arr);
 	}
 
 	inline std::string json_format(KanbanBoard kanban_board) {

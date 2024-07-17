@@ -8,7 +8,9 @@ else
 end
 
 add_requires("asap", "fmt", "md4c", "tl_expected", "ordered_map", "access_private")
-add_requires("picosha2", "yyjson", "yaml-cpp")
+add_requires("picosha2", "tobiaslocker_base64", "yyjson", "yaml-cpp")
+
+add_requires("cpp-dump")
 
 add_requires("argparse")
 
@@ -23,7 +25,7 @@ target("kanban-markdown")
     end
 
     add_packages("asap", "fmt", "md4c", "tl_expected", "ordered_map", "access_private", {public = true})
-    add_packages("picosha2", "yyjson", "yaml-cpp", {public = true})
+    add_packages("picosha2", "tobiaslocker_base64", "yyjson", "yaml-cpp", {public = true})
 
     add_headerfiles("include/(**.hpp)")
     add_includedirs("include", {public = true})

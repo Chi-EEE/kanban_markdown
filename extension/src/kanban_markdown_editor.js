@@ -1,7 +1,6 @@
 const { getNonce } = require('./util');
 
 const vscode = require('vscode');
-const { unraw } = require('unraw');
 const { KanbanMarkdownServer } = require('./kanban_markdown_server');
 
 /**
@@ -48,7 +47,6 @@ class KanbanMarkdownEditorProvider {
             type: 'parse',
             file: document.uri.fsPath,
         }).then(() => {
-
             webviewPanel.webview.options = {
                 enableScripts: true,
             };
@@ -190,8 +188,8 @@ class KanbanMarkdownEditorProvider {
                         format: 'markdown',
                     });
                 }).then(data => {
-                    var markdown = data.markdown;
-                    markdown = unraw(markdown);
+                    var markdown = Buffer.from(data.markdown, 'base64').toString('utf-8');
+                    console.log('Markdown:', markdown);
                     this.updateTextDocument(document, markdown);
                 }).catch(error => {
                     console.error("Error in processing requests:", error);
