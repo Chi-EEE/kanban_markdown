@@ -50,6 +50,7 @@ $(document).ready(function () {
         const color = board.properties.color;
         $('#background-color-picker').val(color);
         $('body').css('background-color', color);
+        $('.modal-content').css('background-color', color);
         $('#kanban-title').text(board.name);
 
         const $board = $('#board').empty();
@@ -319,6 +320,7 @@ $(document).ready(function () {
     $('#background-color-picker').on('input', function (event) {
         const color = event.target.value;
         $('body').css('background-color', color);
+        $('#modal-content').css('background-color', color);
         vscode.postMessage({
             type: 'update',
             path: 'color',

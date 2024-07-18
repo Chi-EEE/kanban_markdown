@@ -129,7 +129,7 @@ class KanbanMarkdownEditorProvider {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
                 <link href="${styleMainUri}" rel="stylesheet" />
-    
+
                 <title>Kanban Board</title>
             </head>
             <body>
@@ -148,17 +148,31 @@ class KanbanMarkdownEditorProvider {
                 <div id="card-modal" class="modal">
                     <div class="modal-content">
                         <span class="close">&times;</span>
-                        <h2>Edit Card</h2>
-                        <div class="modal-body">
-                            <label for="edit-card-title">Title</label>
-                            <input type="text" id="edit-card-title" placeholder="Enter card title" />
-
-                            <label for="edit-card-description">Description</label>
-                            <textarea id="edit-card-description" placeholder="Enter card description"></textarea>
+                        <div class="modal-main">
+                            <div class="modal-header">
+                                <h2>Edit Card</h2>
+                                <div class="label-bar">
+                                    <button class="label-button">Label 1</button>
+                                    <button class="label-button">Label 2</button>
+                                    <button class="label-button">Label 3</button>
+                                </div>
+                            </div>
+                            <div class="modal-body">
+                                <label for="edit-card-title">Title</label>
+                                <input type="text" id="edit-card-title" placeholder="Enter card title" />
+                                <label for="edit-card-description">Description</label>
+                                <textarea id="edit-card-description" placeholder="Enter card description"></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button id="save-card">Save</button>
+                            </div>
                         </div>
-                        <button id="save-card">Save</button>
+                        <div class="modal-sidebar">
+                            <button id="attachment-button">Attachments</button>
+                        </div>
                     </div>
                 </div>
+
 
                 <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous" nonce="${nonce}"></script>
                 <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.min.js" defer crossorigin="anonymous" nonce="${nonce}"></script>

@@ -7,20 +7,25 @@ body {
     flex-direction: column;
     align-items: flex-start;
     height: 100vh;
-    color: #B6C2CF;
-
-    overflow-x: scroll;
+    color: white;
+    /* Set default text color to white */
+    overflow-x: hidden;
+    /* Change overflow-x to hidden */
     padding-bottom: 20px;
 }
 
+::placeholder {
+    color: white;
+}
+
 #title-bar {
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Lighter transparent background */
     color: white;
     width: 100%;
     padding: 10px;
     box-sizing: border-box;
     position: fixed;
-    /* Make title bar fixed */
     top: 0;
     z-index: 1000;
     display: flex;
@@ -37,27 +42,25 @@ body {
     display: flex;
     align-items: flex-start;
     margin-top: 60px;
-
-    padding-left: 20px;
-    padding-right: 20px;
-
+    padding: 20px;
     width: 100%;
     height: calc(100% - 60px);
-    overflow-x: scroll;
+    overflow-x: auto;
     white-space: nowrap;
 }
 
 .list {
-    background-color: #101204;
-    /* Changed background color */
+    background-color: rgba(255, 255, 255, 0.1);
+    /* Much lighter background */
     border-radius: 3px;
-    width: 300px;
+    width: 250px;
+    /* Adjusted width */
     padding: 10px;
     margin-right: 10px;
     display: flex;
     flex-direction: column;
-    color: #B6C2CF;
-    /* Changed text color */
+    color: white;
+    /* Text color set to white */
     position: relative;
 }
 
@@ -65,10 +68,11 @@ body {
     font-size: 18px;
     margin-bottom: 10px;
     padding: 5px;
-    background-color: #101204;
-    /* Match background */
-    color: #B6C2CF;
-    /* Changed text color */
+    border: none;
+    background-color: rgba(255, 255, 255, 0.1);
+    /* Match list background color */
+    color: white;
+    /* Text color set to white */
 }
 
 .cards {
@@ -77,15 +81,17 @@ body {
 }
 
 .card {
-    background-color: #22272B;
-    width: calc(300px - 20px);
-    /* Changed background color */
+    background-color: rgba(255, 255, 255, 0.2);
+    /* Lighter card background */
+    width: calc(250px - 20px);
+    /* Adjusted width to match list */
     border-radius: 3px;
     padding: 10px;
     margin-bottom: 10px;
-    box-shadow: 0 1px 0 rgba(9, 30, 66, .25);
-    color: #B6C2CF;
-    /* Changed text color */
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+    /* Lighter shadow */
+    color: white;
+    /* Text color set to white */
     position: relative;
     cursor: pointer;
 }
@@ -95,54 +101,69 @@ body {
     border: none;
     padding: 0;
     font-size: 16px;
-    background-color: #22272B;
-    /* Match background */
-    color: #B6C2CF;
-    /* Changed text color */
+    background-color: rgba(255, 255, 255, 0);
+    /* Transparent background */
+    color: white;
+    /* Text color set to white */
+}
+
+#edit-card-title {
+    border: none;
+}
+
+#edit-card-description {
+    border: none;
 }
 
 #add-list {
-    background-color: rgba(255, 255, 255, 0.301);
-    /* Grey transparent */
+    background-color: rgba(255, 255, 255, 0.2);
+    /* Lighter background */
     border: none;
     border-radius: 3px;
-    color: #ffffff;
-    /* Changed text color */
+    color: white;
+    /* Text color set to white */
     padding: 10px;
     cursor: pointer;
     font-size: 14px;
     margin-top: 10px;
-
-    min-width: 300px;
-    width: 300px;
-    max-width: 300px;
+    min-width: 250px;
+    /* Adjusted to match list width */
+    width: 250px;
+    /* Adjusted to match list width */
+    max-width: 250px;
+    /* Adjusted to match list width */
 }
 
 #add-list:hover {
-    background-color: rgba(255, 255, 255, 0.493);
+    background-color: rgba(255, 255, 255, 0.3);
+    /* Slightly lighter on hover */
 }
 
 .add-card {
-    background-color: rgba(0, 0, 0, 0);
+    background-color: rgba(255, 255, 255, 0.2);
+    /* Lighter background */
     border: none;
     border-radius: 3px;
-    color: #ffffff;
+    color: white;
+    /* Text color set to white */
     padding: 10px;
     cursor: pointer;
     font-size: 14px;
     margin-top: 10px;
-
     width: 100%;
 }
 
 .add-card:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.3);
+    /* Slightly lighter on hover */
 }
 
 #color-picker {
     padding: 10px;
-    background-color: #007acc;
+    background-color: rgba(0, 122, 204, 0.4);
+    /* Lighter transparent color */
     color: white;
+    /* Text color set to white */
     border: none;
     border-radius: 3px;
     cursor: pointer;
@@ -151,7 +172,8 @@ body {
 .card-menu {
     background: none;
     border: none;
-    color: #B6C2CF;
+    color: white;
+    /* Text color set to white */
     cursor: pointer;
     position: absolute;
     top: 10px;
@@ -162,16 +184,19 @@ body {
     position: absolute;
     top: 30px;
     right: 10px;
-    background-color: #101204;
+    background-color: rgb(133, 133, 133);
+    /* Lighter background */
     border-radius: 3px;
-    box-shadow: 0 1px 0 rgba(9, 30, 66, .25);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+    /* Lighter shadow */
     display: none;
 }
 
 .card-menu-actions button {
     background: none;
     border: none;
-    color: #B6C2CF;
+    color: white;
+    /* Text color set to white */
     cursor: pointer;
     display: block;
     padding: 10px;
@@ -182,7 +207,8 @@ body {
 .list-actions {
     background: none;
     border: none;
-    color: #B6C2CF;
+    color: white;
+    /* Text color set to white */
     cursor: pointer;
     position: absolute;
     top: 10px;
@@ -193,16 +219,19 @@ body {
     position: absolute;
     top: 30px;
     right: 10px;
-    background-color: #101204;
+    background-color: rgba(255, 255, 255, 0.2);
+    /* Lighter background */
     border-radius: 3px;
-    box-shadow: 0 1px 0 rgba(9, 30, 66, .25);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+    /* Lighter shadow */
     display: none;
 }
 
 .list-actions-menu button {
     background: none;
     border: none;
-    color: #B6C2CF;
+    color: white;
+    /* Text color set to white */
     cursor: pointer;
     display: block;
     padding: 10px;
@@ -219,30 +248,92 @@ body {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
+    color: white;
+    /* Text color set to white */
+    background-color: rgba(0, 0, 0, 0.3);
+    /* Lighter overlay */
 }
 
 .modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
+    display: flex;
+    flex-direction: row;
+    background-color: rgba(255, 255, 255, 0.8);
+    /* Lighter modal background */
+    margin: 5% auto;
     padding: 20px;
-    border: 1px solid #888;
     width: 80%;
-    max-width: 600px;
+    max-width: 900px;
+    height: 80%;
+    box-sizing: border-box;
+    border-radius: 12px;
+}
+
+.modal-sidebar {
+    width: 150px;
+    /* Adjusted width */
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.modal-main {
+    flex-grow: 1;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.modal-header h2 {
+    margin-top: 0;
+    color: white;
+    /* Text color set to white */
+}
+
+.label-bar {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.label-button {
+    background-color: rgba(255, 255, 255, 0.3);
+    /* Lighter button background */
+    color: white;
+    /* Text color set to white */
+    border: none;
+    padding: 5px 10px;
+    margin-right: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.label-button:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+    /* Slightly lighter on hover */
 }
 
 .modal-body {
     margin-bottom: 20px;
 }
 
-.modal-content h2 {
-    margin-top: 0;
-}
-
 .modal-content label {
     display: block;
     margin-bottom: 5px;
-    color: #333;
+    color: white;
+    /* Text color set to white */
+}
+
+.modal-content textarea::placeholder {
+    color: white;
+    /* Text color set to white */
 }
 
 .modal-content input[type="text"],
@@ -250,9 +341,12 @@ body {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
-    border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
+    background-color: rgba(255, 255, 255, 0.3);
+    /* Match input and textarea background */
+    color: white;
+    /* Text color set to white */
 }
 
 .modal-content textarea {
@@ -260,21 +354,50 @@ body {
     resize: vertical;
 }
 
-.modal-content button {
-    background-color: #007acc;
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+#attachment-button,
+#save-card {
+    background-color: rgba(255, 255, 255, 0.4);
+    /* Lighter button background */
     color: white;
+    /* Text color set to white */
     border: none;
     padding: 10px 20px;
     cursor: pointer;
     border-radius: 4px;
 }
 
+#attachment-button:hover,
+#save-card:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+    /* Slightly lighter on hover */
+}
+
+.modal-content button {
+    background-color: rgba(255, 255, 255, 0.4);
+    /* Lighter button background */
+    color: white;
+    /* Text color set to white */
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-left: 10px;
+}
+
 .modal-content button:hover {
-    background-color: #005b82;
+    background-color: rgba(255, 255, 255, 0.5);
+    /* Slightly lighter on hover */
 }
 
 .close {
-    color: #aaa;
+    color: white;
+    /* Text color set to white */
     float: right;
     font-size: 28px;
     font-weight: bold;
@@ -283,7 +406,7 @@ body {
 
 .close:hover,
 .close:focus {
-    color: black;
+    color: white;
     text-decoration: none;
 }
 
@@ -291,25 +414,24 @@ body {
 .list-actions-menu {
     position: absolute;
     z-index: 1000;
-    /* Ensure it's on top of other content */
 }
 
 #kanban-title {
     font-size: 24px;
     font-weight: bold;
-    color: #ffffff;
+    color: white;
+    /* Text color set to white */
     border: none;
     outline: none;
-    /* Add any other styles you want */
 }
 
 #edit-title-input {
     font-size: 24px;
     font-weight: bold;
     background: transparent;
-    color: #ffffff;
+    color: white;
+    /* Text color set to white */
     border: none;
     outline: none;
     display: none;
-    /* Add any other styles to match h1 */
 }
