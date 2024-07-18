@@ -1,4 +1,5 @@
 const { getNonce } = require('./util');
+const zlib = require('zlib');
 
 const vscode = require('vscode');
 const { KanbanMarkdownServer } = require('./kanban_markdown_server');
@@ -189,8 +190,13 @@ class KanbanMarkdownEditorProvider {
                 format: 'markdown',
             });
         }).then(data => {
-            var markdown = Buffer.from(data.markdown, 'base64').toString('utf-8');
-            this.updateTextDocument(document, markdown);
+            this.decompressGzipString(data.markdown, (err, markdown) => {
+                if (err) {
+                    console.error('Error decompressing string:', err);
+                    return;
+                }
+                this.updateTextDocument(document, markdown);
+            });
         }).catch(error => {
             console.error("Error in processing requests:", error);
         });
@@ -214,6 +220,18 @@ class KanbanMarkdownEditorProvider {
 
         return vscode.workspace.applyEdit(edit);
     }
+
+    decompressGzipString(gzipString, callback) {
+        let buffer = Buffer.from(gzipString, 'base64');
+        zlib.gunzip(buffer, (err, decompressedBuffer) => {
+            if (err) {
+                return callback(err);
+            }
+            let decompressedString = decompressedBuffer.toString('utf-8');
+            callback(null, decompressedString);
+        });
+    }
+
 }
 
 module.exports = {

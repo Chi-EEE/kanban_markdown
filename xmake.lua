@@ -10,7 +10,7 @@ end
 add_repositories("local-repo xmake/repo")
 
 add_requires("asap-fork", "fmt", "md4c", "tl_expected", "ordered_map")
-add_requires("picosha2", "tobiaslocker_base64", "yyjson", "yaml-cpp")
+add_requires("picosha2", "tobiaslocker_base64", "gzip-hpp", "yyjson", "yaml-cpp")
 add_requires("cpp-dump")
 
 add_requires("argparse")
@@ -26,7 +26,7 @@ target("kanban-markdown")
     end
 
     add_packages("asap-fork", "fmt", "md4c", "tl_expected", "ordered_map", {public = true})
-    add_packages("picosha2", "tobiaslocker_base64", "yyjson", "yaml-cpp", {public = true})
+    add_packages("picosha2", "tobiaslocker_base64", "gzip-hpp", "yyjson", "yaml-cpp", {public = true})
     add_packages("cpp-dump", {public = true})
 
     add_headerfiles("include/(**.hpp)")
