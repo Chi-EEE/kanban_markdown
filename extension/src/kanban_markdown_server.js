@@ -37,6 +37,7 @@ class KanbanMarkdownServer {
                     const response = JSON.parse(line);
 
                     if (this.requestMap.has(response.id)) {
+                        console.log('Received response:', JSON.stringify(response));
                         this.requestMap.get(response.id)(response);
                         this.requestMap.delete(response.id);
                     } else {

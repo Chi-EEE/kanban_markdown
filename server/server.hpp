@@ -16,7 +16,6 @@
 #include "commands/create.hpp"
 #include "commands/update.hpp"
 #include "commands/delete.hpp"
-#include "commands/swap.hpp"
 #include "commands/move.hpp"
 
 namespace server
@@ -235,13 +234,6 @@ namespace server
 					case hash("delete"):
 					{
 						commands::command_delete(kanban_tuple_, command);
-						modified = true;
-						success = true;
-						break;
-					}
-					case hash("swap"):
-					{
-						commands::command_swap(kanban_tuple_, command);
 						modified = true;
 						success = true;
 						break;

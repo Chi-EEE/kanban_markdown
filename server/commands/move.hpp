@@ -57,7 +57,9 @@ namespace server::commands
 			}
 			if (split_result.size() == 1)
 			{
-				throw std::runtime_error("Invalid path: The list must have a second field");
+				std::shared_ptr<kanban_markdown::KanbanList> kanban_list = *it;
+				it = kanban_tuple.kanban_board.list.erase(it);
+				kanban_tuple.kanban_board.list.insert(kanban_tuple.kanban_board.list.begin() + move_value.index, kanban_list);
 			}
 			else
 			{
@@ -103,25 +105,32 @@ namespace server::commands
 			}
 			if (split_result.size() == 2)
 			{
-				static re2::RE2 destination_pattern(R"(\w+\[(.+)\].tasks)");
-				std::string destination_list;
-				if (!RE2::PartialMatch(move_value.destination, destination_pattern, &destination_list))
-				{
-					throw std::runtime_error("Invalid path: The destination must be a list name");
+				if (move_value.destination.empty()) {
+					std::shared_ptr<kanban_markdown::KanbanTask> kanban_task = *it;
+					it = kanban_list->tasks.erase(it);
+					kanban_list->tasks.insert(kanban_list->tasks.begin() + move_value.index, kanban_task);
 				}
+				else {
+					static re2::RE2 destination_pattern(R"(\w+\[(.+)\].tasks)");
+					std::string destination_list;
+					if (!RE2::PartialMatch(move_value.destination, destination_pattern, &destination_list))
+					{
+						throw std::runtime_error("Invalid path: The destination must be a list name");
+					}
 
-				auto parent_it = std::find_if(kanban_tuple.kanban_board.list.begin(), kanban_tuple.kanban_board.list.end(), [&destination_list](const auto& x)
-					{ return x->name == destination_list; });
+					auto parent_it = std::find_if(kanban_tuple.kanban_board.list.begin(), kanban_tuple.kanban_board.list.end(), [&destination_list](const auto& x)
+						{ return x->name == destination_list; });
 
-				if (parent_it == kanban_tuple.kanban_board.list.end())
-				{
-					throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanBoard.list named "{}")", destination_list));
+					if (parent_it == kanban_tuple.kanban_board.list.end())
+					{
+						throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanBoard.list named "{}")", destination_list));
+					}
+					std::shared_ptr<kanban_markdown::KanbanList> parent_list = *parent_it;
+					int old_index = std::distance(kanban_list->tasks.begin(), it);
+					std::shared_ptr<kanban_markdown::KanbanTask> task = kanban_list->tasks[old_index];
+					parent_list->tasks.insert(parent_list->tasks.begin() + move_value.index, task);
+					kanban_list->tasks.erase(kanban_list->tasks.begin() + old_index);
 				}
-				std::shared_ptr<kanban_markdown::KanbanList> parent_list = *parent_it;
-				int old_index = std::distance(kanban_list->tasks.begin(), it);
-				std::shared_ptr<kanban_markdown::KanbanTask> task = kanban_list->tasks[old_index];
-				parent_list->tasks.insert(parent_list->tasks.begin() + move_value.index, task);
-				kanban_list->tasks.erase(kanban_list->tasks.begin() + old_index);
 			}
 			else
 			{
@@ -221,13 +230,13 @@ namespace server::commands
 		}
 
 		yyjson_val* destination = yyjson_obj_get(value, "destination");
-		if (destination == NULL)
+		std::string destination_str;
+		if (destination != NULL)
 		{
-			throw std::runtime_error("Unable to find destination");
+			destination_str = yyjson_get_string_object(destination);
 		}
 
 		unsigned int index_int = yyjson_get_uint(index);
-		std::string destination_str = yyjson_get_string_object(destination);
 
 		internal_move::MoveValue move_value;
 		move_value.destination = destination_str;
