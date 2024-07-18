@@ -9,17 +9,17 @@ namespace server::commands
 {
 	namespace internal_update
 	{
-		void parsePath_1(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value);
+		void parsePath_1(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value);
 
-		void parsePath_1_list(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value, std::string vector_index_name);
-		void parsePath_2_tasks(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name);
-		void parsePath_3_labels(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name);
-		void parsePath_3_attachments(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name);
-		void parsePath_3_checklist(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name);
+		void parsePath_1_list(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::string vector_index_name);
+		void parsePath_2_tasks(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name);
+		void parsePath_3_labels(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name);
+		void parsePath_3_attachments(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name);
+		void parsePath_3_checklist(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name);
 
-		void parsePath_1_labels(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value, std::string vector_index_name);
+		void parsePath_1_labels(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::string vector_index_name);
 
-		void parsePath_1(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value)
+		void parsePath_1(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value)
 		{
 			std::string first = split_result[0];
 
@@ -49,25 +49,26 @@ namespace server::commands
 			}
 		}
 
-		void parsePath_1_list(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value, std::string vector_index_name)
+		void parsePath_1_list(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::string vector_index_name)
 		{
-			if (!kanban_tuple.kanban_board.list.contains(vector_index_name))
+			auto it = std::find_if(kanban_tuple.kanban_board.list.begin(), kanban_tuple.kanban_board.list.end(), [&vector_index_name](const auto& x)
+				{ return x->name == vector_index_name; });
+			if (it == kanban_tuple.kanban_board.list.end())
 			{
 				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanBoard.list named "{}")", vector_index_name));
 			}
-			std::shared_ptr<kanban_markdown::KanbanList> kanban_list = kanban_tuple.kanban_board.list[vector_index_name];
+			std::shared_ptr<kanban_markdown::KanbanList> kanban_list = *it;
 			std::string second = split_result[1];
 			switch (hash(second))
 			{
 			case hash("name"):
 			{
 				const std::string new_name = yyjson_get_string_object(value);
-				if (kanban_list->name == new_name) {
+				if (kanban_list->name == new_name)
+				{
 					return;
 				}
 				kanban_list->name = new_name;
-				kanban_tuple.kanban_board.list[kanban_list->name] = kanban_list;
-				kanban_tuple.kanban_board.list.erase(vector_index_name);
 				break;
 			}
 			default:
@@ -96,21 +97,21 @@ namespace server::commands
 			}
 		}
 
-		void parsePath_2_tasks(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name)
+		void parsePath_2_tasks(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name)
 		{
-			if (!kanban_list->tasks.contains(list_vector_index_name))
+			auto it = std::find_if(kanban_list->tasks.begin(), kanban_list->tasks.end(), [&list_vector_index_name](const auto& x)
+				{ return x->name == list_vector_index_name; });
+			if (it == kanban_list->tasks.end())
 			{
 				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanList.tasks named "{}")", list_vector_index_name));
 			}
-			std::shared_ptr<kanban_markdown::KanbanTask> task = kanban_list->tasks[list_vector_index_name];
+			std::shared_ptr<kanban_markdown::KanbanTask> task = *it;
 			std::string third = split_result[2];
 			switch (hash(third))
 			{
 			case hash("name"):
 			{
 				task->name = yyjson_get_string_object(value);
-				kanban_list->tasks[task->name] = task;
-				kanban_list->tasks.erase(list_vector_index_name);
 				break;
 			}
 			case hash("description"):
@@ -159,26 +160,21 @@ namespace server::commands
 			}
 		}
 
-		void parsePath_3_labels(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name)
+		void parsePath_3_labels(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name)
 		{
-			if (!task->labels.contains(task_vector_index_name))
+			auto it = std::find_if(task->labels.begin(), task->labels.end(), [&task_vector_index_name](const auto& x)
+				{ return x->name == task_vector_index_name; });
+			if (it == task->labels.end())
 			{
 				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanTask.labels named "{}")", task_vector_index_name));
 			}
+			std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = *it;
 			std::string fourth = split_result[3];
 			switch (hash(fourth))
 			{
 			case hash("name"):
 			{
-				std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = task->labels[task_vector_index_name];
 				kanban_label->name = yyjson_get_string_object(value);
-				for (auto &[task_name, task] : kanban_label->tasks)
-				{
-					task->labels[kanban_label->name] = kanban_label;
-					task->labels.erase(task_vector_index_name);
-				}
-				kanban_tuple.kanban_board.labels[kanban_label->name] = kanban_label;
-				kanban_tuple.kanban_board.labels.erase(task_vector_index_name);
 				break;
 			}
 			default:
@@ -186,26 +182,26 @@ namespace server::commands
 			}
 		}
 
-		void parsePath_3_attachments(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name)
+		void parsePath_3_attachments(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name)
 		{
-			if (!task->attachments.contains(task_vector_index_name))
+			auto it = std::find_if(task->attachments.begin(), task->attachments.end(), [&task_vector_index_name](const auto& x)
+				{ return x->name == task_vector_index_name; });
+			if (it == task->attachments.end())
 			{
 				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanTask.attachments named "{}")", task_vector_index_name));
 			}
+			std::shared_ptr<kanban_markdown::KanbanAttachment> kanban_attachment = *it;
 			std::string fourth = split_result[3];
 			switch (hash(fourth))
 			{
 			case hash("name"):
 			{
-				std::shared_ptr<kanban_markdown::KanbanAttachment> kanban_attachment = task->attachments[task_vector_index_name];
 				kanban_attachment->name = yyjson_get_string_object(value);
-				task->attachments[kanban_attachment->name] = kanban_attachment;
-				task->attachments.erase(task_vector_index_name);
 				break;
 			}
 			case hash("url"):
 			{
-				task->attachments[task_vector_index_name]->url = yyjson_get_string_object(value);
+				kanban_attachment->url = yyjson_get_string_object(value);
 				break;
 			}
 			default:
@@ -213,26 +209,26 @@ namespace server::commands
 			}
 		}
 
-		void parsePath_3_checklist(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name)
+		void parsePath_3_checklist(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name)
 		{
-			if (!task->checklist.contains(task_vector_index_name))
+			auto it = std::find_if(task->checklist.begin(), task->checklist.end(), [&task_vector_index_name](const auto& x)
+				{ return x->name == task_vector_index_name; });
+			if (it == task->checklist.end())
 			{
 				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanTask.checklist named "{}")", task_vector_index_name));
 			}
+			std::shared_ptr<kanban_markdown::KanbanChecklistItem> kanban_checklist_item = *it;
 			std::string fourth = split_result[3];
 			switch (hash(fourth))
 			{
 			case hash("name"):
 			{
-				std::shared_ptr<kanban_markdown::KanbanChecklistItem> kanban_checklist_item = task->checklist[task_vector_index_name];
 				kanban_checklist_item->name = yyjson_get_string_object(value);
-				task->checklist[kanban_checklist_item->name] = kanban_checklist_item;
-				task->checklist.erase(task_vector_index_name);
 				break;
 			}
 			case hash("checked"):
 			{
-				task->checklist[task_vector_index_name]->checked = yyjson_get_bool(value);
+				kanban_checklist_item->checked = yyjson_get_bool(value);
 				break;
 			}
 			default:
@@ -240,26 +236,21 @@ namespace server::commands
 			}
 		}
 
-		void parsePath_1_labels(KanbanTuple &kanban_tuple, std::vector<std::string> &split_result, yyjson_val *value, std::string vector_index_name)
+		void parsePath_1_labels(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::string vector_index_name)
 		{
-			if (!kanban_tuple.kanban_board.labels.contains(vector_index_name))
+			auto it = std::find_if(kanban_tuple.kanban_board.labels.begin(), kanban_tuple.kanban_board.labels.end(), [&vector_index_name](const auto& x)
+				{ return x->name == vector_index_name; });
+			if (it == kanban_tuple.kanban_board.labels.end())
 			{
 				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanBoard.labels named "{}")", vector_index_name));
 			}
-			std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = kanban_tuple.kanban_board.labels[vector_index_name];
+			std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = *it;
 			std::string second = split_result[1];
 			switch (hash(second))
 			{
 			case hash("name"):
 			{
 				kanban_label->name = yyjson_get_string_object(value);
-				for (auto &[task_name, task] : kanban_label->tasks)
-				{
-					task->labels[kanban_label->name] = kanban_label;
-					task->labels.erase(vector_index_name);
-				}
-				kanban_tuple.kanban_board.labels[kanban_label->name] = kanban_label;
-				kanban_tuple.kanban_board.labels.erase(vector_index_name);
 				break;
 			}
 			default:
@@ -267,14 +258,14 @@ namespace server::commands
 			}
 		}
 	}
-	void command_update(KanbanTuple &kanban_tuple, yyjson_val *command)
+	void command_update(KanbanTuple& kanban_tuple, yyjson_val* command)
 	{
-		yyjson_val *path = yyjson_obj_get(command, "path");
+		yyjson_val* path = yyjson_obj_get(command, "path");
 		if (path == NULL)
 		{
 			throw std::runtime_error("Unable to find path");
 		}
-		yyjson_val *value = yyjson_obj_get(command, "value");
+		yyjson_val* value = yyjson_obj_get(command, "value");
 		if (value == NULL)
 		{
 			throw std::runtime_error("Unable to find value");

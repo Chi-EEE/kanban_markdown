@@ -5,7 +5,6 @@
 #include <memory>
 
 #include <asap/asap.h>
-#include <tsl/ordered_map.h>
 
 #include "internal.hpp"
 
@@ -43,9 +42,15 @@ namespace kanban_markdown {
 	struct KanbanLabel
 	{
 		bool operator==(const KanbanLabel& other) const {
-			if (this->name != other.name) {
+			if (this->name != other.name || this->tasks.size() != other.tasks.size()) {
 				return false;
 			}
+			// Cannot compare tasks because they would compare recursively
+			/*for (size_t i = 0; i < this->tasks.size(); i++) {
+				if (this->tasks[i] != other.tasks[i]) {
+					return false;
+				}
+			}*/
 			return true;
 		}
 
@@ -54,7 +59,7 @@ namespace kanban_markdown {
 		}
 
 		std::string name;
-		tsl::ordered_map<std::string, std::shared_ptr<KanbanTask>> tasks;
+		std::vector<std::shared_ptr<KanbanTask>> tasks;
 	};
 
 	struct KanbanTask
@@ -68,21 +73,18 @@ namespace kanban_markdown {
 					return false;
 				}
 			}
-			for (auto& [label_name, label] : this->labels) {
-				auto& otherLabel = other.labels.at(label_name);
-				if (*label != *otherLabel) {
+			for (size_t i = 0; i < this->labels.size(); i++) {
+				if (this->labels[i] != other.labels[i]) {
 					return false;
 				}
 			}
-			for (auto& [attachment_name, attachment] : this->attachments) {
-				auto& otherAttachment = other.attachments.at(attachment_name);
-				if (*attachment != *otherAttachment) {
+			for (size_t i = 0; i < this->attachments.size(); i++) {
+				if (this->attachments[i] != other.attachments[i]) {
 					return false;
 				}
 			}
-			for (auto& [checklist_item_name, checklist_item] : this->checklist) {
-				auto& otherChecklistItem = other.checklist.at(checklist_item_name);
-				if (*checklist_item != *otherChecklistItem) {
+			for (size_t i = 0; i < this->checklist.size(); i++) {
+				if (this->checklist[i] != other.checklist[i]) {
 					return false;
 				}
 			}
@@ -96,9 +98,9 @@ namespace kanban_markdown {
 		bool checked = false;
 		std::string name;
 		std::vector<std::string> description;
-		tsl::ordered_map<std::string, std::shared_ptr<KanbanLabel>> labels;
-		tsl::ordered_map<std::string, std::shared_ptr<KanbanAttachment>> attachments;
-		tsl::ordered_map<std::string, std::shared_ptr<KanbanChecklistItem>> checklist;
+		std::vector<std::shared_ptr<KanbanLabel>> labels;
+		std::vector<std::shared_ptr<KanbanAttachment>> attachments;
+		std::vector<std::shared_ptr<KanbanChecklistItem>> checklist;
 	};
 
 	struct KanbanList
@@ -107,10 +109,8 @@ namespace kanban_markdown {
 			if (this->name != other.name || this->tasks.size() != other.tasks.size()) {
 				return false;
 			}
-			// Go through both maps and compare the tasks
-			for (auto& [task_name, task] : this->tasks) {
-				auto& otherTask = other.tasks.at(task_name);
-				if (*task != *otherTask) {
+			for (size_t i = 0; i < this->tasks.size(); i++) {
+				if (this->tasks[i] != other.tasks[i]) {
 					return false;
 				}
 			}
@@ -121,8 +121,9 @@ namespace kanban_markdown {
 			return !operator==(other);
 		}
 
+		int index;
 		std::string name;
-		tsl::ordered_map<std::string, std::shared_ptr<KanbanTask>> tasks;
+		std::vector<std::shared_ptr<KanbanTask>> tasks;
 	};
 
 	struct KanbanBoard
@@ -131,13 +132,13 @@ namespace kanban_markdown {
 			if (this->color != other.color || this->created.timestamp() != other.created.timestamp() || this->last_modified.timestamp() != other.last_modified.timestamp() || this->name != other.name || this->description != other.description || this->labels.size() != other.labels.size() || this->list.size() != other.list.size()) {
 				return false;
 			}
-			for (auto it = this->labels.begin(); it != this->labels.end(); ++it) {
-				if (*it->second != *other.labels.at(it->first)) {
+			for (size_t i = 0; i < this->description.size(); i++) {
+				if (this->description[i] != other.description[i]) {
 					return false;
 				}
 			}
-			for (auto it = this->list.begin(); it != this->list.end(); ++it) {
-				if (it->second != other.list.at(it->first)) {
+			for (size_t i = 0; i < this->list.size(); i++) {
+				if (this->list[i] != other.list[i]) {
 					return false;
 				}
 			}
@@ -156,7 +157,7 @@ namespace kanban_markdown {
 
 		std::string name;
 		std::string description;
-		tsl::ordered_map<std::string, std::shared_ptr<KanbanLabel>> labels;
-		tsl::ordered_map<std::string, std::shared_ptr<KanbanList>> list;
+		std::vector<std::shared_ptr<KanbanLabel>> labels;
+		std::vector<std::shared_ptr<KanbanList>> list;
 	};
 }

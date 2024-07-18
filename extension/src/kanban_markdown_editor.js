@@ -192,7 +192,7 @@ class KanbanMarkdownEditorProvider {
                 format: 'markdown',
             });
         }).then(data => {
-            var markdown = Buffer.from(data.markdown, 'base64').toString('utf-8');
+            const markdown = Buffer.from(data.markdown, 'base64').toString('utf-8');
             this.updateTextDocument(document, markdown);
         }).catch(error => {
             console.error("Error in processing requests:", error);

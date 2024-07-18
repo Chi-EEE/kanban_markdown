@@ -446,7 +446,7 @@ namespace kanban_markdown {
 		for (auto& [label_name, label_detail] : kanban_parser.label_section.label_details) {
 			std::shared_ptr<KanbanLabel> kanban_label = std::make_shared<KanbanLabel>();
 			kanban_label->name = label_name;
-			kanban_board.labels.insert({ label_name, kanban_label });
+			kanban_board.labels.push_back(kanban_label);
 		}
 
 		for (BoardSection board_section : kanban_parser.board_section.boards) {
@@ -458,21 +458,28 @@ namespace kanban_markdown {
 				kanban_task->name = task_name;
 				kanban_task->description = task_detail.description;
 				for (const std::string& label : task_detail.labels) {
-					if (!kanban_board.labels.contains(label)) {
-						kanban_board.labels.insert({ label, std::make_shared<KanbanLabel>(KanbanLabel{ label }) });
+					auto it = std::find_if(kanban_board.labels.begin(), kanban_board.labels.end(), [&label](const std::shared_ptr<KanbanLabel>& x) { return x->name == label; });
+					std::shared_ptr<KanbanLabel> kanban_label;
+					if (it == kanban_board.labels.end()) {
+						kanban_label = std::make_shared<KanbanLabel>();
+						kanban_label->name = label;
+						kanban_board.labels.push_back(kanban_label);
 					}
-					kanban_board.labels[label]->tasks.insert({ task_name, kanban_task });
-					kanban_task->labels.insert({ label, kanban_board.labels[label] });
+					else {
+						kanban_label = *it;
+					}
+					kanban_label->tasks.push_back(kanban_task);
+					kanban_task->labels.push_back(kanban_label);
 				}
 				for (const KanbanAttachment& attachment : task_detail.attachments) {
-					kanban_task->attachments.insert({ attachment.name, std::make_shared<KanbanAttachment>(attachment) });
+					kanban_task->attachments.push_back(std::make_shared<KanbanAttachment>(attachment));
 				}
 				for (const KanbanChecklistItem& checkbox : task_detail.checklist) {
-					kanban_task->checklist.insert({ checkbox.name, std::make_shared<KanbanChecklistItem>(checkbox) });
+					kanban_task->checklist.push_back(std::make_shared<KanbanChecklistItem>(checkbox));
 				}
-				kanban_list->tasks.insert({ task_name, kanban_task });
+				kanban_list->tasks.push_back(kanban_task);
 			}
-			kanban_board.list.insert({ board_section.name , kanban_list });
+			kanban_board.list.push_back(kanban_list);
 		}
 		return kanban_board;
 	}

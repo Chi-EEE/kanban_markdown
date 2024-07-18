@@ -46,7 +46,7 @@ $(document).ready(function () {
      * @param {KanbanBoard} board 
      */
     function loadKanbanBoard(board) {
-        const color = board.properties.color.replace("\u0000", "#");
+        const color = board.properties.color;
         $('#background-color-picker').val(color);
         $('body').css('background-color', color);
 

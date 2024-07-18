@@ -33,7 +33,7 @@ namespace server::commands
 				}
 				std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = std::make_shared<kanban_markdown::KanbanLabel>();
 				kanban_label->name = yyjson_get_string_object(name);
-				kanban_tuple.kanban_board.labels.insert({ kanban_label->name, kanban_label });
+				kanban_tuple.kanban_board.labels.push_back(kanban_label);
 				break;
 			}
 			case hash("list"):
@@ -45,7 +45,7 @@ namespace server::commands
 				}
 				std::shared_ptr<kanban_markdown::KanbanList> kanban_list = std::make_shared<kanban_markdown::KanbanList>();
 				kanban_list->name = yyjson_get_string_object(name);
-				kanban_tuple.kanban_board.list.insert({ kanban_list->name, kanban_list });
+				kanban_tuple.kanban_board.list.push_back(kanban_list);
 				break;
 			}
 			default:
@@ -77,11 +77,13 @@ namespace server::commands
 
 		void parsePath_1_list(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::string vector_index_name)
 		{
-			if (!kanban_tuple.kanban_board.list.contains(vector_index_name))
+			auto it = std::find_if(kanban_tuple.kanban_board.list.begin(), kanban_tuple.kanban_board.list.end(), [&vector_index_name](const auto& x)
+				{ return x->name == vector_index_name; });
+			if (it == kanban_tuple.kanban_board.list.end())
 			{
 				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanBoard.list named "")", vector_index_name));
 			}
-			std::shared_ptr<kanban_markdown::KanbanList> kanban_list = kanban_tuple.kanban_board.list[vector_index_name];
+			std::shared_ptr<kanban_markdown::KanbanList> kanban_list = *it;
 			std::string second = split_result[1];
 
 			switch (hash(second))
@@ -127,15 +129,20 @@ namespace server::commands
 				yyjson_arr_foreach(labels, idx, max, label)
 				{
 					std::string label_name = yyjson_get_string_object(yyjson_obj_get(label, "name"));
-					if (!kanban_tuple.kanban_board.labels.contains(label_name))
+					auto it = std::find_if(kanban_tuple.kanban_board.labels.begin(), kanban_tuple.kanban_board.labels.end(), [&label_name](const auto& x)
+						{ return x->name == label_name; });
+					std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label;
+					if (it == kanban_tuple.kanban_board.labels.end())
 					{
-						std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = std::make_shared<kanban_markdown::KanbanLabel>();
+						kanban_label = std::make_shared<kanban_markdown::KanbanLabel>();
 						kanban_label->name = label_name;
-						kanban_tuple.kanban_board.labels.insert({ label_name, kanban_label });
+						kanban_tuple.kanban_board.labels.push_back(kanban_label);
 					}
-					std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = kanban_tuple.kanban_board.labels[label_name];
-					kanban_task->labels[label_name] = kanban_label;
-					kanban_label->tasks.insert({ kanban_task->name, kanban_task });
+					else {
+						kanban_label = *it;
+					}
+					kanban_task->labels.push_back(kanban_label);
+					kanban_label->tasks.push_back(kanban_task);
 				}
 
 				yyjson_val* attachment;
@@ -146,7 +153,7 @@ namespace server::commands
 					auto kanban_attachment = std::make_shared<kanban_markdown::KanbanAttachment>();
 					kanban_attachment->name = attachment_name;
 					kanban_attachment->url = attachment_url;
-					kanban_task->attachments[attachment_name] = kanban_attachment;
+					kanban_task->attachments.push_back(kanban_attachment);
 				}
 
 				yyjson_val* checklist_item;
@@ -157,10 +164,10 @@ namespace server::commands
 					auto kanban_checklist_item = std::make_shared<kanban_markdown::KanbanChecklistItem>();
 					kanban_checklist_item->name = checklist_item_name;
 					kanban_checklist_item->checked = checklist_item_checked;
-					kanban_task->checklist[checklist_item_name] = kanban_checklist_item;
+					kanban_task->checklist.push_back(kanban_checklist_item);
 				}
 
-				kanban_list->tasks.insert({ kanban_task->name, kanban_task });
+				kanban_list->tasks.push_back(kanban_task);
 				break;
 			}
 			default:
@@ -190,11 +197,13 @@ namespace server::commands
 
 		void parsePath_2_tasks(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, yyjson_val* value, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name)
 		{
-			if (!kanban_list->tasks.contains(list_vector_index_name))
+			auto it = std::find_if(kanban_list->tasks.begin(), kanban_list->tasks.end(), [&list_vector_index_name](const auto& x)
+				{ return x->name == list_vector_index_name; });
+			if (it == kanban_list->tasks.end())
 			{
 				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanList.tasks named "{}")", list_vector_index_name));
 			}
-			std::shared_ptr<kanban_markdown::KanbanTask> task = kanban_list->tasks[list_vector_index_name];
+			std::shared_ptr<kanban_markdown::KanbanTask> task = *it;
 			std::string third = split_result[2];
 			switch (hash(third))
 			{
@@ -206,15 +215,20 @@ namespace server::commands
 					throw std::runtime_error("Unable to find name");
 				}
 				std::string label_name = yyjson_get_string_object(name);
-				if (!kanban_tuple.kanban_board.labels.contains(label_name))
+				auto it = std::find_if(kanban_tuple.kanban_board.labels.begin(), kanban_tuple.kanban_board.labels.end(), [&label_name](const auto& x)
+					{ return x->name == label_name; });
+				std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label;
+				if (it == kanban_tuple.kanban_board.labels.end())
 				{
-					std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = std::make_shared<kanban_markdown::KanbanLabel>();
+					kanban_label = std::make_shared<kanban_markdown::KanbanLabel>();
 					kanban_label->name = label_name;
-					kanban_tuple.kanban_board.labels.insert({ label_name, kanban_label });
+					kanban_tuple.kanban_board.labels.push_back(kanban_label);
 				}
-				std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = kanban_tuple.kanban_board.labels[label_name];
-				task->labels[label_name] = kanban_label;
-				kanban_label->tasks.insert({ task->name, task });
+				else {
+					kanban_label = *it;
+				}
+				task->labels.push_back(kanban_label);
+				kanban_label->tasks.push_back(task);
 				break;
 			}
 			case hash("attachments"):
@@ -234,7 +248,7 @@ namespace server::commands
 				auto kanban_attachment = std::make_shared<kanban_markdown::KanbanAttachment>();
 				kanban_attachment->name = attachment_name;
 				kanban_attachment->url = attachment_url;
-				task->attachments[attachment_name] = kanban_attachment;
+				task->attachments.push_back(kanban_attachment);
 				break;
 			}
 			case hash("checklist"):
@@ -254,7 +268,7 @@ namespace server::commands
 				auto kanban_checklist_item = std::make_shared<kanban_markdown::KanbanChecklistItem>();
 				kanban_checklist_item->name = checklist_item_name;
 				kanban_checklist_item->checked = checklist_item_checked;
-				task->checklist[checklist_item_name] = kanban_checklist_item;
+				task->checklist.push_back(kanban_checklist_item);
 				break;
 			}
 			default:
