@@ -84,6 +84,7 @@ $(document).ready(function () {
 
     function createListElement(list, listIndex) {
         const $newList = $('<div>').addClass('list').attr('id', `list-${listIndex}`);
+        $newList.data('name', list.name);
 
         const $listTitle = $('<input>')
             .addClass('list-title')
@@ -100,6 +101,7 @@ $(document).ready(function () {
                     path: `list[${previousTitle}].name`,
                     value: newTitle
                 });
+                $newList.data('name', newTitle);
             }
         });
 
@@ -110,6 +112,11 @@ $(document).ready(function () {
         const $cards = $('<div>').addClass('cards').sortable({
             connectWith: '.cards',
             tolerance: 'pointer'
+        });
+
+        $cards.on('sortupdate', function (event, ui) {
+            console.log(event);
+            console.log(ui);
         });
 
         list.tasks.forEach(task => {
@@ -274,13 +281,15 @@ $(document).ready(function () {
             if (!isListTitleChanged) {
                 $newList.remove();
             } else {
+                const listName = $(this).val();
                 vscode.postMessage({
                     type: 'create',
                     path: 'list',
                     value: {
-                        name: $(this).val(),
+                        name: listName,
                     }
                 });
+                $newList.data('name', listName);
             }
             $('#add-list').show();
             $newList.find('.add-card').show();
@@ -383,6 +392,21 @@ $(document).ready(function () {
 
     $('#board').sortable({
         items: '> .list',
-        tolerance: 'pointer'
+        tolerance: 'pointer',
+		start: function (event, ui) {
+			$(ui.item).data("startindex", ui.item.index());
+		},
+		stop: function (event, ui) {
+			var $item = ui.item;
+            var startIndex = $item.data("startindex") + 1;
+            var newIndex = $item.index() + 1;
+            if (newIndex != startIndex) {
+                vscode.postMessage({
+                    type: 'swap',
+                    path: `list[${$item.data('name')}]`,
+                    value: newIndex
+                });
+            }
+		}
     });
 });

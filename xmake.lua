@@ -7,9 +7,10 @@ else
     set_runtimes("MT")
 end
 
-add_requires("asap", "fmt", "md4c", "tl_expected", "ordered_map", "access_private")
-add_requires("picosha2", "tobiaslocker_base64", "yyjson", "yaml-cpp")
+add_repositories("local-repo xmake/repo")
 
+add_requires("asap-fork", "fmt", "md4c", "tl_expected", "ordered_map")
+add_requires("picosha2", "tobiaslocker_base64", "yyjson", "yaml-cpp")
 add_requires("cpp-dump")
 
 add_requires("argparse")
@@ -24,8 +25,9 @@ target("kanban-markdown")
         add_cxxflags("/utf-8", {public = true})
     end
 
-    add_packages("asap", "fmt", "md4c", "tl_expected", "ordered_map", "access_private", {public = true})
+    add_packages("asap-fork", "fmt", "md4c", "tl_expected", "ordered_map", {public = true})
     add_packages("picosha2", "tobiaslocker_base64", "yyjson", "yaml-cpp", {public = true})
+    add_packages("cpp-dump", {public = true})
 
     add_headerfiles("include/(**.hpp)")
     add_includedirs("include", {public = true})

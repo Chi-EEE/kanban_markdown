@@ -1,0 +1,12 @@
+diff --git a/include/asap/datetime.h b/include/asap/datetime.h
+index b8fc108..146f0be 100644
+--- a/include/asap/datetime.h
++++ b/include/asap/datetime.h
+@@ -76,7 +76,6 @@ namespace asap {
+       int year() const;
+       asap::datetime & year(int value);
+ 
+-    private:
+       void add(long seconds);
+       std::tm when;
+   };

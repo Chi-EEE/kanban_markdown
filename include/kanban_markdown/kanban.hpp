@@ -5,6 +5,7 @@
 #include <memory>
 
 #include <asap/asap.h>
+#include <cpp-dump/dump.hpp>
 
 #include "internal.hpp"
 
@@ -161,3 +162,10 @@ namespace kanban_markdown {
 		std::vector<std::shared_ptr<KanbanList>> list;
 	};
 }
+CPP_DUMP_DEFINE_EXPORT_OBJECT(asap::datetime, when);
+CPP_DUMP_DEFINE_EXPORT_OBJECT(kanban_markdown::KanbanAttachment, name, url);
+CPP_DUMP_DEFINE_EXPORT_OBJECT(kanban_markdown::KanbanChecklistItem, checked, name);
+CPP_DUMP_DEFINE_EXPORT_OBJECT(kanban_markdown::KanbanTask, checked, name, description, labels, attachments, checklist);
+CPP_DUMP_DEFINE_EXPORT_OBJECT(kanban_markdown::KanbanLabel, name, tasks);
+CPP_DUMP_DEFINE_EXPORT_OBJECT(kanban_markdown::KanbanList, index, name, tasks);
+CPP_DUMP_DEFINE_EXPORT_OBJECT(kanban_markdown::KanbanBoard, color, created, last_modified, version, checksum, name, description, labels, list);

@@ -1,9 +1,6 @@
 #pragma once
 
 #include <asap/asap.h>
-#include <access_private.hpp>
-
-ACCESS_PRIVATE_FIELD(asap::datetime, std::tm, when)
 
 namespace kanban_markdown::internal {
 	std::string kanban_markdown_string_to_id(const std::string& string)
@@ -62,8 +59,7 @@ namespace kanban_markdown::internal {
 		std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
 		std::tm* utc_tm = std::gmtime(&now_time_t);
 		asap::datetime now_utc;
-		auto& when = access_private::when(now_utc);
-		when = *utc_tm;
+		now_utc.when = *utc_tm;
 		return now_utc;
 	}
 }
