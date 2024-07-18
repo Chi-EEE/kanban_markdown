@@ -55,8 +55,8 @@ $(document).ready(function () {
         const $board = $('#board').empty();
 
         board.lists.forEach((list, index) => {
-            const $newList = createListElement(list, index + 1);
-            $board.append($newList);
+            const $list = createListElement(list, index + 1);
+            $board.append($list);
         });
 
         const $addListButton = $('<button>').attr('id', 'add-list').text('Add another list +');
@@ -83,8 +83,8 @@ $(document).ready(function () {
     }
 
     function createListElement(list, listIndex) {
-        const $newList = $('<div>').addClass('list').attr('id', `list-${listIndex}`);
-        $newList.data('name', list.name);
+        const $list = $('<div>').addClass('list').attr('id', `list-${listIndex}`);
+        $list.data('name', list.name);
 
         const $listTitle = $('<input>')
             .addClass('list-title')
@@ -101,7 +101,7 @@ $(document).ready(function () {
                     path: `list[${previousTitle}].name`,
                     value: newTitle
                 });
-                $newList.data('name', newTitle);
+                $list.data('name', newTitle);
             }
         });
 
@@ -111,12 +111,37 @@ $(document).ready(function () {
 
         const $cards = $('<div>').addClass('cards').sortable({
             connectWith: '.cards',
-            tolerance: 'pointer'
-        });
-
-        $cards.on('sortupdate', function (event, ui) {
-            console.log(event);
-            console.log(ui);
+            tolerance: 'pointer',
+            start: function (event, ui) {
+                $(ui.item).data("parentName", ui.item.parent().parent().data('name'));
+                $(ui.item).data("startIndex", ui.item.index());
+            },
+            stop: function (event, ui) {
+                const $item = ui.item;
+                const parentName = $item.data("parentName");
+                const newParentName = $item.parent().parent().data('name');
+                if (parentName !== newParentName) {
+                    const newIndex = $item.index();
+                    vscode.postMessage({
+                        type: 'move',
+                        path: `list[${parentName}].tasks[${$item.data('name')}]`,
+                        value: {
+                            index: newIndex,
+                            destination: `list[${newParentName}].tasks`,
+                        }
+                    });
+                } else {
+                    const startIndex = $item.data("startIndex");
+                    const newIndex = $item.index();
+                    if (newIndex != startIndex) {
+                        vscode.postMessage({
+                            type: 'swap',
+                            path: `list[${parentName}].tasks[${$item.data('name')}]`,
+                            value: newIndex
+                        });
+                    }
+                }
+            }
         });
 
         list.tasks.forEach(task => {
@@ -125,10 +150,10 @@ $(document).ready(function () {
         });
 
         const $addCardButton = createAddCardButton($listTitle, $cards);
-        const $listActionsButton = createListActionsButton($listTitle, $newList);
+        const $listActionsButton = createListActionsButton($listTitle, $list);
 
-        $newList.append($listTitle, $listActionsButton, $cards, $addCardButton);
-        return $newList;
+        $list.append($listTitle, $listActionsButton, $cards, $addCardButton);
+        return $list;
     }
 
     /**
@@ -136,7 +161,7 @@ $(document).ready(function () {
      * @returns 
      */
     function createCardElement(task) {
-        const $card = $('<div>').addClass('card');
+        const $card = $('<div>').addClass('card').data('name', task.name);
 
         const $cardTitleInput = $('<input>')
             .addClass('card-title')
@@ -229,17 +254,17 @@ $(document).ready(function () {
     /**
      * 
      * @param {*} $listTitle 
-     * @param {*} $newList 
+     * @param {*} $list 
      * @returns 
      */
-    function createListActionsButton($listTitle, $newList) {
+    function createListActionsButton($listTitle, $list) {
         const $listActionsButton = $('<button>')
             .addClass('list-actions')
             .text('⋮')
             .on('click', function (event) {
                 event.stopPropagation();
                 closeAllMenus();
-                $newList.find('.list-actions-menu').toggle();
+                $list.find('.list-actions-menu').toggle();
             });
 
         const $listActionsMenu = $('<div>').addClass('list-actions-menu').hide();
@@ -247,12 +272,12 @@ $(document).ready(function () {
             .addClass('remove-list')
             .text('Remove list')
             .on('click', () => {
-                console.log($newList)
+                console.log($list)
                 vscode.postMessage({
                     type: 'delete',
                     path: `list[${$listTitle.val()}]`,
                 });
-                $newList.remove()
+                $list.remove()
             });
 
         $listActionsMenu.append($removeListButton);
@@ -264,22 +289,22 @@ $(document).ready(function () {
         $addListButton.on('click', function () {
             $(this).hide();
             const $board = $('#board');
-            const $newList = createNewList($board);
-            $board.children('#add-list').before($newList);
-            $newList.find('.list-title').trigger('focus');
+            const $list = createNewList($board);
+            $board.children('#add-list').before($list);
+            $list.find('.list-title').trigger('focus');
         });
     }
 
     function createNewList($board) {
         const listId = `list-${$board.find('.list').length + 1}`;
-        const $newList = $('<div>').addClass('list').attr('id', listId);
+        const $list = $('<div>').addClass('list').attr('id', listId);
         const $listTitle = $('<input>').addClass('list-title').attr('placeholder', 'Enter list title');
         let isListTitleChanged = false;
 
         $listTitle.on('input', () => isListTitleChanged = true);
         $listTitle.on('blur', function () {
             if (!isListTitleChanged) {
-                $newList.remove();
+                $list.remove();
             } else {
                 const listName = $(this).val();
                 vscode.postMessage({
@@ -289,11 +314,11 @@ $(document).ready(function () {
                         name: listName,
                     }
                 });
-                $newList.data('name', listName);
+                $list.data('name', listName);
             }
             $('#add-list').show();
-            $newList.find('.add-card').show();
-            $newList.find('.cards').show();
+            $list.find('.add-card').show();
+            $list.find('.cards').show();
         });
 
         $listTitle.on('keypress', function (e) {
@@ -302,14 +327,44 @@ $(document).ready(function () {
 
         const $cards = $('<div>').addClass('cards').sortable({
             connectWith: '.cards',
-            tolerance: 'pointer'
+            tolerance: 'pointer',
+            start: function (event, ui) {
+                $(ui.item).data("parentName", ui.item.parent().parent().data('name'));
+                $(ui.item).data("startIndex", ui.item.index());
+            },
+            stop: function (event, ui) {
+                const $item = ui.item;
+                const parentName = $item.data("parentName");
+                const newParentName = $item.parent().parent().data('name');
+                if (parentName !== newParentName) {
+                    const newIndex = $item.index();
+                    vscode.postMessage({
+                        type: 'move',
+                        path: `list[${parentName}].tasks[${$item.data('name')}]`,
+                        value: {
+                            index: newIndex,
+                            destination: `list[${newParentName}].tasks`,
+                        }
+                    });
+                } else {
+                    const startIndex = $item.data("startIndex");
+                    const newIndex = $item.index();
+                    if (newIndex != startIndex) {
+                        vscode.postMessage({
+                            type: 'swap',
+                            path: `list[${parentName}].tasks[${$item.data('name')}]`,
+                            value: newIndex
+                        });
+                    }
+                }
+            }
         }).hide();
 
         const $addCardButton = createAddCardButton($listTitle, $cards);
-        const $listActionsButton = createListActionsButton($listTitle, $newList);
+        const $listActionsButton = createListActionsButton($listTitle, $list);
 
-        $newList.append($listTitle, $listActionsButton, $cards, $addCardButton);
-        return $newList;
+        $list.append($listTitle, $listActionsButton, $cards, $addCardButton);
+        return $list;
     }
 
     function editCard($cardTitleInput) {
@@ -393,12 +448,12 @@ $(document).ready(function () {
     $('#board').sortable({
         items: '> .list',
         tolerance: 'pointer',
-		start: function (event, ui) {
-			$(ui.item).data("startindex", ui.item.index());
-		},
-		stop: function (event, ui) {
-			var $item = ui.item;
-            var startIndex = $item.data("startindex") + 1;
+        start: function (event, ui) {
+            $(ui.item).data("startIndex", ui.item.index());
+        },
+        stop: function (event, ui) {
+            var $item = ui.item;
+            var startIndex = $item.data("startIndex") + 1;
             var newIndex = $item.index() + 1;
             if (newIndex != startIndex) {
                 vscode.postMessage({
@@ -407,6 +462,6 @@ $(document).ready(function () {
                     value: newIndex
                 });
             }
-		}
+        }
     });
 });

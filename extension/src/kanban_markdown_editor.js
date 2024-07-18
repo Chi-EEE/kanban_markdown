@@ -83,6 +83,7 @@ class KanbanMarkdownEditorProvider {
                     case 'create':
                     case 'delete':
                     case 'swap':
+                    case 'move':
                         this.sendCommand(document, e);
                         return;
                 }

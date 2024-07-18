@@ -73,7 +73,7 @@ namespace server::commands
 				switch (hash(second))
 				{
 				case hash("name"):
-					throw std::runtime_error("Invalid path: KanbanList.name is a key and cannot be deleted");
+					throw std::runtime_error("Invalid path: KanbanList.name is a key and cannot be swapped");
 				default:
 				{
 					static re2::RE2 path_pattern(R"((\w+)\[(.+)\])");
@@ -124,11 +124,11 @@ namespace server::commands
 				switch (hash(third))
 				{
 				case hash("name"):
-					throw std::runtime_error("Invalid path: KanbanTask.name is a key and cannot be deleted");
+					throw std::runtime_error("Invalid path: KanbanTask.name is a key and cannot be swapped");
 				case hash("description"):
-					throw std::runtime_error("Invalid path: KanbanTask.description is a key and cannot be deleted");
+					throw std::runtime_error("Invalid path: KanbanTask.description is a key and cannot be swapped");
 				case hash("checked"):
-					throw std::runtime_error("Invalid path: KanbanTask.checked is a key and cannot be deleted");
+					throw std::runtime_error("Invalid path: KanbanTask.checked is a key and cannot be swapped");
 				default:
 				{
 					static re2::RE2 path_pattern(R"((\w+)\[(.+)\])");
@@ -189,7 +189,7 @@ namespace server::commands
 				switch (hash(fourth))
 				{
 				case hash("name"):
-					throw std::runtime_error("Invalid path: KanbanLabel.name is a key and cannot be deleted");
+					throw std::runtime_error("Invalid path: KanbanLabel.name is a key and cannot be swapped");
 				default:
 					throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanLabel named "{}")", fourth));
 				}
@@ -219,9 +219,9 @@ namespace server::commands
 				switch (hash(fourth))
 				{
 				case hash("name"):
-					throw std::runtime_error("Invalid path: KanbanAttachment.name is a key and cannot be deleted");
+					throw std::runtime_error("Invalid path: KanbanAttachment.name is a key and cannot be swapped");
 				case hash("url"):
-					throw std::runtime_error("Invalid path: KanbanAttachment.url is a key and cannot be deleted");
+					throw std::runtime_error("Invalid path: KanbanAttachment.url is a key and cannot be swapped");
 				default:
 					throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanAttachment named "{}")", fourth));
 				}
@@ -251,9 +251,9 @@ namespace server::commands
 				switch (hash(fourth))
 				{
 				case hash("name"):
-					throw std::runtime_error("Invalid path: KanbanChecklistItem.name is a key and cannot be deleted");
+					throw std::runtime_error("Invalid path: KanbanChecklistItem.name is a key and cannot be swapped");
 				case hash("checked"):
-					throw std::runtime_error("Invalid path: KanbanChecklistItem.checked is a key and cannot be deleted");
+					throw std::runtime_error("Invalid path: KanbanChecklistItem.checked is a key and cannot be swapped");
 				default:
 					throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanChecklistItem named "{}")", fourth));
 				}
@@ -273,7 +273,7 @@ namespace server::commands
 			switch (hash(second))
 			{
 			case hash("name"):
-				throw std::runtime_error("Invalid path: KanbanLabel.name is a key and cannot be deleted");
+				throw std::runtime_error("Invalid path: KanbanLabel.name is a key and cannot be swapped");
 			default:
 				throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanLabel named "{}")", second));
 			}
@@ -292,7 +292,7 @@ namespace server::commands
 		{
 			throw std::runtime_error("Unable to find value");
 		}
-		int new_index = yyjson_get_uint(value) - 1;
+		int new_index = yyjson_get_uint(value);
 
 		std::string path_str = yyjson_get_string_object(path);
 		std::vector<std::string> split_result = split(path_str, ".");
@@ -306,13 +306,13 @@ namespace server::commands
 		switch (hash(first))
 		{
 		case hash("name"):
-			throw std::runtime_error("Invalid path: KanbanBoard.name is a key and cannot be deleted");
+			throw std::runtime_error("Invalid path: KanbanBoard.name is a key and cannot be swapped");
 		case hash("description"):
-			throw std::runtime_error("Invalid path: KanbanBoard.description is a key and cannot be deleted");
+			throw std::runtime_error("Invalid path: KanbanBoard.description is a key and cannot be swapped");
 		case hash("list"):
-			throw std::runtime_error("Invalid path: KanbanBoard.list is a key and cannot be deleted");
+			throw std::runtime_error("Invalid path: KanbanBoard.list is a key and cannot be swapped");
 		case hash("labels"):
-			throw std::runtime_error("Invalid path: KanbanBoard.labels is a key and cannot be deleted");
+			throw std::runtime_error("Invalid path: KanbanBoard.labels is a key and cannot be swapped");
 		default:
 			internal_swap::parsePath_1(kanban_tuple, split_result, new_index);
 			break;
