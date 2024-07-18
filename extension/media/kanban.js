@@ -38,7 +38,7 @@
  * @property {any[]} [checklist] - The checklist items of the task. Optional.
  */
 
-$(document).ready(() => {
+$(document).ready(function () {
     // @ts-ignore
     const vscode = acquireVsCodeApi();
 
@@ -53,7 +53,7 @@ $(document).ready(() => {
         $('#kanban-title').text(board.name);
 
         const $board = $('#board').empty();
-        board.lists.forEach((list, index) => {
+        board.lists.forEach(function (list, index) {
             const $list = createListElement(list, index + 1);
             $board.append($list);
         });
@@ -63,7 +63,7 @@ $(document).ready(() => {
         bindAddListButtonEvent($addListButton);
     };
 
-    window.addEventListener('message', (event) => {
+    window.addEventListener('message', function (event) {
         const { type, text: { json: kanbanBoard } } = event.data;
         if (type === 'update') {
             loadKanbanBoard(kanbanBoard);
@@ -94,8 +94,8 @@ $(document).ready(() => {
                 $list.data('name', newTitle);
                 previousTitle = newTitle;
             }
-        }).on('keypress', (e) => {
-            if (e.which === 13) $(this).blur();
+        }).on('keypress', function (e) {
+            if (e.which === 13) $(this).trigger('blur');
         });
 
         const $cards = $('<div>').addClass('cards').sortable({
@@ -110,7 +110,7 @@ $(document).ready(() => {
             }
         });
 
-        list.tasks.forEach(task => {
+        list.tasks.forEach(function (task) {
             const $card = createCardElement(task);
             $cards.append($card);
         });
@@ -162,7 +162,7 @@ $(document).ready(() => {
     };
 
     function createCardMenuButton($card) {
-        return $('<button>').addClass('card-menu').text('⋮').on('click', (event) => {
+        return $('<button>').addClass('card-menu').text('⋮').on('click', function (event) {
             event.stopPropagation();
             closeAllMenus();
             $card.find('.card-menu-actions').toggle();
@@ -171,7 +171,7 @@ $(document).ready(() => {
 
     function createCardMenuActions($cardTitleInput) {
         const $cardMenuActions = $('<div>').addClass('card-menu-actions').hide();
-        const $editCardButton = $('<button>').addClass('edit-card').text('Edit').on('click', (event) => {
+        const $editCardButton = $('<button>').addClass('edit-card').text('Edit').on('click', function (event) {
             event.stopPropagation();
             editCard($cardTitleInput);
         });
@@ -194,7 +194,7 @@ $(document).ready(() => {
         const $cardTitleInput = $('<input>').addClass('card-title').attr('placeholder', 'Enter card title');
         let isCardTitleChanged = false;
 
-        $cardTitleInput.on('input', () => isCardTitleChanged = true).on('blur', function () {
+        $cardTitleInput.on('input', function () { isCardTitleChanged = true }).on('blur', function () {
             if (!isCardTitleChanged) {
                 $card.remove();
             } else {
@@ -212,8 +212,10 @@ $(document).ready(() => {
                 });
             }
             $('.add-card').show();
-        }).on('keypress', (e) => {
-            if (e.which === 13) $(this).blur();
+        }).on('keypress', function (e) {
+            if (e.which == 13) {
+                $(this).trigger('blur');
+            }
         });
 
         const $cardMenuButton = createCardMenuButton($card);
@@ -224,14 +226,14 @@ $(document).ready(() => {
     };
 
     function createListActionsButton($listTitle, $list) {
-        const $listActionsButton = $('<button>').addClass('list-actions').text('⋮').on('click', (event) => {
+        const $listActionsButton = $('<button>').addClass('list-actions').text('⋮').on('click', function (event) {
             event.stopPropagation();
             closeAllMenus();
             $list.find('.list-actions-menu').toggle();
         });
 
         const $listActionsMenu = $('<div>').addClass('list-actions-menu').hide();
-        const $removeListButton = $('<button>').addClass('remove-list').text('Remove list').on('click', () => {
+        const $removeListButton = $('<button>').addClass('remove-list').text('Remove list').on('click', function () {
             vscode.postMessage({
                 type: 'delete',
                 path: `list[${$listTitle.val()}]`
@@ -260,7 +262,7 @@ $(document).ready(() => {
         const $listTitle = $('<input>').addClass('list-title').attr('placeholder', 'Enter list title');
         let isListTitleChanged = false;
 
-        $listTitle.on('input', () => isListTitleChanged = true).on('blur', function () {
+        $listTitle.on('input', function () { isListTitleChanged = true }).on('blur', function () {
             if (!isListTitleChanged) {
                 $list.remove();
             } else {
@@ -275,18 +277,18 @@ $(document).ready(() => {
             $('#add-list').show();
             $list.find('.add-card').show();
             $list.find('.cards').show();
-        }).on('keypress', (e) => {
-            if (e.which === 13) $(this).blur();
+        }).on('keypress', function (e) {
+            if (e.which === 13) $(this).trigger('blur');
         });
 
         const $cards = $('<div>').addClass('cards').sortable({
             connectWith: '.cards',
             tolerance: 'pointer',
-            start: (event, ui) => {
+            start: function (event, ui) {
                 $(ui.item).data("parentName", ui.item.parent().parent().data('name'));
                 $(ui.item).data("startIndex", ui.item.index());
             },
-            stop: (event, ui) => {
+            stop: function (event, ui) {
                 handleCardSortStop(ui);
             }
         }).hide();
@@ -304,7 +306,7 @@ $(document).ready(() => {
         $('#card-modal').show();
         $cardTitleInput.prop('readonly', false).focus();
 
-        $('#save-card').one('click', () => {
+        $('#save-card').one('click', function () {
             $cardTitleInput.val($('#edit-card-title').val());
             $('#card-modal').hide();
         });
@@ -314,7 +316,7 @@ $(document).ready(() => {
         $('.card-menu-actions, .list-actions-menu').hide();
     };
 
-    $('#background-color-picker').on('input', (event) => {
+    $('#background-color-picker').on('input', function (event) {
         const color = event.target.value;
         $('body').css('background-color', color);
         vscode.postMessage({
@@ -325,14 +327,14 @@ $(document).ready(() => {
     });
 
     const $modal = $('#card-modal');
-    $('.close').on('click', () => $modal.hide());
+    $('.close').on('click', function () { $modal.hide() });
 
-    $(window).on('click', (event) => {
+    $(window).on('click', function (event) {
         if ($(event.target).is($modal)) $modal.hide();
         closeAllMenus();
     });
 
-    $('#save-card').on('click', () => {
+    $('#save-card').on('click', function () {
         const cardTitle = $('#edit-card-title').val();
 
         $('.card').each(function () {
@@ -355,12 +357,12 @@ $(document).ready(() => {
     const $kanbanTitle = $('#kanban-title');
     const $editTitleInput = $('#edit-title-input');
 
-    $kanbanTitle.on('click', () => {
+    $kanbanTitle.on('click', function () {
         $kanbanTitle.hide();
         $editTitleInput.show().val($kanbanTitle.text().trim()).trigger('focus');
     });
 
-    $editTitleInput.on('blur', () => {
+    $editTitleInput.on('blur', function () {
         const newTitle = $editTitleInput.val().trim();
         if (newTitle === '') {
             $editTitleInput.val($kanbanTitle.text().trim());
@@ -374,6 +376,8 @@ $(document).ready(() => {
         }
         $kanbanTitle.show();
         $editTitleInput.hide();
+    }).on('keypress', function (e) {
+        if (e.which === 13) $(this).trigger('blur');
     });
 
     $('#board').sortable({
