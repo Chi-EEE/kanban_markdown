@@ -105,7 +105,7 @@ $(document).ready(function () {
             connectWith: '.cards',
             tolerance: 'pointer',
             start: function (event, ui) {
-                $(ui.item).data("parentName", ui.item.parent().parent().data('name'));
+                $(ui.item).data("parentName", ui.item.closest('.list').data('name'));
                 $(ui.item).data("startIndex", ui.item.index());
             },
             stop: function (event, ui) {
@@ -126,9 +126,10 @@ $(document).ready(function () {
     };
 
     function handleCardSortStop(ui) {
+        /** @type {JQuery<HTMLElement>} */
         const $item = ui.item;
         const parentName = $item.data("parentName");
-        const newParentName = $item.parent().parent().data('name');
+        const newParentName = $item.closest('.list').data('name');
         const newIndex = $item.index();
 
         if (parentName !== newParentName) {
@@ -242,6 +243,12 @@ $(document).ready(function () {
         });
     };
 
+    /**
+     * 
+     * @param {JQuery<HTMLElement>} $card 
+     * @param {*} $cardTitleInput 
+     * @returns 
+     */
     function createCardMenuActions($card, $cardTitleInput) {
         const $cardMenuActions = $('<div>').addClass('card-menu-actions').hide();
         const $editCardButton = $('<button>').addClass('edit-card').text('Edit').on('click', function (event) {
@@ -249,9 +256,18 @@ $(document).ready(function () {
             editCard($card, $cardTitleInput);
         });
 
-        $cardMenuActions.append($editCardButton);
+        const $deleteCardButton = $('<button>').addClass('delete-card').text('Delete').on('click', function (event) {
+            event.stopPropagation();
+            vscode.postMessage({
+                type: 'delete',
+                path: `list[${$card.closest('.list').data('name')}].tasks[${$card.data('name')}]`
+            });
+            $card.remove();
+        });
+
+        $cardMenuActions.append($editCardButton, $deleteCardButton);
         return $cardMenuActions;
-    };
+    }
 
     function createAddCardButton($listTitle, $cards) {
         return $('<button>').addClass('add-card').text('Add another card +').on('click', function () {
@@ -365,7 +381,7 @@ $(document).ready(function () {
             connectWith: '.cards',
             tolerance: 'pointer',
             start: function (event, ui) {
-                $(ui.item).data("parentName", ui.item.parent().parent().data('name'));
+                $(ui.item).data("parentName", ui.item.closest('.list').data('name'));
                 $(ui.item).data("startIndex", ui.item.index());
             },
             stop: function (event, ui) {
