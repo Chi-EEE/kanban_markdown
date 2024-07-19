@@ -136,45 +136,45 @@ class KanbanMarkdownEditorProvider {
                 <button id="add-list">Add another list +</button>
             </div>
             <div id="card-modal" class="modal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <div class="modal-main">
-                        <div class="modal-header">
+                <div id="modal-content">
+                    <span id="modal-close">&times;</span>
+                    <div id="modal-main">
+                        <div id="modal-header">
                             <h2>Edit Card</h2>
-                            <div class="modal-label-bar"></div>
+                            <div id="modal-label-bar"></div>
                         </div>
-                        <div class="modal-body">
-                            <label for="edit-card-title">Title</label>
-                            <input type="text" id="edit-card-title" placeholder="Enter card title" />
-                            <label for="edit-card-description">Description</label>
-                            <textarea id="edit-card-description" placeholder="Enter card description"></textarea>
+                        <div id="modal-body">
+                            <label for="modal-edit-card-title">Title</label>
+                            <input type="text" id="modal-edit-card-title" placeholder="Enter card title" />
+                            <label for="modal-edit-card-description">Description</label>
+                            <textarea id="modal-edit-card-description" placeholder="Enter card description"></textarea>
                         </div>
-                        <div class="modal-footer">
-                            <button id="save-card">Save</button>
+                        <div id="modal-footer">
+                            <button id="modal-save-card">Save</button>
                         </div>
                     </div>
-                    <div class="modal-sidebar">
-                        <button id="label-button">Labels</button>
-                        <button id="attachment-button">Attachments</button>
+                    <div id="modal-sidebar">
+                        <button id="modal-label-button">Labels</button>
+                        <button id="modal-attachment-button">Attachments</button>
                     </div>
                 </div>
-                <div id="label-menu" class="menu">
-                    <div id="label-select">
+                <div id="modal-label-menu" class="menu">
+                    <div id="modal-label-select">
                         <h3>Labels</h3>
-                        <div id="label-list"></div>
-                        <button id="create-label-button">Create a new label</button>
+                        <div id="modal-label-list"></div>
+                        <button id="modal-create-label-button">Create a new label</button>
                     </div>
-                    <div id="label-create">
+                    <div id="modal-label-create">
                         <h3>Create Label</h3>
-                        <label for="new-label-title">Title</label>
-                        <input type="text" id="new-label-title" />
-                        <label for="new-label-color">Color</label>
-                        <input type="color" id="new-label-color" value="#ffffff" />
-                        <button id="create-label">Create</button>
-                        <button id="back-to-label-select">Back</button>
+                        <label for="modal-new-label-title">Title</label>
+                        <input type="text" id="modal-new-label-title" />
+                        <label for="modal-new-label-color">Color</label>
+                        <input type="color" id="modal-new-label-color" value="#ffffff" />
+                        <button id="modal-create-label">Create</button>
+                        <button id="modal-back-to-label-select">Back</button>
                     </div>
                 </div>
-                <div id="attachment-menu" class="menu">Attachment menu content</div>
+                <div id="modal-attachment-menu" class="menu">Attachment menu content</div>
             </div>
             <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous" nonce="${nonce}"></script>
             <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.min.js" defer crossorigin="anonymous" nonce="${nonce}"></script>

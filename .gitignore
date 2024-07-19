@@ -1,3 +1,6 @@
+# Visual Studio Code Extension (Use `vsce package` to create a .vsix package)
+*.vsix
+
 # Prerequisites
 *.d
 

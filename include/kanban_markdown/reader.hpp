@@ -15,6 +15,7 @@
 #include <tsl/ordered_map.h>
 
 #include <md4c.h>
+#include <pugixml.hpp>
 #include <yaml-cpp/yaml.h>
 
 #include "kanban.hpp"
@@ -207,7 +208,9 @@ namespace kanban_markdown {
 			switch (kanban_parser->list_item_level) {
 			case 1:
 			{
-				kanban_parser->label_section.label_details[text_content] = LabelDetail();
+				LabelDetail label_detail;
+				label_detail.name = text_content;
+				kanban_parser->label_section.label_details[text_content] = label_detail;
 				kanban_parser->label_section.current_label_name = text_content;
 				break;
 			}
@@ -417,6 +420,32 @@ namespace kanban_markdown {
 				parseSection(kanban_parser, text_content);
 				break;
 			}
+			case MD_TEXT_HTML:
+			{
+				if (kanban_parser->state == KanbanState::Labels) {
+					static std::string end_of_html_tag = "</";
+					auto end_of_current_html_tag = std::mismatch(end_of_html_tag.begin(), end_of_html_tag.end(), text_content.begin());
+					if (end_of_current_html_tag.first != end_of_html_tag.end()) {
+						// Start of the HTML tag
+						kanban_parser->label_section.html_tags.push_back(text_content);
+					}
+					else {
+						// End of the HTML tag
+						std::string opening_html_tag = kanban_parser->label_section.html_tags.back();
+						kanban_parser->label_section.html_tags.pop_back();
+						std::string complete_html_tag = opening_html_tag + text_content;
+						pugi::xml_document doc;
+						pugi::xml_parse_result result = doc.load_buffer(complete_html_tag.c_str(), complete_html_tag.size());
+						if (!result)
+						{
+							std::cerr << result.description() << '\n';
+							return 0;
+						}
+						kanban_parser->label_section.label_details[kanban_parser->label_section.current_label_name].color = doc.child("span").attribute("data-color").value();
+					}
+				}
+				break;
+			}
 			default:
 			{
 				break;
@@ -443,19 +472,20 @@ namespace kanban_markdown {
 		kanban_board.name = kanban_parser.kanban_board_name;
 		kanban_board.description = kanban_parser.kanban_board_description;
 
-		for (auto& [label_name, label_detail] : kanban_parser.label_section.label_details) {
+		for (auto& [_, label_detail] : kanban_parser.label_section.label_details) {
 			std::shared_ptr<KanbanLabel> kanban_label = std::make_shared<KanbanLabel>();
-			kanban_label->name = label_name;
+			kanban_label->name = label_detail.name;
+			kanban_label->color = label_detail.color;
 			kanban_board.labels.push_back(kanban_label);
 		}
 
 		for (BoardSection board_section : kanban_parser.board_section.boards) {
 			std::shared_ptr<KanbanList> kanban_list = std::make_shared<KanbanList>();
 			kanban_list->name = board_section.name;
-			for (auto& [task_name, task_detail] : board_section.task_details) {
+			for (auto& [_, task_detail] : board_section.task_details) {
 				std::shared_ptr<KanbanTask> kanban_task = std::make_shared<KanbanTask>();
 				kanban_task->checked = task_detail.checked;
-				kanban_task->name = task_name;
+				kanban_task->name = task_detail.name;
 				kanban_task->description = task_detail.description;
 				for (const std::string& label : task_detail.labels) {
 					auto it = std::find_if(kanban_board.labels.begin(), kanban_board.labels.end(), [&label](const std::shared_ptr<KanbanLabel>& x) { return x->name == label; });

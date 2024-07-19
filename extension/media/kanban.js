@@ -82,8 +82,24 @@ $(document).ready(function () {
 
         const $board = $('#board').empty();
         board.lists.forEach(function (list, index) {
-            const $list = createListElement(list, index + 1);
+            const $list = createListElement(board, list, index + 1);
             $board.append($list);
+        });
+
+        const $label_list = $('#modal-label-list').empty();
+        console.log(board.labels)
+        board.labels.forEach(function (label) {
+            const $newLabel = $('<button>')
+                .addClass('label-button')
+                .css('background-color', label.color)
+                .text(label.name).on('click', function () {
+                    const $currentCard = $card_modal.data('current-card');
+                    if ($currentCard) {
+                        toggleLabelOnCard(label, $currentCard, $currentCard.find('.label-bar'));
+                    }
+                    $('#modal-label-menu').show();
+                });
+            $label_list.append($newLabel);
         });
 
         const $addListButton = $('<button>').attr('id', 'add-list').text('Add another list +');
@@ -106,7 +122,14 @@ $(document).ready(function () {
         loadKanbanBoard(state.json);
     }
 
-    function createListElement(list, listIndex) {
+    /**
+     * 
+     * @param {KanbanBoard} board 
+     * @param {List} list 
+     * @param {number} listIndex 
+     * @returns 
+     */
+    function createListElement(board, list, listIndex) {
         const $list = $('<div>').addClass('list').attr('id', `list-${listIndex}`).data('name', list.name);
         const $listTitle = $('<input>').addClass('list-title').attr('placeholder', 'Enter list title').val(list.name);
 
@@ -140,7 +163,7 @@ $(document).ready(function () {
         });
 
         list.tasks.forEach(function (task) {
-            const $card = createCardElement(task);
+            const $card = createCardElement(board, task);
             $cards.append($card);
         });
 
@@ -182,15 +205,16 @@ $(document).ready(function () {
     };
 
     /**
+     * @param {KanbanBoard} board
      * @param {Task} task 
      * @returns 
      */
-    function createCardElement(task) {
+    function createCardElement(board, task) {
         const $card = $('<div>').addClass('card')
             .data('name', task.name)
             .data('description', task.description)
             .data('checked', task.checked)
-            .data('labels', task.labels || [])
+            .data('labels', task.labels)
             .data('attachments', task.attachments)
             .data('checklist', task.checklist);
 
@@ -198,18 +222,24 @@ $(document).ready(function () {
         const $cardMenuButton = createCardMenuButton($card);
         const $cardMenuActions = createCardMenuActions($card, $cardTitleInput);
 
-        const $labelBar = $('<div>').addClass('label-bar');
-        task.labels && task.labels.forEach(label => {
-            const $label = $('<button>').addClass('label-button')
-                .css('background-color', label.color)
-                .text(label.name)
-                .on('click', function () {
-                    toggleLabelOnCard(label, $card, $labelBar);
-                });
-            $labelBar.append($label);
-        });
+        const $label_bar = $('<div>').addClass('label-bar');
+        if (task.labels.length > 0) {
+            task.labels.forEach(label => {
+                const $label = $('<button>').addClass('label-button')
+                    .css('background-color', label.color)
+                    .text(label.name)
+                    .on('click', function () {
+                        toggleLabelOnCard(label, $card, $label_bar);
+                        $('#modal-label-menu').show();
+                    });
+                $label_bar.append($label);
+            });
+            $label_bar.show();
+        } else {
+            $label_bar.hide();
+        }
 
-        $card.append($cardTitleInput, $cardMenuButton, $cardMenuActions, $labelBar);
+        $card.append($cardTitleInput, $cardMenuButton, $cardMenuActions, $label_bar);
         return $card;
     };
 
@@ -220,41 +250,37 @@ $(document).ready(function () {
      * @param {JQuery<HTMLElement>} $label_bar
      */
     function toggleLabelOnCard(label, $card, $label_bar) {
-        const labels = $card.data('labels') || [];
+        console.log("aczxcxzasdfcjbnhsu: ", $card)
+        console.log("aczxcxzasdfcjzxczxbnhsu: ", $card.data())
+        console.log("acasdcxzzszxcxz: ", $card.data('labels'))
+        const labels = $card.data('labels');
+        console.log("aczxcxz", labels)
+        console.log("aczxzxczxcxz: ", labels.length)
         const labelIndex = labels.findIndex(l => l.name === label.name);
+        console.log("aczxcxzafsdojcuniadks: ", labelIndex)
 
         if (labelIndex === -1) {
-            // Label is not selected, so add it
             labels.push(label);
-            $('.modal-label-bar').append($('<button>').addClass('label-button')
-                .css('background-color', label.color)
-                .text(label.name))
-                .on('click', function () {
-                    const $currentCard = $card_modal.data('current-card');
-                    if ($currentCard) {
-                        toggleLabelOnCard(label, $currentCard, $currentCard.find('.label-bar'));
-                    }
-                    $('#label-menu').hide();
-                });
-            $label_bar.append($('<button>').addClass('label-button')
-                .css('background-color', label.color)
-                .text(label.name))
-                .on('click', function () {
-                    const $currentCard = $card_modal.data('current-card');
-                    if ($currentCard) {
-                        toggleLabelOnCard(label, $currentCard, $currentCard.find('.label-bar'));
-                    }
-                    $('#label-menu').hide();
-                });
+            $label_bar.show()
+            addLabel(label, $card, $label_bar);
+            vscode.postMessage({
+                type: 'create',
+                path: `list[${$card.closest('.list').data('name')}].tasks[${$card.data('name')}].labels`,
+                value: label
+            });
         } else {
             // Label is selected, so remove it
             labels.splice(labelIndex, 1);
-            $('.modal-label-bar').find('.label-button').filter(function () {
+            $('#modal-label-bar').find('.label-button').filter(function () {
                 return $(this).text() === label.name;
             }).remove();
             $label_bar.find('.label-button').filter(function () {
                 return $(this).text() === label.name;
             }).remove();
+            vscode.postMessage({
+                type: 'delete',
+                path: `list[${$card.closest('.list').data('name')}].tasks[${$card.data('name')}].labels[${label.name}]`
+            });
         }
 
         $card.data('labels', labels);
@@ -435,43 +461,78 @@ $(document).ready(function () {
     }
 
     /**
+     * 
+     * @param {Label} label 
      * @param {JQuery<HTMLElement>} $card 
-     * @param {*} $cardTitleInput 
+     * @param {JQuery<HTMLElement>} $label_bar 
+     */
+    function addLabel(label, $card, $label_bar) {
+        $label_bar.append($('<button>').addClass('label-button')
+            .css('background-color', label.color)
+            .text(label.name)
+            .on('click', function () {
+                toggleLabelOnCard(label, $card, $label_bar);
+                $('#modal-label-menu').show();
+            }));
+        $('#modal-label-bar').append($('<button>').addClass('modal-label-button')
+            .css('background-color', label.color)
+            .text(label.name)
+            .on('click', function () {
+                toggleLabelOnCard(label, $card, $label_bar);
+                $('#modal-label-menu').show();
+            }));
+        const labels = $card.data('labels');
+        labels.concat(label)
+        $card.data('labels', labels);
+    }
+
+    /**
+     * @param {JQuery<HTMLElement>} $card 
+     * @param {JQuery<HTMLElement>} $cardTitleInput 
      */
     function editCard($card, $cardTitleInput) {
-        $('#edit-card-title').val($card.data('name'));
-        $('#edit-card-description').val($card.data('description'));
+        $('#modal-edit-card-title').val($card.data('name'));
+        $('#modal-edit-card-description').val($card.data('description'));
 
         const $label_bar = $card.find('.label-bar')
         $label_bar.empty();
-        $('.modal-label-bar').empty();
+        $label_bar.hide();
+        $('#modal-label-bar').empty();
 
         setCurrentCard($card);
 
-        // Populate the label bar with the labels of the current card
-        const labels = $card.data('labels') || [];
-        labels.forEach(function (label) {
-            $label_bar.append($('<button>').addClass('label-button')
-                .css('background-color', label.color)
-                .text(label.name)
-                .on('click', function () {
-                    toggleLabelOnCard(label, $card, $label_bar);
-                }));
-            $('.modal-label-bar').append($('<button>').addClass('label-button')
-                .css('background-color', label.color)
-                .text(label.name)
-                .on('click', function () {
-                    toggleLabelOnCard(label, $card, $label_bar);
-                }));
-        });
+        /** @type {Label[]} */
+        const labels = $card.data('labels');
+        if (labels.length > 0) {
+            $label_bar.show();
+            labels.forEach(function (label) {
+                addLabel(label, $card, $label_bar)
+            });
+        }
 
         $card_modal.show();
-        $cardTitleInput.prop('readonly', false).focus();
 
-        $('#save-card').one('click', function () {
-            $cardTitleInput.val($('#edit-card-title').val());
-            $card_modal.hide();
-        });
+        $('#modal-save-card').one('click', function () { saveCard($card, $cardTitleInput) });
+    }
+
+    /**
+     * @param {JQuery<HTMLElement>} $card 
+     * @param {JQuery<HTMLElement>} $cardTitleInput 
+     */
+    function saveCard($card, $cardTitleInput) {
+        const cardTitle = $('#modal-edit-card-title').val();
+
+        $cardTitleInput.val();
+        $card_modal.hide();
+
+        if (cardTitle !== $card.data('name')) {
+            vscode.postMessage({
+                type: 'update',
+                path: `list[${$card.closest('.list').data('name')}].tasks[${$card.data('name')}].name`,
+                value: cardTitle
+            });
+            $card.data('name', cardTitle);
+        }
     }
 
     $('#background-color-picker').on('input', function (event) {
@@ -498,61 +559,78 @@ $(document).ready(function () {
         }).show();
     }
 
-    $('#label-button').on('click', function (event) {
+    $('#modal-label-button').on('click', function (event) {
         event.stopPropagation();
         closeAllMenus();
-        positionMenu($('#label-menu'), $(this));
+        positionMenu($('#modal-label-menu'), $(this));
     });
 
-    $('#attachment-button').on('click', function (event) {
+    $('#modal-attachment-button').on('click', function (event) {
         event.stopPropagation();
         closeAllMenus();
-        positionMenu($('#attachment-menu'), $(this));
+        positionMenu($('#modal-attachment-menu'), $(this));
     });
 
-    $('#create-label-button').on('click', function () {
-        $('#label-select').hide();
-        $('#label-create').show();
+    $('#modal-create-label-button').on('click', function () {
+        $('#modal-label-select').hide();
+        $('#modal-label-create').show();
     });
 
-    $('#back-to-label-select').on('click', function () {
-        $('#label-create').hide();
-        $('#label-select').show();
+    $('#modal-back-to-label-select').on('click', function () {
+        $('#modal-label-create').hide();
+        $('#modal-label-select').show();
     });
 
-    $('#create-label').on('click', function () {
+    $('#modal-create-label').on('click', function () {
         /** @type {string} */
         // @ts-ignore
-        const title = $('#new-label-title').val();
+        const title = $('#modal-new-label-title').val();
         /** @type {string} */
         // @ts-ignore
-        const color = $('#new-label-color').val();
+        const color = $('#modal-new-label-color').val();
         if (title && color) {
+            const label = { name: title, color: color, tasks: [] };
+
             vscode.postMessage({
                 type: 'create',
                 path: 'labels',
-                value: { name: title, color: color }
+                value: label
             });
+
+            const $currentCard = $card_modal.data('current-card');
 
             const $newLabel = $('<button>')
                 .addClass('label-button')
                 .css('background-color', color)
                 .text(title).on('click', function () {
-                    const $currentCard = $card_modal.data('current-card');
                     if ($currentCard) {
-                        toggleLabelOnCard({ name: title, color: color }, $currentCard, $currentCard.find('.label-bar'));
+                        toggleLabelOnCard(label, $currentCard, $currentCard.find('.label-bar'));
                     }
-                    $('#label-menu').hide();
+                    $('#modal-label-menu').show();
                 });
-            $('#label-list').append($newLabel);
+
+            $('#modal-label-list').append($newLabel);
+
+            /** @type {JQuery<HTMLElement>} */
+            const $label_bar = $currentCard.find('.label-bar')
+            $label_bar.append($newLabel);
+            $label_bar.show();
+
+            const $list = $currentCard.closest('.list')
+
+            vscode.postMessage({
+                type: 'create',
+                path: `list[${$list.data('name')}].tasks[${$currentCard.data('name')}].labels`,
+                value: label
+            });
 
             // Clear the form
             $('#new-label-title').val('');
             $('#new-label-color').val('#ffffff');
 
             // Switch back to label selection mode
-            $('#label-create').hide();
-            $('#label-select').show();
+            $('#modal-label-create').hide();
+            $('#modal-label-select').show();
         }
     });
 
@@ -561,7 +639,7 @@ $(document).ready(function () {
         $('.card-menu-actions, .list-actions-menu').hide();
     }
 
-    $('.close').on('click', function () {
+    $('#modal-close').on('click', function () {
         $card_modal.hide();
     });
 
@@ -573,8 +651,8 @@ $(document).ready(function () {
         event.stopPropagation();
     });
 
-    $('#save-card').on('click', function () {
-        const cardTitle = $('#edit-card-title').val();
+    $('#modal-save-card').on('click', function () {
+        const cardTitle = $('#modal-edit-card-title').val();
 
         $('.card').each(function () {
             const $cardTitleInput = $(this).find('.card-title');

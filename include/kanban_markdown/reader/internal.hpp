@@ -22,12 +22,14 @@ namespace kanban_markdown::internal {
 
 	struct LabelDetail {
 		std::string name;
+		std::string color;
 		std::vector<std::string> list_items;
 	};
 
 	struct LabelSection {
 		std::string current_label_name;
 		tsl::ordered_map<std::string, LabelDetail> label_details;
+		std::vector<std::string> html_tags;
 	};
 
 	struct TaskDetail {

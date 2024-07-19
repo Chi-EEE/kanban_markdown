@@ -105,11 +105,11 @@ body {
     color: white;
 }
 
-#edit-card-title {
+#modal-edit-card-title {
     border: none;
 }
 
-#edit-card-description {
+#modal-edit-card-description {
     border: none;
 }
 
@@ -233,7 +233,7 @@ body {
     /* Lighter overlay */
 }
 
-.modal-content {
+#modal-content {
     display: flex;
     flex-direction: row;
     background-color: var(--background-color);
@@ -247,7 +247,7 @@ body {
     border-radius: 12px;
 }
 
-.modal-sidebar {
+#modal-sidebar {
     width: 150px;
     padding: 10px;
     background-color: rgba(255, 255, 255, 0);
@@ -256,42 +256,41 @@ body {
     align-items: flex-start;
 }
 
-.modal-sidebar>* {
+#modal-sidebar>* {
     margin: 5px 0;
 }
 
-.modal-main {
+#modal-main {
     flex-grow: 1;
     padding: 10px;
     display: flex;
     flex-direction: column;
 }
 
-.modal-header {
+#modal-header {
     display: flex;
     flex-direction: column;
     margin-bottom: 10px;
 }
 
-.modal-header h2 {
+#modal-header h2 {
     margin-top: 0;
     color: white;
     /* Text color set to white */
 }
 
-.modal-label-bar {
+#modal-label-bar {
     display: flex;
     flex-wrap: wrap;
     margin-top: 10px;
 }
 
 .label-bar {
-    display: flex;
     flex-wrap: wrap;
     margin-top: 10px;
 }
 
-.label-button {
+.modal-label-button {
     background-color: rgba(255, 255, 255, 0.3);
     /* Lighter button background */
     color: white;
@@ -303,29 +302,29 @@ body {
     cursor: pointer;
 }
 
-.label-button:hover {
+.modal-label-button:hover {
     background-color: rgba(255, 255, 255, 0.4);
     /* Slightly lighter on hover */
 }
 
-.modal-body {
+#modal-body {
     margin-bottom: 20px;
 }
 
-.modal-content label {
+#modal-content label {
     display: block;
     margin-bottom: 5px;
     color: white;
     /* Text color set to white */
 }
 
-.modal-content textarea::placeholder {
+#modal-content textarea::placeholder {
     color: white;
     /* Text color set to white */
 }
 
-.modal-content input[type="text"],
-.modal-content textarea {
+#modal-content input[type="text"],
+#modal-content textarea {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
@@ -337,20 +336,20 @@ body {
     /* Text color set to white */
 }
 
-.modal-content textarea {
+#modal-content textarea {
     height: 150px;
     resize: vertical;
 }
 
-.modal-footer {
+#modal-footer {
     display: flex;
     justify-content: flex-end;
     align-items: center;
 }
 
-#label-button,
-#attachment-button,
-#save-card {
+#modal-label-button,
+#modal-attachment-button,
+#modal-save-card {
     background-color: rgba(255, 255, 255, 0.4);
     /* Lighter button background */
     color: white;
@@ -362,14 +361,14 @@ body {
     width: 100%;
 }
 
-#label-button:hover,
-#attachment-button:hover,
-#save-card:hover {
+#modal-label-button:hover,
+#modal-attachment-button:hover,
+#modal-save-card:hover {
     background-color: rgba(255, 255, 255, 0.5);
     /* Slightly lighter on hover */
 }
 
-.modal-content button {
+#modal-content button {
     background-color: rgba(255, 255, 255, 0.4);
     /* Lighter button background */
     color: white;
@@ -381,12 +380,12 @@ body {
     margin-left: 10px;
 }
 
-.modal-content button:hover {
+#modal-content button:hover {
     background-color: rgba(255, 255, 255, 0.5);
     /* Slightly lighter on hover */
 }
 
-.close {
+#modal-close {
     color: white;
     /* Text color set to white */
     float: right;
@@ -395,8 +394,8 @@ body {
     cursor: pointer;
 }
 
-.close:hover,
-.close:focus {
+#modal-close:hover,
+#modal-close:focus {
     color: white;
     text-decoration: none;
 }
@@ -436,12 +435,13 @@ body {
     z-index: 1000;
 }
 
-#label-list {
+#modal-label-list {
     display: flex;
     flex-direction: column;
 }
 
-.label-button {
+.label-button,
+.modal-label-button {
     display: block;
     margin: 5px 0;
     padding: 5px;
@@ -459,6 +459,6 @@ body {
     border-radius: 3px;
 }
 
-#label-create {
+#modal-label-create {
     display: none;
 }

@@ -163,6 +163,7 @@ namespace kanban_markdown {
 		for (const auto& kanban_label : kanban_board.labels) {
 			yyjson_mut_val* label_obj = yyjson_mut_obj(doc);
 			yyjson_mut_obj_add_strncpy(doc, label_obj, "name", kanban_label->name.c_str(), kanban_label->name.length());
+			yyjson_mut_obj_add_strncpy(doc, label_obj, "color", kanban_label->color.c_str(), kanban_label->color.length());
 
 			yyjson_mut_val* tasks_arr = yyjson_mut_arr(doc);
 			for (const auto& kanban_task : kanban_label->tasks) {
@@ -200,6 +201,7 @@ namespace kanban_markdown {
 				for (const auto& label : kanban_task->labels) {
 					yyjson_mut_val* task_label_obj = yyjson_mut_obj(doc);
 					yyjson_mut_obj_add_strncpy(doc, task_label_obj, "name", label->name.c_str(), label->name.length());
+					yyjson_mut_obj_add_strncpy(doc, task_label_obj, "color", label->color.c_str(), label->color.length());
 					yyjson_mut_arr_add_val(task_labels_arr, task_label_obj);
 				}
 				yyjson_mut_obj_add_val(doc, task_obj, "labels", task_labels_arr);
