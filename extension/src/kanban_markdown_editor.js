@@ -115,71 +115,74 @@ class KanbanMarkdownEditorProvider {
         const nonce = getNonce();
 
         return /* html */`
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-    
-                <!--
-                Use a content security policy to only allow loading images from https or from our extension directory,
-                and only allow scripts that have a specific nonce.
-                -->
-                <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
-    
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-                <link href="${styleMainUri}" rel="stylesheet" />
-
-                <title>Kanban Board</title>
-            </head>
-            <body>
-                <div id="title-bar">
-                    <div id="editable-title">
-                        <h1 id="kanban-title">Untitled Board</h1>
-                        <input type="text" id="edit-title-input" />
-                    </div>
-                    <input type="color" id="background-color-picker" value="#A0A0A0">
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link href="${styleMainUri}" rel="stylesheet" />
+            <title>Kanban Board</title>
+        </head>
+        <body>
+            <div id="title-bar">
+                <div id="editable-title">
+                    <h1 id="kanban-title">Untitled Board</h1>
+                    <input type="text" id="edit-title-input" />
                 </div>
-
-                <div id="board">
-                    <button id="add-list">Add another list +</button>
-                </div>
-                
-                <div id="card-modal" class="modal">
-                    <div class="modal-content">
-                        <span class="close">&times;</span>
-                        <div class="modal-main">
-                            <div class="modal-header">
-                                <h2>Edit Card</h2>
-                                <div class="label-bar">
-                                    <button class="label-button">Label 1</button>
-                                    <button class="label-button">Label 2</button>
-                                    <button class="label-button">Label 3</button>
-                                </div>
-                            </div>
-                            <div class="modal-body">
-                                <label for="edit-card-title">Title</label>
-                                <input type="text" id="edit-card-title" placeholder="Enter card title" />
-                                <label for="edit-card-description">Description</label>
-                                <textarea id="edit-card-description" placeholder="Enter card description"></textarea>
-                            </div>
-                            <div class="modal-footer">
-                                <button id="save-card">Save</button>
-                            </div>
+                <input type="color" id="background-color-picker" value="#A0A0A0">
+            </div>
+            <div id="board">
+                <button id="add-list">Add another list +</button>
+            </div>
+            <div id="card-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <div class="modal-main">
+                        <div class="modal-header">
+                            <h2>Edit Card</h2>
+                            <div class="modal-label-bar"></div>
                         </div>
-                        <div class="modal-sidebar">
-                            <button id="attachment-button">Attachments</button>
+                        <div class="modal-body">
+                            <label for="edit-card-title">Title</label>
+                            <input type="text" id="edit-card-title" placeholder="Enter card title" />
+                            <label for="edit-card-description">Description</label>
+                            <textarea id="edit-card-description" placeholder="Enter card description"></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="save-card">Save</button>
                         </div>
                     </div>
+                    <div class="modal-sidebar">
+                        <button id="label-button">Labels</button>
+                        <button id="attachment-button">Attachments</button>
+                    </div>
                 </div>
+                <div id="label-menu" class="menu">
+                    <div id="label-select">
+                        <h3>Labels</h3>
+                        <div id="label-list"></div>
+                        <button id="create-label-button">Create a new label</button>
+                    </div>
+                    <div id="label-create">
+                        <h3>Create Label</h3>
+                        <label for="new-label-title">Title</label>
+                        <input type="text" id="new-label-title" />
+                        <label for="new-label-color">Color</label>
+                        <input type="color" id="new-label-color" value="#ffffff" />
+                        <button id="create-label">Create</button>
+                        <button id="back-to-label-select">Back</button>
+                    </div>
+                </div>
+                <div id="attachment-menu" class="menu">Attachment menu content</div>
+            </div>
+            <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous" nonce="${nonce}"></script>
+            <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.min.js" defer crossorigin="anonymous" nonce="${nonce}"></script>
+            <script nonce="${nonce}" src="${scriptUri}"></script>
+        </body>
+        </html>
 
-
-                <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous" nonce="${nonce}"></script>
-                <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.min.js" defer crossorigin="anonymous" nonce="${nonce}"></script>
-
-                <script nonce="${nonce}" src="${scriptUri}"></script>
-                </body>
-            </html>`;
+`;
     }
 
     /**

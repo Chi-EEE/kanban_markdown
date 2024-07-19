@@ -43,7 +43,7 @@ namespace kanban_markdown {
 	struct KanbanLabel
 	{
 		bool operator==(const KanbanLabel& other) const {
-			if (this->name != other.name || this->tasks.size() != other.tasks.size()) {
+			if (this->name != other.name || this->color != other.color || this->tasks.size() != other.tasks.size()) {
 				return false;
 			}
 			// Cannot compare tasks because they would compare recursively
@@ -59,6 +59,7 @@ namespace kanban_markdown {
 			return !(*this == other);
 		}
 
+		std::string color;
 		std::string name;
 		std::vector<std::shared_ptr<KanbanTask>> tasks;
 	};

@@ -38,9 +38,10 @@ namespace kanban_markdown {
 		for (auto& kanban_label : kanban_board.labels) {
 			const std::string kanban_label_name = kanban_label->name;
 			markdown_file += fmt::format(
-				R"(- <span id="{kanban_md}-label-{id}">{name}</span>{eol})",
+				R"(- <span id="{kanban_md}-label-{id}" data-color="{color}">{name}</span>{eol})",
 				fmt::arg("kanban_md", constants::kanban_md),
 				fmt::arg("id", kanban_markdown_string_to_id(kanban_label_name)),
+				fmt::arg("color", kanban_label->color),
 				fmt::arg("name", kanban_label_name),
 				fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 			);

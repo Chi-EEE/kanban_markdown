@@ -270,12 +270,15 @@ body {
 
 .modal-sidebar {
     width: 150px;
-    /* Adjusted width */
     padding: 10px;
     background-color: rgba(255, 255, 255, 0);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+}
+
+.modal-sidebar>* {
+    margin: 5px 0;
 }
 
 .modal-main {
@@ -295,6 +298,12 @@ body {
     margin-top: 0;
     color: white;
     /* Text color set to white */
+}
+
+.modal-label-bar {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 10px;
 }
 
 .label-bar {
@@ -360,6 +369,7 @@ body {
     align-items: center;
 }
 
+#label-button,
 #attachment-button,
 #save-card {
     background-color: rgba(255, 255, 255, 0.4);
@@ -370,8 +380,10 @@ body {
     padding: 10px 20px;
     cursor: pointer;
     border-radius: 4px;
+    width: 100%;
 }
 
+#label-button:hover,
 #attachment-button:hover,
 #save-card:hover {
     background-color: rgba(255, 255, 255, 0.5);
@@ -433,5 +445,41 @@ body {
     /* Text color set to white */
     border: none;
     outline: none;
+    display: none;
+}
+
+.menu {
+    display: none;
+    position: absolute;
+    background-color: rgb(97, 97, 97);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    z-index: 1000;
+}
+
+#label-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.label-button {
+    display: block;
+    margin: 5px 0;
+    padding: 5px;
+    cursor: pointer;
+    border: none;
+    color: white;
+    text-align: left;
+}
+
+.label {
+    display: inline-block;
+    padding: 3px 5px;
+    margin: 2px;
+    color: white;
+    border-radius: 3px;
+}
+
+#label-create {
     display: none;
 }

@@ -31,7 +31,13 @@ namespace server::commands
 				{
 					throw std::runtime_error("Unable to find name");
 				}
+				yyjson_val* color = yyjson_obj_get(value, "color");
+				if (color == NULL)
+				{
+					throw std::runtime_error("Unable to find color");
+				}
 				std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = std::make_shared<kanban_markdown::KanbanLabel>();
+				kanban_label->color = yyjson_get_string_object(color);
 				kanban_label->name = yyjson_get_string_object(name);
 				kanban_tuple.kanban_board.labels.push_back(kanban_label);
 				break;

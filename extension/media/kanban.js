@@ -18,6 +18,7 @@
 
 /**
  * @typedef {Object} Label
+ * @property {string} color - The color of the label.
  * @property {string} name - The name of the label.
  * @property {Task[]} tasks - The tasks associated with the label.
  */
@@ -85,6 +86,7 @@ $(document).ready(function () {
 
         let previousTitle = $listTitle.val();
         $listTitle.on('blur', function () {
+            // @ts-ignore
             const newTitle = $(this).val().trim();
             if (newTitle) {
                 vscode.postMessage({
@@ -152,15 +154,85 @@ $(document).ready(function () {
         }
     };
 
+    /**
+     * @param {Task} task 
+     * @returns 
+     */
     function createCardElement(task) {
-        const $card = $('<div>').addClass('card').data('name', task.name);
+        const $card = $('<div>').addClass('card')
+            .data('name', task.name)
+            .data('description', task.description)
+            .data('checked', task.checked)
+            .data('labels', task.labels || [])
+            .data('attachments', task.attachments)
+            .data('checklist', task.checklist);
+
         const $cardTitleInput = $('<input>').addClass('card-title').attr('placeholder', 'Enter card title').val(task.name).prop('readonly', true);
         const $cardMenuButton = createCardMenuButton($card);
-        const $cardMenuActions = createCardMenuActions($cardTitleInput);
+        const $cardMenuActions = createCardMenuActions($card, $cardTitleInput);
 
-        $card.append($cardTitleInput, $cardMenuButton, $cardMenuActions);
+        const $labelBar = $('<div>').addClass('label-bar');
+        task.labels && task.labels.forEach(label => {
+            const $label = $('<button>').addClass('label-button')
+                .css('background-color', label.color)
+                .text(label.name)
+                .on('click', function () {
+                    toggleLabelOnCard(label, $card, $labelBar);
+                });
+            $labelBar.append($label);
+        });
+
+        $card.append($cardTitleInput, $cardMenuButton, $cardMenuActions, $labelBar);
         return $card;
     };
+
+    /**
+     * Toggle the label on the card
+     * @param {Label} label
+     * @param {JQuery<HTMLElement>} $card
+     * @param {JQuery<HTMLElement>} $label_bar
+     */
+    function toggleLabelOnCard(label, $card, $label_bar) {
+        const labels = $card.data('labels') || [];
+        const labelIndex = labels.findIndex(l => l.name === label.name);
+
+        if (labelIndex === -1) {
+            // Label is not selected, so add it
+            labels.push(label);
+            $('.modal-label-bar').append($('<button>').addClass('label-button')
+                .css('background-color', label.color)
+                .text(label.name))
+                .on('click', function () {
+                    const $currentCard = $card_modal.data('current-card');
+                    if ($currentCard) {
+                        toggleLabelOnCard(label, $currentCard, $currentCard.find('.label-bar'));
+                    }
+                    $('#label-menu').hide();
+                });
+            $label_bar.append($('<button>').addClass('label-button')
+                .css('background-color', label.color)
+                .text(label.name))
+                .on('click', function () {
+                    const $currentCard = $card_modal.data('current-card');
+                    if ($currentCard) {
+                        toggleLabelOnCard(label, $currentCard, $currentCard.find('.label-bar'));
+                    }
+                    $('#label-menu').hide();
+                });
+        } else {
+            // Label is selected, so remove it
+            labels.splice(labelIndex, 1);
+            $('.modal-label-bar').find('.label-button').filter(function () {
+                return $(this).text() === label.name;
+            }).remove();
+            $label_bar.find('.label-button').filter(function () {
+                return $(this).text() === label.name;
+            }).remove();
+        }
+
+        $card.data('labels', labels);
+    }
+
 
     function createCardMenuButton($card) {
         return $('<button>').addClass('card-menu').text('⋮').on('click', function (event) {
@@ -170,11 +242,11 @@ $(document).ready(function () {
         });
     };
 
-    function createCardMenuActions($cardTitleInput) {
+    function createCardMenuActions($card, $cardTitleInput) {
         const $cardMenuActions = $('<div>').addClass('card-menu-actions').hide();
         const $editCardButton = $('<button>').addClass('edit-card').text('Edit').on('click', function (event) {
             event.stopPropagation();
-            editCard($cardTitleInput);
+            editCard($card, $cardTitleInput);
         });
 
         $cardMenuActions.append($editCardButton);
@@ -191,7 +263,14 @@ $(document).ready(function () {
     };
 
     function createEditableCard($listTitle) {
-        const $card = $('<div>').addClass('card');
+        const $card = $('<div>').addClass('card')
+            .data('name', '')
+            .data('description', '')
+            .data('checked', false)
+            .data('labels', [])
+            .data('attachments', [])
+            .data('checklist', []);
+
         const $cardTitleInput = $('<input>').addClass('card-title').attr('placeholder', 'Enter card title');
         let isCardTitleChanged = false;
 
@@ -220,7 +299,7 @@ $(document).ready(function () {
         });
 
         const $cardMenuButton = createCardMenuButton($card);
-        const $cardMenuActions = createCardMenuActions($cardTitleInput);
+        const $cardMenuActions = createCardMenuActions($card, $cardTitleInput);
 
         $card.append($cardTitleInput, $cardMenuButton, $cardMenuActions);
         return $card;
@@ -301,23 +380,58 @@ $(document).ready(function () {
         return $list;
     };
 
-    function editCard($cardTitleInput) {
-        $('#edit-card-title').val($cardTitleInput.val());
-        $('#edit-card-description').val('');
-        $('#card-modal').show();
+    const $card_modal = $('#card-modal');
+
+    /**
+    * Set the current card being edited or selected
+    * @param {JQuery<HTMLElement>} $card
+    */
+    function setCurrentCard($card) {
+        $card_modal.data('current-card', $card);
+    }
+
+    /**
+     * @param {JQuery<HTMLElement>} $card 
+     * @param {*} $cardTitleInput 
+     */
+    function editCard($card, $cardTitleInput) {
+        $('#edit-card-title').val($card.data('name'));
+        $('#edit-card-description').val($card.data('description'));
+
+        const $label_bar = $card.find('.label-bar')
+        $label_bar.empty();
+        $('.modal-label-bar').empty();
+
+        setCurrentCard($card);
+
+        // Populate the label bar with the labels of the current card
+        const labels = $card.data('labels') || [];
+        labels.forEach(function (label) {
+            $label_bar.append($('<button>').addClass('label-button')
+                .css('background-color', label.color)
+                .text(label.name)
+                .on('click', function () {
+                    toggleLabelOnCard(label, $card, $label_bar);
+                }));
+            $('.modal-label-bar').append($('<button>').addClass('label-button')
+                .css('background-color', label.color)
+                .text(label.name)
+                .on('click', function () {
+                    toggleLabelOnCard(label, $card, $label_bar);
+                }));
+        });
+
+        $card_modal.show();
         $cardTitleInput.prop('readonly', false).focus();
 
         $('#save-card').one('click', function () {
             $cardTitleInput.val($('#edit-card-title').val());
-            $('#card-modal').hide();
+            $card_modal.hide();
         });
-    };
-
-    function closeAllMenus() {
-        $('.card-menu-actions, .list-actions-menu').hide();
-    };
+    }
 
     $('#background-color-picker').on('input', function (event) {
+        // @ts-ignore
         const color = event.target.value;
         $('body').css('background-color', color);
         $('#modal-content').css('background-color', color);
@@ -328,12 +442,91 @@ $(document).ready(function () {
         });
     });
 
-    const $modal = $('#card-modal');
-    $('.close').on('click', function () { $modal.hide() });
+    function positionMenu($menu, $button) {
+        const buttonOffset = $button.offset();
+        const buttonHeight = $button.outerHeight();
+        $menu.css({
+            position: 'absolute',
+            top: buttonOffset.top + buttonHeight,
+            left: buttonOffset.left,
+            display: 'flex',
+            'flex-direction': 'column' // Added to make the menu vertical
+        }).show();
+    }
 
-    $(window).on('click', function (event) {
-        if ($(event.target).is($modal)) $modal.hide();
+    $('#label-button').on('click', function (event) {
+        event.stopPropagation();
         closeAllMenus();
+        positionMenu($('#label-menu'), $(this));
+    });
+
+    $('#attachment-button').on('click', function (event) {
+        event.stopPropagation();
+        closeAllMenus();
+        positionMenu($('#attachment-menu'), $(this));
+    });
+
+    $('#create-label-button').on('click', function () {
+        $('#label-select').hide();
+        $('#label-create').show();
+    });
+
+    $('#back-to-label-select').on('click', function () {
+        $('#label-create').hide();
+        $('#label-select').show();
+    });
+
+    $('#create-label').on('click', function () {
+        /** @type {string} */
+        // @ts-ignore
+        const title = $('#new-label-title').val();
+        /** @type {string} */
+        // @ts-ignore
+        const color = $('#new-label-color').val();
+        if (title && color) {
+            vscode.postMessage({
+                type: 'create',
+                path: 'labels',
+                value: { name: title, color: color }
+            });
+
+            const $newLabel = $('<button>')
+                .addClass('label-button')
+                .css('background-color', color)
+                .text(title).on('click', function () {
+                    const $currentCard = $card_modal.data('current-card');
+                    if ($currentCard) {
+                        toggleLabelOnCard({ name: title, color: color }, $currentCard, $currentCard.find('.label-bar'));
+                    }
+                    $('#label-menu').hide();
+                });
+            $('#label-list').append($newLabel);
+
+            // Clear the form
+            $('#new-label-title').val('');
+            $('#new-label-color').val('#ffffff');
+
+            // Switch back to label selection mode
+            $('#label-create').hide();
+            $('#label-select').show();
+        }
+    });
+
+    function closeAllMenus() {
+        $('.menu').hide();
+        $('.card-menu-actions, .list-actions-menu').hide();
+    }
+
+    $('.close').on('click', function () {
+        $card_modal.hide();
+    });
+
+    $(window).on('click', function () {
+        closeAllMenus();
+    });
+
+    $(document).on('click', '.menu', function (event) {
+        event.stopPropagation();
     });
 
     $('#save-card').on('click', function () {
@@ -353,7 +546,7 @@ $(document).ready(function () {
             }
         });
 
-        $modal.hide();
+        $card_modal.hide();
     });
 
     const $kanbanTitle = $('#kanban-title');
@@ -365,6 +558,7 @@ $(document).ready(function () {
     });
 
     $editTitleInput.on('blur', function () {
+        // @ts-ignore
         const newTitle = $editTitleInput.val().trim();
         if (newTitle === '') {
             $editTitleInput.val($kanbanTitle.text().trim());
