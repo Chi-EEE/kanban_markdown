@@ -32,6 +32,7 @@
 /**
  * @typedef {Object} Task
  * @property {string} name - The name of the task.
+ * @property {number} counter - The counter of the task.
  * @property {boolean} [checked] - The status of the task (checked or not). Optional.
  * @property {string[]} [description] - The description of the task. Optional.
  * @property {Label[]} [labels] - The labels associated with the task. Optional.
@@ -184,7 +185,7 @@ $(document).ready(function () {
         if (parentName !== newParentName) {
             vscode.postMessage({
                 type: 'move',
-                path: `list[${parentName}].tasks[${$item.data('name')}]`,
+                path: `list[${parentName}].tasks[${$item.data('name')}][${$item.data('counter')}]`,
                 value: {
                     index: newIndex,
                     destination: `list[${newParentName}].tasks`
@@ -195,7 +196,7 @@ $(document).ready(function () {
             if (newIndex !== startIndex) {
                 vscode.postMessage({
                     type: 'move',
-                    path: `list[${parentName}].tasks[${$item.data('name')}]`,
+                    path: `list[${parentName}].tasks[${$item.data('name')}][${$item.data('counter')}]`,
                     value: {
                         index: newIndex
                     }
@@ -212,6 +213,7 @@ $(document).ready(function () {
     function createCardElement(board, task) {
         const $card = $('<div>').addClass('card')
             .data('name', task.name)
+            .data('counter', task.counter)
             .data('description', task.description)
             .data('checked', task.checked)
             .data('labels', task.labels)
@@ -265,7 +267,7 @@ $(document).ready(function () {
             addLabel(label, $card, $label_bar);
             vscode.postMessage({
                 type: 'create',
-                path: `list[${$card.closest('.list').data('name')}].tasks[${$card.data('name')}].labels`,
+                path: `list[${$card.closest('.list').data('name')}].tasks[${$card.data('name')}][${$card.data('counter')}].labels`,
                 value: label
             });
         } else {
@@ -279,7 +281,7 @@ $(document).ready(function () {
             }).remove();
             vscode.postMessage({
                 type: 'delete',
-                path: `list[${$card.closest('.list').data('name')}].tasks[${$card.data('name')}].labels[${label.name}]`
+                path: `list[${$card.closest('.list').data('name')}].tasks[${$card.data('name')}][${$card.data('counter')}].labels[${label.name}]`
             });
         }
 
@@ -313,7 +315,7 @@ $(document).ready(function () {
             event.stopPropagation();
             vscode.postMessage({
                 type: 'delete',
-                path: `list[${$card.closest('.list').data('name')}].tasks[${$card.data('name')}]`
+                path: `list[${$card.closest('.list').data('name')}].tasks[${$card.data('name')}][${$card.data('counter')}]`
             });
             $card.remove();
             $cardMenuActions.hide();
@@ -335,6 +337,7 @@ $(document).ready(function () {
     function createEditableCard($listTitle) {
         const $card = $('<div>').addClass('card')
             .data('name', '')
+            .data('counter', 1)
             .data('description', '')
             .data('checked', false)
             .data('labels', [])
@@ -528,7 +531,7 @@ $(document).ready(function () {
         if (cardTitle !== $card.data('name')) {
             vscode.postMessage({
                 type: 'update',
-                path: `list[${$card.closest('.list').data('name')}].tasks[${$card.data('name')}].name`,
+                path: `list[${$card.closest('.list').data('name')}].tasks[${$card.data('name')}][${$card.data('counter')}].name`,
                 value: cardTitle
             });
             $card.data('name', cardTitle);

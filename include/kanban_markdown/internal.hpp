@@ -3,7 +3,7 @@
 #include <asap/asap.h>
 
 namespace kanban_markdown::internal {
-	std::string kanban_markdown_string_to_id(const std::string& string)
+	static inline std::string kanban_markdown_string_to_id(const std::string& string)
 	{
 		std::string id;
 		for (int i = 0; i < string.size(); i++)
@@ -35,26 +35,26 @@ namespace kanban_markdown::internal {
 	const char* ws = " \t\n\r\f\v";
 
 	// trim from end of string (right)
-	inline std::string& kanban_markdown_rtrim(std::string& s, const char* t = ws)
+	static inline std::string& kanban_markdown_rtrim(std::string& s, const char* t = ws)
 	{
 		s.erase(s.find_last_not_of(t) + 1);
 		return s;
 	}
 
 	// trim from beginning of string (left)
-	inline std::string& kanban_markdown_ltrim(std::string& s, const char* t = ws)
+	static inline std::string& kanban_markdown_ltrim(std::string& s, const char* t = ws)
 	{
 		s.erase(0, s.find_first_not_of(t));
 		return s;
 	}
 
 	// trim from both ends of string (right then left)
-	inline std::string& kanban_markdown_trim(std::string& s, const char* t = ws)
+	static inline std::string& kanban_markdown_trim(std::string& s, const char* t = ws)
 	{
 		return kanban_markdown_ltrim(kanban_markdown_rtrim(s, t), t);
 	}
 
-	inline asap::datetime now_utc() {
+	static inline asap::datetime now_utc() {
 		auto now = std::chrono::system_clock::now();
 		std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
 		std::tm* utc_tm = std::gmtime(&now_time_t);

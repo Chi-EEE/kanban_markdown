@@ -7,9 +7,17 @@
 #include <asap/asap.h>
 #include <cpp-dump/dump.hpp>
 
+#include <tsl/robin_map.h>
+#include <tsl/robin_set.h>
+
 #include "internal.hpp"
 
 namespace kanban_markdown {
+	struct TaskNameTracker {
+		unsigned int counter;
+		tsl::robin_set<unsigned int> used_hash;
+	};
+
 	struct KanbanAttachment
 	{
 		bool operator==(const KanbanAttachment& other) const {
@@ -67,7 +75,7 @@ namespace kanban_markdown {
 	struct KanbanTask
 	{
 		bool operator==(const KanbanTask& other) const {
-			if (this->checked != other.checked || this->name != other.name || this->description.size() != other.description.size() || this->labels.size() != other.labels.size() || this->attachments.size() != other.attachments.size() || this->checklist.size() != other.checklist.size()) {
+			if (this->checked != other.checked || this->counter != other.counter || this->name != other.name || this->description.size() != other.description.size() || this->labels.size() != other.labels.size() || this->attachments.size() != other.attachments.size() || this->checklist.size() != other.checklist.size()) {
 				return false;
 			}
 			for (size_t i = 0; i < this->description.size(); i++) {
@@ -98,6 +106,7 @@ namespace kanban_markdown {
 		}
 
 		bool checked = false;
+		unsigned int counter;
 		std::string name;
 		std::vector<std::string> description;
 		std::vector<std::shared_ptr<KanbanLabel>> labels;
@@ -161,6 +170,7 @@ namespace kanban_markdown {
 		std::string description;
 		std::vector<std::shared_ptr<KanbanLabel>> labels;
 		std::vector<std::shared_ptr<KanbanList>> list;
+		tsl::robin_map<std::string, TaskNameTracker> task_name_tracker_map;
 	};
 }
 CPP_DUMP_DEFINE_EXPORT_OBJECT(asap::datetime, when);

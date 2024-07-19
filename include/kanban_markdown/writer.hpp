@@ -29,7 +29,7 @@ namespace kanban_markdown {
 #pragma endregion
 		markdown_file += '\n';
 #pragma region Header and Description
-		markdown_file += constants::first_header + (!kanban_board.name.empty() ? kanban_board.name : constants::default_board_name) + constants::END_OF_MARKDOWN_LINE;
+		markdown_file += "# " + (!kanban_board.name.empty() ? kanban_board.name : constants::default_board_name) + constants::END_OF_MARKDOWN_LINE;
 		markdown_file += (!kanban_board.description.empty() ? kanban_board.description : constants::default_description) + constants::END_OF_MARKDOWN_LINE;
 #pragma endregion
 		markdown_file += '\n';
@@ -48,10 +48,11 @@ namespace kanban_markdown {
 			for (auto& kanban_task : kanban_label->tasks) {
 				const std::string kanban_task_name = kanban_task->name;
 				markdown_file += fmt::format(
-					R"(  - [{name}](#{github}{kanban_md}-task-{id}){eol})",
+					R"(  - [{name}](#{github}{kanban_md}-task-{id}-{counter}){eol})",
 					fmt::arg("github", kanban_writer_flags.github ? constants::github_added_tag : ""),
 					fmt::arg("kanban_md", constants::kanban_md),
 					fmt::arg("id", kanban_markdown_string_to_id(kanban_task_name)),
+					fmt::arg("counter", kanban_task->counter),
 					fmt::arg("name", kanban_task_name),
 					fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 				);
@@ -68,10 +69,11 @@ namespace kanban_markdown {
 				fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 			);
 			for (auto& kanban_task : kanban_list->tasks) {
-				markdown_file += fmt::format(R"(- [{checked}] <span id="{kanban_md}-task-{id}">{name}</span>{eol})",
+				markdown_file += fmt::format(R"(- [{checked}] <span id="{kanban_md}-task-{id}-{counter}" data-counter="{counter}">{name}</span>{eol})",
 					fmt::arg("checked", kanban_task->checked ? 'x' : ' '),
 					fmt::arg("kanban_md", constants::kanban_md),
 					fmt::arg("id", kanban_markdown_string_to_id(kanban_task->name)),
+					fmt::arg("counter", kanban_task->counter),
 					fmt::arg("name", kanban_task->name),
 					fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 				);
@@ -121,8 +123,8 @@ namespace kanban_markdown {
 		YAML::Node properties;
 		properties["Color"] = kanban_board.color;
 		properties["Version"] = kanban_board.version;
-		properties["Created"] = kanban_board.created.str("%Y-%m-%d %H:%M:%S UTC");
-		properties["Last Modified"] = kanban_board.last_modified.str("%Y-%m-%d %H:%M:%S UTC");
+		properties["Created"] = kanban_board.created.str(constants::time_format);
+		properties["Last Modified"] = kanban_board.last_modified.str(constants::time_format);
 
 		// Get the checksum of the file without the properties
 		std::vector<unsigned char> hash(picosha2::k_digest_size);
@@ -188,6 +190,7 @@ namespace kanban_markdown {
 				yyjson_mut_val* task_obj = yyjson_mut_obj(doc);
 				yyjson_mut_obj_add_strncpy(doc, task_obj, "name", kanban_task->name.c_str(), kanban_task->name.length());
 				yyjson_mut_obj_add_bool(doc, task_obj, "checked", kanban_task->checked);
+				yyjson_mut_obj_add_uint(doc, task_obj, "counter", kanban_task->counter);
 
 				// Description
 				yyjson_mut_val* desc_arr = yyjson_mut_arr(doc);

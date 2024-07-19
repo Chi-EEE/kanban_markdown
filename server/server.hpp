@@ -34,27 +34,31 @@ namespace server
 			while (true)
 			{
 				std::getline(std::cin, input);
+				if (input.empty())
+				{
+					continue;
+				}
 				try
 				{
 					doc = yyjson_read(input.c_str(), input.size(), 0);
 					if (doc == NULL)
 					{
-						throw std::runtime_error("Invalid JSON");
+						throw std::runtime_error("The request made to the server is invalid; it must be in JSON format.");
 					}
 					yyjson_val* root = yyjson_doc_get_root(doc);
 					if (root == NULL)
 					{
-						throw std::runtime_error("Invalid JSON");
+						throw std::runtime_error("The request made to the server is invalid; it must be in JSON format.");
 					}
 					yyjson_val* id = yyjson_obj_get(root, "id");
 					if (id == NULL)
 					{
-						throw std::runtime_error("Unable to find id");
+						throw std::runtime_error("All requests made to the server require an ID to track the server's response.");
 					}
 					yyjson_val* type = yyjson_obj_get(root, "type");
 					if (type == NULL)
 					{
-						throw std::runtime_error("Unable to find type");
+						throw std::runtime_error("All requests made to the server require a type to determine the action to be taken.");
 					}
 					std::string id_str = yyjson_get_string_object(id);
 					std::string type_str = yyjson_get_string_object(type);
@@ -85,7 +89,7 @@ namespace server
 					{
 						if (!kanban_tuple.has_value())
 						{
-							throw std::runtime_error("No kanban board loaded");
+							throw std::runtime_error("No kanban board has been parsed yet.");
 						}
 						else
 						{

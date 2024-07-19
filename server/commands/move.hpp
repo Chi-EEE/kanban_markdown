@@ -17,7 +17,7 @@ namespace server::commands
 		void parsePath_1(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, internal_move::MoveValue move_value);
 
 		void parsePath_1_list(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, internal_move::MoveValue move_value, std::string vector_index_name);
-		void parsePath_2_tasks(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, internal_move::MoveValue move_value, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name);
+		void parsePath_2_tasks(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, internal_move::MoveValue move_value, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name, unsigned int list_vector_index_counter);
 		void parsePath_3_checklist(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, internal_move::MoveValue move_value, std::shared_ptr<kanban_markdown::KanbanTask> task, std::string task_vector_index_name);
 
 		void parsePath_1(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, internal_move::MoveValue move_value)
@@ -71,19 +71,22 @@ namespace server::commands
 					throw std::runtime_error("Invalid path: KanbanList.name is a key and cannot be moved");
 				default:
 				{
-					static re2::RE2 path_pattern(R"((\w+)\[(.+)\])");
+					static re2::RE2 path_pattern(R"((\w+)\[(.+)\]\[(.+)\])");
 					std::string list_vector_name;
 					std::string list_vector_index_name;
-					if (!RE2::PartialMatch(second, path_pattern, &list_vector_name, &list_vector_index_name))
+					std::string list_vector_index_counter_str;
+					if (!RE2::PartialMatch(second, path_pattern, &list_vector_name, &list_vector_index_name, &list_vector_index_counter_str))
 					{
 						throw std::runtime_error("Invalid path: The first field must be a vector name with an index inside of KanbanList");
 					}
+
+					unsigned int list_vector_index_counter = std::stoi(list_vector_index_counter_str);
 
 					switch (hash(list_vector_name))
 					{
 					case hash("tasks"):
 					{
-						parsePath_2_tasks(kanban_tuple, split_result, move_value, kanban_list, list_vector_index_name);
+						parsePath_2_tasks(kanban_tuple, split_result, move_value, kanban_list, list_vector_index_name, list_vector_index_counter);
 						break;
 					}
 					default:
@@ -95,13 +98,13 @@ namespace server::commands
 			}
 		}
 
-		void parsePath_2_tasks(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, internal_move::MoveValue move_value, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name)
+		void parsePath_2_tasks(KanbanTuple& kanban_tuple, std::vector<std::string>& split_result, internal_move::MoveValue move_value, std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::string list_vector_index_name, unsigned int list_vector_index_counter)
 		{
-			auto it = std::find_if(kanban_list->tasks.begin(), kanban_list->tasks.end(), [&list_vector_index_name](const auto& x)
-				{ return x->name == list_vector_index_name; });
+			auto it = std::find_if(kanban_list->tasks.begin(), kanban_list->tasks.end(), [&list_vector_index_name, &list_vector_index_counter](const std::shared_ptr<kanban_markdown::KanbanTask>& x)
+				{ return x->name == list_vector_index_name && x->counter == list_vector_index_counter; });
 			if (it == kanban_list->tasks.end())
 			{
-				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanList.tasks named "{}")", list_vector_index_name));
+				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanList.tasks named "{}" and with counter "{}")", list_vector_index_name, list_vector_index_counter));
 			}
 			if (split_result.size() == 2)
 			{
