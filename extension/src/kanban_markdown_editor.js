@@ -176,7 +176,6 @@ class KanbanMarkdownEditorProvider {
                 </div>
                 <div id="modal-attachment-menu" class="menu">Attachment menu content</div>
             </div>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/autosize.js/4.0.2/autosize.min.js" crossorigin="anonymous" nonce="${nonce}"></script>
             <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous" nonce="${nonce}"></script>
             <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.min.js" defer crossorigin="anonymous" nonce="${nonce}"></script>
             <script nonce="${nonce}" src="${scriptUri}"></script>

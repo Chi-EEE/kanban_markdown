@@ -124,7 +124,20 @@ $(document).ready(function () {
         loadKanbanBoard(state.json);
     }
 
-    autosize(document.querySelectorAll('textarea'));
+    /**
+     * @param {JQuery<HTMLElement>} element 
+     */
+    function autoResize(element) {
+        element.css('height', '0');
+        element.css('height', element.prop('scrollHeight') + 'px');
+    }
+
+    $("textarea").each(function () {
+        $(this).css('height', $(this).prop('scrollHeight') + 'px');
+        $(this).css('overflow-y', 'hidden');
+    }).on("input", function () {
+        autoResize($(this))
+    });
 
     /**
      * 
@@ -547,8 +560,11 @@ $(document).ready(function () {
      * @param {JQuery<HTMLElement>} $cardTitleInput 
      */
     function editCard($card, $cardTitleInput) {
-        $('#modal-edit-card-title').val($card.data('name'));
-        $('#modal-edit-card-description').val($card.data('description'));
+        const $modal_edit_card_title = $('#modal-edit-card-title')
+        const $modal_edit_card_description = $('#modal-edit-card-description')
+
+        $modal_edit_card_title.val($card.data('name'));
+        $modal_edit_card_description.val($card.data('description'));
 
         const $label_bar = $card.find('.label-bar')
         $label_bar.empty();
@@ -565,8 +581,11 @@ $(document).ready(function () {
                 addLabel(label, $card, $label_bar)
             });
         }
-
+        
         $card_modal.show();
+
+        autoResize($modal_edit_card_title);
+        autoResize($modal_edit_card_description);
 
         $('#modal-save-card').one('click', function () { saveCard($card, $cardTitleInput) });
     }
