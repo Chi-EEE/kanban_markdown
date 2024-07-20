@@ -64,7 +64,8 @@ namespace kanban_markdown {
 		markdown_file += "## Board:" + constants::END_OF_MARKDOWN_LINE;
 		markdown_file += '\n';
 		for (auto& kanban_list : kanban_board.list) {
-			markdown_file += fmt::format("### {name}{eol}",
+			markdown_file += fmt::format(R"(### <span data-checked="{checked}">{name}</span>{eol})",
+				fmt::arg("checked", kanban_list->checked),
 				fmt::arg("name", kanban_list->name),
 				fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 			);

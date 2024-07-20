@@ -130,7 +130,10 @@ namespace server::commands
 					}
 					std::shared_ptr<kanban_markdown::KanbanList> parent_list = *parent_it;
 					int old_index = std::distance(kanban_list->tasks.begin(), it);
+
 					std::shared_ptr<kanban_markdown::KanbanTask> task = kanban_list->tasks[old_index];
+					task->checked = parent_list->checked;
+
 					parent_list->tasks.insert(parent_list->tasks.begin() + move_value.index, task);
 					kanban_list->tasks.erase(kanban_list->tasks.begin() + old_index);
 				}

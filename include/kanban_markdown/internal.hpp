@@ -54,6 +54,14 @@ namespace kanban_markdown::internal {
 		return kanban_markdown_ltrim(kanban_markdown_rtrim(s, t), t);
 	}
 
+	static inline bool kanban_markdown_to_bool(std::string str) {
+		std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+		std::istringstream is(str);
+		bool b;
+		is >> std::boolalpha >> b;
+		return b;
+	}
+
 	static inline asap::datetime now_utc() {
 		auto now = std::chrono::system_clock::now();
 		std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);

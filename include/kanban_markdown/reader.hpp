@@ -69,6 +69,7 @@ namespace kanban_markdown {
 		};
 
 		struct BoardSection {
+			bool checked;
 			std::string name;
 
 			CurrentTask current_task;
@@ -80,6 +81,7 @@ namespace kanban_markdown {
 
 		struct ListSection {
 			std::vector<BoardSection> boards;
+			bool reading_task = false;
 			BoardSection* current_board = nullptr;
 			TaskReadState task_read_state = TaskReadState::None;
 			tsl::robin_map<std::string, TaskNameTracker> task_name_tracker_map;
@@ -402,19 +404,21 @@ namespace kanban_markdown {
 				return;
 			}
 			switch (kanban_parser->list_item_level) {
-			case 0:
+			case 0: // It is not in a list
 			{
-				// Check if it is not a main header
-				if (kanban_parser->header_level == 1 || kanban_parser->header_level == 2) {
+				// Check if it is not a main header or a description
+				if (kanban_parser->header_level <= 2) {
 					return;
 				}
 				BoardSection board_section;
 				board_section.name = text_content;
 				kanban_parser->list_section.boards.push_back(board_section);
 				kanban_parser->list_section.current_board = &kanban_parser->list_section.boards.back();
+				kanban_parser->list_section.task_read_state = TaskReadState::None;
+				kanban_parser->list_section.reading_task = false;
 				break;
 			}
-			case 1:
+			case 1: // It is in the first level of a list
 			{
 				BoardSection* current_board = kanban_parser->list_section.current_board;
 				if (current_board == nullptr) {
@@ -422,6 +426,7 @@ namespace kanban_markdown {
 					return;
 				}
 				current_board->current_task.name = text_content;
+				kanban_parser->list_section.reading_task = true;
 
 				TaskDetail task_detail;
 				task_detail.counter = utils::kanban_get_counter_with_name(text_content, kanban_parser->list_section.task_name_tracker_map);
@@ -430,12 +435,12 @@ namespace kanban_markdown {
 				current_board->task_details[current_board->current_task.name] = task_detail;
 				break;
 			}
-			case 2:
+			case 2: // It is in the second level of a list
 			{
 				parseTaskDetails(kanban_parser, text_content);
 				break;
 			}
-			case 3:
+			case 3: // It is in the third level of a list
 			{
 				parseTaskDetailList(kanban_parser, text_content);
 				break;
@@ -503,14 +508,21 @@ namespace kanban_markdown {
 							std::cerr << result.description() << '\n';
 							return 0;
 						}
-						TaskDetail& current_task_detail = kanban_parser->list_section.current_board->task_details[kanban_parser->list_section.current_board->current_task.name];
-						unsigned int counter = std::atoll(doc.child("span").attribute("data-counter").value());
-						if (counter > 0) {
-							if (current_task_detail.counter != counter) {
-								kanban_parser->list_section.task_name_tracker_map[text_content].used_hash.erase(current_task_detail.counter);
+						if (!kanban_parser->list_section.reading_task)
+						{
+							kanban_parser->list_section.current_board->checked = kanban_markdown_to_bool(doc.child("span").attribute("data-checked").value());
+						}
+						else
+						{
+							TaskDetail& current_task_detail = kanban_parser->list_section.current_board->task_details[kanban_parser->list_section.current_board->current_task.name];
+							unsigned int counter = std::atoll(doc.child("span").attribute("data-counter").value());
+							if (counter > 0) {
+								if (current_task_detail.counter != counter) {
+									kanban_parser->list_section.task_name_tracker_map[text_content].used_hash.erase(current_task_detail.counter);
+								}
+								current_task_detail.counter = counter;
+								kanban_parser->list_section.task_name_tracker_map[text_content].used_hash.insert(counter);
 							}
-							current_task_detail.counter = counter;
-							kanban_parser->list_section.task_name_tracker_map[text_content].used_hash.insert(counter);
 						}
 					}
 					break;
@@ -578,6 +590,7 @@ namespace kanban_markdown {
 
 		for (BoardSection board_section : kanban_parser.list_section.boards) {
 			std::shared_ptr<KanbanList> kanban_list = std::make_shared<KanbanList>();
+			kanban_list->checked = board_section.checked;
 			kanban_list->name = board_section.name;
 			for (auto& [_, task_detail] : board_section.task_details) {
 				std::shared_ptr<KanbanTask> kanban_task = std::make_shared<KanbanTask>();
