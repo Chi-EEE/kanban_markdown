@@ -34,82 +34,27 @@ namespace kanban_markdown {
 #pragma endregion
 		markdown_file += '\n';
 #pragma region Labels:
-		markdown_file += "## Labels:" + constants::END_OF_MARKDOWN_LINE;
-		for (auto& kanban_label : kanban_board.labels) {
-			const std::string kanban_label_name = kanban_label->name;
-			markdown_file += fmt::format(
-				R"(- <span id="{kanban_md}-label-{id}" data-color="{color}">{name}</span>{eol})",
-				fmt::arg("kanban_md", constants::kanban_md),
-				fmt::arg("id", kanban_markdown_string_to_id(kanban_label_name)),
-				fmt::arg("color", kanban_label->color),
-				fmt::arg("name", kanban_label_name),
-				fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
-			);
-			for (auto& kanban_task : kanban_label->tasks) {
-				const std::string kanban_task_name = kanban_task->name;
+		if (!kanban_board.labels.empty()) {
+			markdown_file += "## Labels:" + constants::END_OF_MARKDOWN_LINE;
+			for (auto& kanban_label : kanban_board.labels) {
+				const std::string kanban_label_name = kanban_label->name;
 				markdown_file += fmt::format(
-					R"(  - [{name}](#{github}{kanban_md}-task-{id}-{counter}){eol})",
-					fmt::arg("github", kanban_writer_flags.github ? constants::github_added_tag : ""),
+					R"(- <span id="{kanban_md}-label-{id}" data-color="{color}">{name}</span>{eol})",
 					fmt::arg("kanban_md", constants::kanban_md),
-					fmt::arg("id", kanban_markdown_string_to_id(kanban_task_name)),
-					fmt::arg("counter", kanban_task->counter),
-					fmt::arg("name", kanban_task_name),
+					fmt::arg("id", kanban_markdown_string_to_id(kanban_label_name)),
+					fmt::arg("color", kanban_label->color),
+					fmt::arg("name", kanban_label_name),
 					fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 				);
-			}
-		}
-#pragma endregion
-		markdown_file += '\n';
-#pragma region Board
-		markdown_file += "## Board:" + constants::END_OF_MARKDOWN_LINE;
-		markdown_file += '\n';
-		for (auto& kanban_list : kanban_board.list) {
-			markdown_file += fmt::format(R"(### <span data-checked="{checked}">{name}</span>{eol})",
-				fmt::arg("checked", kanban_list->checked),
-				fmt::arg("name", kanban_list->name),
-				fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
-			);
-			for (auto& kanban_task : kanban_list->tasks) {
-				markdown_file += fmt::format(R"(- [{checked}] <span id="{kanban_md}-task-{id}-{counter}" data-counter="{counter}">{name}</span>{eol})",
-					fmt::arg("checked", kanban_task->checked ? 'x' : ' '),
-					fmt::arg("kanban_md", constants::kanban_md),
-					fmt::arg("id", kanban_markdown_string_to_id(kanban_task->name)),
-					fmt::arg("counter", kanban_task->counter),
-					fmt::arg("name", kanban_task->name),
-					fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
-				);
-				std::string description_string = "  - **Description**:  ";
-				for (std::string description_line : kanban_task->description) {
-					description_string += "\n  " + description_line + "  ";
-				}
-				markdown_file += description_string + constants::END_OF_MARKDOWN_LINE;
-				markdown_file += "  - **Labels**:" + constants::END_OF_MARKDOWN_LINE;
-				for (auto& kanban_label : kanban_task->labels) {
-					const std::string kanban_label_name = kanban_label->name;
+				for (auto& kanban_task : kanban_label->tasks) {
+					const std::string kanban_task_name = kanban_task->name;
 					markdown_file += fmt::format(
-						"    - [{name}](#{github}{kanban_md}-label-{id}){eol}",
+						R"(  - [{name}](#{github}{kanban_md}-task-{id}-{counter}){eol})",
 						fmt::arg("github", kanban_writer_flags.github ? constants::github_added_tag : ""),
 						fmt::arg("kanban_md", constants::kanban_md),
-						fmt::arg("id", kanban_markdown_string_to_id(kanban_label_name)),
-						fmt::arg("name", kanban_label_name),
-						fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
-					);
-				}
-				markdown_file += "  - **Attachments**:" + constants::END_OF_MARKDOWN_LINE;
-				for (auto& kanban_attachment : kanban_task->attachments) {
-					markdown_file += fmt::format(
-						"    - [{name}]({url}){eol}",
-						fmt::arg("name", kanban_attachment->name),
-						fmt::arg("url", kanban_attachment->url),
-						fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
-					);
-				}
-				markdown_file += "  - **Checklist**:" + constants::END_OF_MARKDOWN_LINE;
-				for (auto& kanban_checklist_item : kanban_task->checklist) {
-					markdown_file += fmt::format(
-						"    - [{checked}] {name}{eol}",
-						fmt::arg("checked", kanban_checklist_item->checked ? 'x' : ' '),
-						fmt::arg("name", kanban_checklist_item->name),
+						fmt::arg("id", kanban_markdown_string_to_id(kanban_task_name)),
+						fmt::arg("counter", kanban_task->counter),
+						fmt::arg("name", kanban_task_name),
 						fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 					);
 				}
@@ -117,7 +62,74 @@ namespace kanban_markdown {
 			markdown_file += '\n';
 		}
 #pragma endregion
-		markdown_file += '\n';
+#pragma region Board
+		if (!kanban_board.list.empty()) {
+			markdown_file += "## Board:" + constants::END_OF_MARKDOWN_LINE;
+			markdown_file += '\n';
+			for (auto& kanban_list : kanban_board.list) {
+				markdown_file += fmt::format(R"(### <span data-checked="{checked}">{name}</span>{eol})",
+					fmt::arg("checked", kanban_list->checked),
+					fmt::arg("name", kanban_list->name),
+					fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
+				);
+				for (auto& kanban_task : kanban_list->tasks) {
+					markdown_file += fmt::format(R"(- [{checked}] <span id="{kanban_md}-task-{id}-{counter}" data-counter="{counter}">{name}</span>{eol})",
+						fmt::arg("checked", kanban_task->checked ? 'x' : ' '),
+						fmt::arg("kanban_md", constants::kanban_md),
+						fmt::arg("id", kanban_markdown_string_to_id(kanban_task->name)),
+						fmt::arg("counter", kanban_task->counter),
+						fmt::arg("name", kanban_task->name),
+						fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
+					);
+					if (!kanban_task->description.empty()) {
+						std::string description_string = "  - **Description**:  ";
+						for (std::string description_line : kanban_task->description) {
+							description_string += "\n  " + description_line + "  ";
+						}
+						markdown_file += description_string + constants::END_OF_MARKDOWN_LINE;
+					}
+					if (!kanban_task->labels.empty()) {
+						markdown_file += "  - **Labels**:" + constants::END_OF_MARKDOWN_LINE;
+						for (auto& kanban_label : kanban_task->labels) {
+							const std::string kanban_label_name = kanban_label->name;
+							markdown_file += fmt::format(
+								"    - [{name}](#{github}{kanban_md}-label-{id}){eol}",
+								fmt::arg("github", kanban_writer_flags.github ? constants::github_added_tag : ""),
+								fmt::arg("kanban_md", constants::kanban_md),
+								fmt::arg("id", kanban_markdown_string_to_id(kanban_label_name)),
+								fmt::arg("name", kanban_label_name),
+								fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
+							);
+						}
+					}
+					if (!kanban_task->attachments.empty()) {
+						markdown_file += "  - **Attachments**:" + constants::END_OF_MARKDOWN_LINE;
+						for (auto& kanban_attachment : kanban_task->attachments) {
+							markdown_file += fmt::format(
+								"    - [{name}]({url}){eol}",
+								fmt::arg("name", kanban_attachment->name),
+								fmt::arg("url", kanban_attachment->url),
+								fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
+							);
+						}
+					}
+					if (!kanban_task->checklist.empty()) {
+						markdown_file += "  - **Checklist**:" + constants::END_OF_MARKDOWN_LINE;
+						for (auto& kanban_checklist_item : kanban_task->checklist) {
+							markdown_file += fmt::format(
+								"    - [{checked}] {name}{eol}",
+								fmt::arg("checked", kanban_checklist_item->checked ? 'x' : ' '),
+								fmt::arg("name", kanban_checklist_item->name),
+								fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
+							);
+						}
+					}
+				}
+				markdown_file += '\n';
+			}
+			markdown_file += '\n';
+		}
+#pragma endregion
 #pragma region Properties
 		std::string properties_string;
 		properties_string += "---\n";
