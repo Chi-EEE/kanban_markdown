@@ -8,10 +8,21 @@ body {
     align-items: flex-start;
     height: 100vh;
     color: white;
-    /* Set default text color to white */
     overflow-x: hidden;
-    /* Change overflow-x to hidden */
     padding-bottom: 20px;
+}
+
+textarea {
+    font-family: Arial, sans-serif;
+    resize: none;
+    overflow-x: unset;
+    overflow-y: auto;
+    field-sizing: content;
+}
+
+a:hover {
+    text-decoration: none;
+    color: white;
 }
 
 ::placeholder {
@@ -20,7 +31,6 @@ body {
 
 #title-bar {
     background-color: rgba(0, 0, 0, 0.4);
-    /* Lighter transparent background */
     color: white;
     width: 100%;
     padding: 10px;
@@ -51,16 +61,13 @@ body {
 
 .list {
     background-color: rgba(255, 255, 255, 0.1);
-    /* Much lighter background */
     border-radius: 3px;
     width: 250px;
-    /* Adjusted width */
     padding: 10px;
     margin-right: 10px;
     display: flex;
     flex-direction: column;
     color: white;
-    /* Text color set to white */
     position: relative;
 }
 
@@ -70,9 +77,7 @@ body {
     padding: 5px;
     border: none;
     background-color: rgba(255, 255, 255, 0.1);
-    /* Match list background color */
     color: white;
-    /* Text color set to white */
 }
 
 .cards {
@@ -81,17 +86,14 @@ body {
 }
 
 .card {
+    display: block;
     background-color: rgba(255, 255, 255, 0.2);
-    /* Lighter card background */
     width: calc(250px - 20px);
-    /* Adjusted width to match list */
     border-radius: 3px;
     padding: 10px;
     margin-bottom: 10px;
     box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
-    /* Lighter shadow */
     color: white;
-    /* Text color set to white */
     position: relative;
     cursor: pointer;
 }
@@ -103,9 +105,19 @@ body {
     font-size: 16px;
     background-color: rgba(255, 255, 255, 0);
     color: white;
+    display: inline-block;
+    overflow: hidden;
+    overflow-wrap: break-word;
+    white-space: normal;
 }
 
 #modal-edit-card-title {
+    min-height: auto;
+    resize: none;
+    display: inline-block;
+    overflow: hidden;
+    overflow-wrap: break-word;
+    white-space: normal;
     border: none;
 }
 
@@ -161,9 +173,11 @@ body {
     border: none;
     color: white;
     cursor: pointer;
+    display: none;
     position: absolute;
     top: 10px;
     right: 10px;
+    transform: rotate(180deg);
 }
 
 .card-menu-actions {
@@ -228,16 +242,13 @@ body {
     height: 100%;
     overflow: auto;
     color: white;
-    /* Text color set to white */
     background-color: rgba(0, 0, 0, 0.3);
-    /* Lighter overlay */
 }
 
 #modal-content {
     display: flex;
     flex-direction: row;
     background-color: var(--background-color);
-    /* Lighter modal background */
     margin: 5% auto;
     padding: 20px;
     width: 80%;
@@ -276,7 +287,6 @@ body {
 #modal-header h2 {
     margin-top: 0;
     color: white;
-    /* Text color set to white */
 }
 
 #modal-label-bar {
@@ -292,9 +302,7 @@ body {
 
 .modal-label-button {
     background-color: rgba(255, 255, 255, 0.3);
-    /* Lighter button background */
     color: white;
-    /* Text color set to white */
     border: none;
     padding: 5px 10px;
     margin-right: 5px;
@@ -304,7 +312,6 @@ body {
 
 .modal-label-button:hover {
     background-color: rgba(255, 255, 255, 0.4);
-    /* Slightly lighter on hover */
 }
 
 #modal-body {
@@ -315,12 +322,10 @@ body {
     display: block;
     margin-bottom: 5px;
     color: white;
-    /* Text color set to white */
 }
 
 #modal-content textarea::placeholder {
     color: white;
-    /* Text color set to white */
 }
 
 #modal-content input[type="text"],
@@ -331,14 +336,7 @@ body {
     border-radius: 4px;
     box-sizing: border-box;
     background-color: rgba(255, 255, 255, 0.3);
-    /* Match input and textarea background */
     color: white;
-    /* Text color set to white */
-}
-
-#modal-content textarea {
-    height: 150px;
-    resize: vertical;
 }
 
 #modal-footer {
@@ -351,9 +349,7 @@ body {
 #modal-attachment-button,
 #modal-save-card {
     background-color: rgba(255, 255, 255, 0.4);
-    /* Lighter button background */
     color: white;
-    /* Text color set to white */
     border: none;
     padding: 10px 20px;
     cursor: pointer;
@@ -365,14 +361,11 @@ body {
 #modal-attachment-button:hover,
 #modal-save-card:hover {
     background-color: rgba(255, 255, 255, 0.5);
-    /* Slightly lighter on hover */
 }
 
 #modal-content button {
     background-color: rgba(255, 255, 255, 0.4);
-    /* Lighter button background */
     color: white;
-    /* Text color set to white */
     border: none;
     padding: 10px 20px;
     cursor: pointer;
@@ -382,12 +375,10 @@ body {
 
 #modal-content button:hover {
     background-color: rgba(255, 255, 255, 0.5);
-    /* Slightly lighter on hover */
 }
 
 #modal-close {
     color: white;
-    /* Text color set to white */
     float: right;
     font-size: 28px;
     font-weight: bold;
@@ -410,7 +401,6 @@ body {
     font-size: 24px;
     font-weight: bold;
     color: white;
-    /* Text color set to white */
     border: none;
     outline: none;
 }
@@ -420,7 +410,6 @@ body {
     font-weight: bold;
     background: transparent;
     color: white;
-    /* Text color set to white */
     border: none;
     outline: none;
     display: none;

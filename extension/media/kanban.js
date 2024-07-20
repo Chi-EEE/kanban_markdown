@@ -124,6 +124,8 @@ $(document).ready(function () {
         loadKanbanBoard(state.json);
     }
 
+    autosize(document.querySelectorAll('textarea'));
+
     /**
      * 
      * @param {KanbanBoard} board 
@@ -135,7 +137,7 @@ $(document).ready(function () {
         const $list = $('<div>').addClass('list').attr('id', `list-${listIndex}`)
             .data('name', list.name)
             .data('checked', list.checked);
-        const $listTitle = $('<input>').addClass('list-title').attr('placeholder', 'Enter list title').val(list.name);
+        const $listTitle = $('<textarea>').addClass('list-title').attr('placeholder', 'Enter list title').val(list.name);
 
         let previousTitle = $listTitle.val();
         $listTitle.on('blur', function () {
@@ -214,7 +216,7 @@ $(document).ready(function () {
      * @returns 
      */
     function createCardElement(board, task) {
-        const $card = $('<div>').addClass('card')
+        const $card = $('<a>').addClass('card')
             .data('name', task.name)
             .data('counter', task.counter)
             .data('description', task.description)
@@ -223,9 +225,27 @@ $(document).ready(function () {
             .data('attachments', task.attachments)
             .data('checklist', task.checklist);
 
-        const $cardTitleInput = $('<input>').addClass('card-title').attr('placeholder', 'Enter card title').val(task.name).prop('readonly', true);
-        const $cardMenuButton = createCardMenuButton($card);
+        $card.on('click', function (event) {
+            event.stopPropagation();
+            editCard($card, $cardTitleInput);
+        });
+
+        const $cardTitleInput = $('<a>').addClass('card-title').attr('placeholder', 'Enter card title').text(task.name).prop('readonly', true).on('click', function (event) {
+            event.stopPropagation();
+            editCard($card, $cardTitleInput);
+        });
+
         const $cardMenuActions = createCardMenuActions($card, $cardTitleInput);
+
+        const $cardMenuButton = createCardMenuButton($card, $cardMenuActions);
+
+        $card.on('mouseover', function () {
+            $cardMenuButton.show();
+        });
+
+        $card.on('mouseleave', function () {
+            $cardMenuButton.hide();
+        });
 
         const $label_bar = $('<div>').addClass('label-bar');
         if (task.labels.length > 0) {
@@ -291,12 +311,16 @@ $(document).ready(function () {
         $card.data('labels', labels);
     }
 
-
-    function createCardMenuButton($card) {
-        return $('<button>').addClass('card-menu').text('⋮').on('click', function (event) {
+    /**
+     * 
+     * @param {JQuery<HTMLElement>} $card 
+     * @param {JQuery<HTMLElement>} $cardMenuActions 
+     * @returns 
+     */
+    function createCardMenuButton($card, $cardMenuActions) {
+        return $('<button>').addClass('card-menu').text('\u2710').on('click', function (event) {
             event.stopPropagation();
-            closeAllMenus();
-            $card.find('.card-menu-actions').toggle();
+            $cardMenuActions.toggle();
         });
     };
 
@@ -338,7 +362,7 @@ $(document).ready(function () {
     };
 
     function createEditableCard($listTitle) {
-        const $card = $('<div>').addClass('card')
+        const $card = $('<a>').addClass('card')
             .data('name', '')
             .data('counter', 1)
             .data('description', '')
@@ -347,7 +371,12 @@ $(document).ready(function () {
             .data('attachments', [])
             .data('checklist', []);
 
-        const $cardTitleInput = $('<input>').addClass('card-title').attr('placeholder', 'Enter card title');
+        $card.on('click', function (event) {
+            event.stopPropagation();
+            editCard($card, $cardTitleInput);
+        });
+
+        const $cardTitleInput = $('<textarea>').addClass('card-title').attr('placeholder', 'Enter card title');
         let isCardTitleChanged = false;
 
         $cardTitleInput.on('input', function () { isCardTitleChanged = true }).on('blur', function () {
@@ -355,16 +384,22 @@ $(document).ready(function () {
                 $card.remove();
             } else {
                 $(this).prop('readonly', true);
+                const name = $(this).val();
                 vscode.postMessage({
                     type: 'create',
                     path: `list[${$listTitle.val()}].tasks`,
                     value: {
-                        name: $(this).val(),
+                        name: name,
                         description: '',
                         labels: [],
                         attachments: [],
                         checklist: []
                     }
+                });
+                $cardTitleInput.remove();
+                // @ts-ignore
+                $('a').addClass('card-title').text(name).on('click', function () {
+                    $card.find('.card-title').show().trigger('focus');
                 });
             }
             $('.add-card').show();
@@ -374,21 +409,31 @@ $(document).ready(function () {
             }
         });
 
-        const $cardMenuButton = createCardMenuButton($card);
         const $cardMenuActions = createCardMenuActions($card, $cardTitleInput);
+
+        const $cardMenuButton = createCardMenuButton($card, $cardMenuActions);
+
+        $card.on('mouseover', function () {
+            $cardMenuButton.show();
+        });
+
+        $card.on('mouseleave', function () {
+            $cardMenuButton.hide();
+        });
+
 
         $card.append($cardTitleInput, $cardMenuButton, $cardMenuActions);
         return $card;
     };
 
     function createListActionsButton($listTitle, $list) {
+        const $listActionsMenu = $('<div>').addClass('list-actions-menu').hide();
+
         const $listActionsButton = $('<button>').addClass('list-actions').text('⋮').on('click', function (event) {
             event.stopPropagation();
-            closeAllMenus();
-            $list.find('.list-actions-menu').toggle();
+            $listActionsMenu.toggle();
         });
 
-        const $listActionsMenu = $('<div>').addClass('list-actions-menu').hide();
         const $removeListButton = $('<button>').addClass('remove-list').text('Remove list').on('click', function () {
             vscode.postMessage({
                 type: 'delete',
@@ -415,7 +460,7 @@ $(document).ready(function () {
     function createNewList($board) {
         const listId = `list-${$board.find('.list').length + 1}`;
         const $list = $('<div>').addClass('list').attr('id', listId);
-        const $listTitle = $('<input>').addClass('list-title').attr('placeholder', 'Enter list title');
+        const $listTitle = $('<textarea>').addClass('list-title').attr('placeholder', 'Enter list title');
         let isListTitleChanged = false;
 
         $listTitle.on('input', function () { isListTitleChanged = true }).on('blur', function () {
@@ -429,6 +474,11 @@ $(document).ready(function () {
                     value: { name: listName }
                 });
                 $list.data('name', listName);
+                $listTitle.remove()
+                // @ts-ignore
+                $('h2').addClass('list-title').text(listName).on('click', function () {
+                    $list.find('.list-title').show().trigger('focus');
+                });
             }
             $('#add-list').show();
             $list.find('.add-card').show();
@@ -562,19 +612,25 @@ $(document).ready(function () {
             left: buttonOffset.left,
             display: 'flex',
             'flex-direction': 'column' // Added to make the menu vertical
-        }).show();
+        });
     }
 
     $('#modal-label-button').on('click', function (event) {
         event.stopPropagation();
-        closeAllMenus();
-        positionMenu($('#modal-label-menu'), $(this));
+        $('#modal-label-menu').toggle();
+        if ($('#modal-label-menu').is(":visible")) {
+            $('#modal-attachment-menu').hide();
+            positionMenu($('#modal-label-menu'), $(this));
+        }
     });
 
     $('#modal-attachment-button').on('click', function (event) {
         event.stopPropagation();
-        closeAllMenus();
-        positionMenu($('#modal-attachment-menu'), $(this));
+        $('#modal-attachment-menu').toggle();
+        if ($('#modal-attachment-menu').is(":visible")) {
+            $('#modal-label-menu').hide();
+            positionMenu($('#modal-attachment-menu'), $(this));
+        }
     });
 
     $('#modal-create-label-button').on('click', function () {

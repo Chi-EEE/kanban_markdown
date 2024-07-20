@@ -5,38 +5,39 @@
 namespace kanban_markdown::internal {
 	static inline std::string kanban_markdown_string_to_id(const std::string& string)
 	{
-		std::string id;
+		std::string buffer;
+		buffer.reserve(string.size() * 1.1);
 		for (char character : string) {
 			switch (character) {
 			case ' ':
-				id += '_';
+				buffer += '_';
 				break;
 			case '<':
-				id += "&lt;";
+				buffer += "&lt;";
 				break;
 			case '>':
-				id += "&gt;";
+				buffer += "&gt;";
 				break;
 			case '&':
-				id += "&amp;";
+				buffer += "&amp;";
 				break;
 			case '"':
-				id += "&quot;";
+				buffer += "&quot;";
 				break;
 			case '\'':
-				id += "&apos;";
+				buffer += "&apos;";
 				break;
 			default:
 				if ((character >= 'A' && character <= 'Z') || (character >= 'a' && character <= 'z')) {
-					id += std::tolower(character);
+					buffer += std::tolower(character);
 				}
 				else {
-					id += character;
+					buffer += character;
 				}
 				break;
 			}
 		}
-		return id;
+		return buffer;
 	}
 
 	static constexpr inline uint32_t kanban_markdown_hash(const std::string_view s) noexcept
