@@ -29,7 +29,12 @@ namespace server
 
 		void run()
 		{
-			this->internal_visitBoard();
+			if (this->path_split.size() == 1 && this->path_split.back().empty()) {
+				this->visitBoard();
+			}
+			else {
+				this->internal_visitBoard();
+			}
 		}
 #pragma endregion
 
@@ -42,6 +47,9 @@ namespace server
 
 #pragma region Override These
 	private:
+		// KanbanBoard
+		virtual void visitBoard() = 0;
+
 		// KanbanBoard.name
 		virtual void editBoardName() = 0;
 		// KanbanBoard.description

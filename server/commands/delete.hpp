@@ -13,6 +13,10 @@ namespace server::commands
 		DeleteCommandVisitor(kanban_markdown::KanbanBoard* kanban_board, std::string path, void* userdata) : KanbanPathVisitor(kanban_board, path, userdata) {}
 
 	private:
+		void visitBoard() final {
+			throw std::runtime_error("Invalid path: KanbanBoard is a key object and cannot be deleted");
+		}
+
 		void editBoardName() final {
 			throw std::runtime_error("Invalid path: KanbanBoard.name is a key and cannot be deleted");
 		}

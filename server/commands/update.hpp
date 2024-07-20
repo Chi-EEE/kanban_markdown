@@ -13,6 +13,10 @@ namespace server::commands
 		UpdateCommandVisitor(kanban_markdown::KanbanBoard* kanban_board, std::string path, void* userdata) : KanbanPathVisitor(kanban_board, path, userdata) {}
 
 	private:
+		void visitBoard() final {
+			throw std::runtime_error("Invalid path: KanbanBoard is a object and cannot be modified.");
+		}
+
 		void editBoardName() final {
 			this->kanban_board->name = yyjson_get_string_object((yyjson_val*)userdata);
 		}

@@ -13,6 +13,10 @@ namespace server::commands
 		CreateCommandVisitor(kanban_markdown::KanbanBoard* kanban_board, std::string path, void* userdata) : KanbanPathVisitor(kanban_board, path, userdata) {}
 
 	private:
+		void visitBoard() final {
+			throw std::runtime_error("Invalid path: KanbanBoard is a object and cannot be used for creation.");
+		}
+
 		void editBoardName() final {
 			throw std::runtime_error("Invalid path: KanbanBoard.name is a key and cannot be used for creation.");
 		}

@@ -18,6 +18,10 @@ namespace server::commands
 		MoveCommandVisitor(kanban_markdown::KanbanBoard* kanban_board, std::string path, void* userdata) : KanbanPathVisitor(kanban_board, path, userdata) {}
 
 	private:
+		void visitBoard() final {
+			throw std::runtime_error("Invalid path: KanbanBoard is a key object and cannot be moved");
+		}
+
 		void editBoardName() final {
 			throw std::runtime_error("Invalid path: KanbanBoard.name is a key and cannot be moved");
 		}
