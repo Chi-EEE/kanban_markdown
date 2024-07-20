@@ -484,7 +484,7 @@ $(document).ready(function () {
                 vscode.postMessage({
                     type: 'create',
                     path: 'list',
-                    value: { name: listName }
+                    value: { checked: false, name: listName }
                 });
                 $list.data('name', listName);
                 $listTitle.remove()
@@ -581,7 +581,7 @@ $(document).ready(function () {
                 addLabel(label, $card, $label_bar)
             });
         }
-        
+
         $card_modal.show();
 
         autoResize($modal_edit_card_title);

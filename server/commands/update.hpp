@@ -25,6 +25,14 @@ namespace server::commands
 			this->kanban_board->color = yyjson_get_string_object((yyjson_val*)userdata);
 		}
 
+		void editBoardList() final {
+			throw std::runtime_error("Invalid path: KanbanBoard.list is a key and cannot be modified through the update command.");
+		}
+
+		void editBoardLabels() final {
+			throw std::runtime_error("Invalid path: KanbanBoard.labels is a key and cannot be modified through the update command.");
+		}
+
 		void visitList(std::vector<std::shared_ptr<kanban_markdown::KanbanList>>::iterator kanban_list_iterator) final {
 			throw std::runtime_error("Invalid path: KanbanList is a object and cannot be modified.");
 		}
@@ -34,6 +42,9 @@ namespace server::commands
 		}
 		void editListChecked(std::shared_ptr<kanban_markdown::KanbanList> kanban_list) final {
 			kanban_list->checked = yyjson_get_bool((yyjson_val*)userdata);
+		}
+		void editListTasks(std::shared_ptr<kanban_markdown::KanbanList> kanban_list) final {
+			throw std::runtime_error("Invalid path: KanbanList.tasks is a object and cannot be modified.");
 		}
 
 		void visitTask(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::vector<std::shared_ptr<kanban_markdown::KanbanTask>>::iterator kanban_task_iterator) final {
@@ -121,6 +132,6 @@ namespace server::commands
 		std::string path_str = yyjson_get_string_object(path);
 
 		UpdateCommandVisitor visitor(&kanban_tuple.kanban_board, path_str, (void*)value);
-		visitor.visitKanbanBoard();
+		visitor.run();
 	}
 }

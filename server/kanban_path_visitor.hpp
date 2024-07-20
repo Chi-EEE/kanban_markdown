@@ -13,6 +13,7 @@ namespace server
 {
 	class KanbanPathVisitor
 	{
+#pragma region Public
 	public:
 		KanbanPathVisitor(kanban_markdown::KanbanBoard* kanban_board, std::string path, void* userdata) {
 			this->kanban_board = kanban_board;
@@ -26,99 +27,92 @@ namespace server
 			this->userdata = nullptr;
 		}
 
-		void visitKanbanBoard()
+		void run()
 		{
-			std::string board_item = this->path_split[0];
-			if (this->path_split.size() == 1)
-			{
-				switch (hash(board_item))
-				{
-				case hash("name"):
-					this->editBoardName();
-					break;
-				case hash("description"):
-					this->editBoardDescription();
-					break;
-				case hash("color"):
-					this->editBoardColor();
-					break;
-				default:
-					throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanBoard named "{}")", board_item));
-				}
-			}
-			else
-			{
-				static re2::RE2 path_pattern(R"((\w+)\[(.+)\])");
-				std::string board_item_name;
-				std::string board_item_index_name;
-
-				if (!RE2::PartialMatch(board_item, path_pattern, &board_item_name, &board_item_index_name))
-				{
-					throw std::runtime_error("Invalid path: The first field must be a vector name with an index");
-				}
-
-				switch (hash(board_item_name))
-				{
-				case hash("list"):
-				{
-					internal_visitList(board_item_index_name);
-					break;
-				}
-				case hash("labels"):
-				{
-					internal_visitLabels(board_item_index_name);
-					break;
-				}
-				default:
-					throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanBoard named "{}")", board_item_name));
-				}
-			}
+			this->internal_visitBoard();
 		}
+#pragma endregion
 
+#pragma region Use These
 	protected:
 		kanban_markdown::KanbanBoard* kanban_board;
 		std::vector<std::string> path_split;
 		void* userdata;
+#pragma endregion
 
+#pragma region Override These
 	private:
+		// KanbanBoard.name
 		virtual void editBoardName() = 0;
+		// KanbanBoard.description
 		virtual void editBoardDescription() = 0;
+		// KanbanBoard.color
 		virtual void editBoardColor() = 0;
+		// KanbanBoard.list
+		virtual void editBoardList() = 0;
+		// KanbanBoard.labels
+		virtual void editBoardLabels() = 0;
 
+		// KanbanList
 		virtual void visitList(std::vector<std::shared_ptr<kanban_markdown::KanbanList>>::iterator kanban_list_iterator) = 0;
 
+		// KanbanList.name
 		virtual void editListName(std::shared_ptr<kanban_markdown::KanbanList> kanban_list) = 0;
+		// KanbanList.checked
 		virtual void editListChecked(std::shared_ptr<kanban_markdown::KanbanList> kanban_list) = 0;
+		// KanbanList.tasks
+		virtual void editListTasks(std::shared_ptr<kanban_markdown::KanbanList> kanban_list) = 0;
 
+		// KanbanTask
 		virtual void visitTask(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::vector<std::shared_ptr<kanban_markdown::KanbanTask>>::iterator kanban_task_iterator) = 0;
 
+		// KanbanTask.name
 		virtual void editTaskName(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) = 0;
+		// KanbanTask.description
 		virtual void editTaskDescription(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) = 0;
+		// KanbanTask.checked
 		virtual void editTaskChecked(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) = 0;
+		// KanbanTask.labels
 		virtual void editTaskLabels(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) = 0;
+		// KanbanTask.attachments
 		virtual void editTaskAttachments(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) = 0;
+		// KanbanTask.checklist
 		virtual void editTaskChecklist(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) = 0;
 
+		// KanbanLabel
 		virtual void visitTaskLabel(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task, std::vector<std::shared_ptr<kanban_markdown::KanbanLabel>>::iterator kanban_label_iterator) = 0;
 
+		// KanbanLabel.name
 		virtual void editTaskLabelName(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task, std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label) = 0;
+		// KanbanLabel.color
 		virtual void editTaskLabelColor(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task, std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label) = 0;
 
+		// KanbanAttachment
 		virtual void visitTaskAttachment(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task, std::vector<std::shared_ptr<kanban_markdown::KanbanAttachment>>::iterator kanban_attachment_iterator) = 0;
 
+		// KanbanAttachment.name
 		virtual void editTaskAttachmentName(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task, std::shared_ptr<kanban_markdown::KanbanAttachment> kanban_attachment) = 0;
+		// KanbanAttachment.url
 		virtual void editTaskAttachmentUrl(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task, std::shared_ptr<kanban_markdown::KanbanAttachment> kanban_attachment) = 0;
 
+		// KanbanChecklistItem
 		virtual void visitTaskChecklist(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task, std::vector<std::shared_ptr<kanban_markdown::KanbanChecklistItem>>::iterator kanban_checklist_item_iterator) = 0;
 
+		// KanbanChecklistItem.name
 		virtual void editTaskChecklistName(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task, std::shared_ptr<kanban_markdown::KanbanChecklistItem> kanban_checklist_item) = 0;
+		// KanbanChecklistItem.checked
 		virtual void editTaskChecklistChecked(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task, std::shared_ptr<kanban_markdown::KanbanChecklistItem> kanban_checklist_item) = 0;
 
+		// KanbanLabel
 		virtual void visitLabel(std::vector<std::shared_ptr<kanban_markdown::KanbanLabel>>::iterator kanban_label_iterator) = 0;
 
+		// KanbanLabel.name
 		virtual void editLabelName(std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label) = 0;
+		// KanbanLabel.color
 		virtual void editLabelColor(std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label) = 0;
+#pragma endregion
 
+#pragma region Private
 	private:
 		std::vector<std::string> parsePathString(const std::string& s, char delimiter = '.')
 		{
@@ -157,6 +151,57 @@ namespace server
 			return splitted;
 		}
 
+		void internal_visitBoard()
+		{
+			std::string board_item = this->path_split[0];
+			switch (hash(board_item))
+			{
+			case hash("name"):
+				this->editBoardName();
+				break;
+			case hash("description"):
+				this->editBoardDescription();
+				break;
+			case hash("color"):
+				this->editBoardColor();
+				break;
+			case hash("list"):
+				this->editBoardList();
+				break;
+			case hash("labels"):
+				this->editBoardLabels();
+				break;
+			default:
+			{
+				static re2::RE2 path_pattern(R"((\w+)\[(.+)\])");
+				std::string board_item_name;
+				std::string board_item_index_name;
+
+				if (!RE2::PartialMatch(board_item, path_pattern, &board_item_name, &board_item_index_name))
+				{
+					throw std::runtime_error("Invalid path: The first field must be a vector name with an index");
+				}
+
+				switch (hash(board_item_name))
+				{
+				case hash("list"):
+				{
+					internal_visitList(board_item_index_name);
+					break;
+				}
+				case hash("labels"):
+				{
+					internal_visitLabels(board_item_index_name);
+					break;
+				}
+				default:
+					throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanBoard named "{}")", board_item_name));
+				}
+				break;
+			}
+			}
+		}
+
 		void internal_visitList(std::string board_item_index_name)
 		{
 			auto it = std::find_if(this->kanban_board->list.begin(), this->kanban_board->list.end(), [&board_item_index_name](const auto& x)
@@ -177,6 +222,12 @@ namespace server
 				{
 				case hash("name"):
 					this->editListName(kanban_list);
+					break;
+				case hash("checked"):
+					this->editListChecked(kanban_list);
+					break;
+				case hash("tasks"):
+					this->editListTasks(kanban_list);
 					break;
 				default:
 				{
@@ -397,5 +448,6 @@ namespace server
 				}
 			}
 		}
+#pragma endregion	
 	};
 }

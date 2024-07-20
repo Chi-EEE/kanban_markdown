@@ -25,6 +25,14 @@ namespace server::commands
 			throw std::runtime_error("Invalid path: KanbanBoard.color is a key and cannot be deleted");
 		}
 
+		void editBoardList() final {
+			throw std::runtime_error("Invalid path: KanbanBoard.list is a key and cannot be deleted");
+		}
+
+		void editBoardLabels() final {
+			throw std::runtime_error("Invalid path: KanbanBoard.labels is a key and cannot be deleted");
+		}
+
 		void visitList(std::vector<std::shared_ptr<kanban_markdown::KanbanList>>::iterator kanban_list_iterator) final {
 			std::shared_ptr<kanban_markdown::KanbanList> kanban_list = *kanban_list_iterator;
 			for (auto& kanban_task : kanban_list->tasks) {
@@ -41,6 +49,9 @@ namespace server::commands
 		}
 		void editListChecked(std::shared_ptr<kanban_markdown::KanbanList> kanban_list) final {
 			throw std::runtime_error("Invalid path: KanbanList.checked is a key and cannot be deleted");
+		}
+		void editListTasks(std::shared_ptr<kanban_markdown::KanbanList> kanban_list) final {
+			throw std::runtime_error("Invalid path: KanbanList.tasks is a key and cannot be deleted");
 		}
 
 		void visitTask(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::vector<std::shared_ptr<kanban_markdown::KanbanTask>>::iterator kanban_task_iterator) final {
@@ -143,6 +154,6 @@ namespace server::commands
 		}
 		std::string path_str = yyjson_get_string_object(path);
 		DeleteCommandVisitor visitor(&kanban_tuple.kanban_board, path_str, (void*)nullptr);
-		visitor.visitKanbanBoard();
+		visitor.run();
 	}
 }
