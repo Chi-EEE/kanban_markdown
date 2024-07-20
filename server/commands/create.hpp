@@ -36,9 +36,12 @@ namespace server::commands
 				{
 					throw std::runtime_error("Unable to find color");
 				}
+				std::string name_str = yyjson_get_string_object(name);
+				re2::RE2::GlobalReplace(&name_str, constants::vertical_whitespace_regex_pattern, "");
+
 				std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = std::make_shared<kanban_markdown::KanbanLabel>();
 				kanban_label->color = yyjson_get_string_object(color);
-				kanban_label->name = yyjson_get_string_object(name);
+				kanban_label->name = name_str;
 				kanban_tuple.kanban_board.labels.push_back(kanban_label);
 				break;
 			}
@@ -49,8 +52,11 @@ namespace server::commands
 				{
 					throw std::runtime_error("Unable to find name");
 				}
+				std::string name_str = yyjson_get_string_object(name);
+				re2::RE2::GlobalReplace(&name_str, constants::vertical_whitespace_regex_pattern, "");
+
 				std::shared_ptr<kanban_markdown::KanbanList> kanban_list = std::make_shared<kanban_markdown::KanbanList>();
-				kanban_list->name = yyjson_get_string_object(name);
+				kanban_list->name = name_str;
 				kanban_tuple.kanban_board.list.push_back(kanban_list);
 				break;
 			}
@@ -125,10 +131,10 @@ namespace server::commands
 				{
 					throw std::runtime_error("Unable to find checklist");
 				}
+				std::string name_str = yyjson_get_string_object(name);
+				re2::RE2::GlobalReplace(&name_str, constants::vertical_whitespace_regex_pattern, "");
 
 				std::shared_ptr<kanban_markdown::KanbanTask> kanban_task = std::make_shared<kanban_markdown::KanbanTask>();
-				std::string name_str = yyjson_get_string_object(name);
-
 				kanban_task->counter = kanban_markdown::utils::kanban_get_counter_with_name(name_str, kanban_tuple.kanban_board.task_name_tracker_map);
 				kanban_task->name = name_str;
 				kanban_task->description = split(yyjson_get_string_object(description), "\n");
@@ -138,6 +144,7 @@ namespace server::commands
 				yyjson_arr_foreach(labels, idx, max, label)
 				{
 					std::string label_name = yyjson_get_string_object(yyjson_obj_get(label, "name"));
+					re2::RE2::GlobalReplace(&label_name, constants::vertical_whitespace_regex_pattern, "");
 					auto it = std::find_if(kanban_tuple.kanban_board.labels.begin(), kanban_tuple.kanban_board.labels.end(), [&label_name](const auto& x)
 						{ return x->name == label_name; });
 					std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label;
@@ -158,6 +165,7 @@ namespace server::commands
 				yyjson_arr_foreach(attachments, idx, max, attachment)
 				{
 					std::string attachment_name = yyjson_get_string_object(yyjson_obj_get(attachment, "name"));
+					re2::RE2::GlobalReplace(&attachment_name, constants::vertical_whitespace_regex_pattern, "");
 					std::string attachment_url = yyjson_get_string_object(yyjson_obj_get(attachment, "url"));
 					auto kanban_attachment = std::make_shared<kanban_markdown::KanbanAttachment>();
 					kanban_attachment->name = attachment_name;
@@ -169,6 +177,7 @@ namespace server::commands
 				yyjson_arr_foreach(checklist, idx, max, checklist_item)
 				{
 					std::string checklist_item_name = yyjson_get_string_object(yyjson_obj_get(checklist_item, "name"));
+					re2::RE2::GlobalReplace(&checklist_item_name, constants::vertical_whitespace_regex_pattern, "");
 					bool checklist_item_checked = yyjson_get_bool(yyjson_obj_get(checklist_item, "checked"));
 					auto kanban_checklist_item = std::make_shared<kanban_markdown::KanbanChecklistItem>();
 					kanban_checklist_item->name = checklist_item_name;
@@ -230,14 +239,16 @@ namespace server::commands
 				{
 					throw std::runtime_error("Unable to find name");
 				}
-				std::string label_name = yyjson_get_string_object(name);
-				auto it = std::find_if(kanban_tuple.kanban_board.labels.begin(), kanban_tuple.kanban_board.labels.end(), [&label_name](const auto& x)
-					{ return x->name == label_name; });
+				std::string name_str = yyjson_get_string_object(name);
+				re2::RE2::GlobalReplace(&name_str, constants::vertical_whitespace_regex_pattern, "");
+
+				auto it = std::find_if(kanban_tuple.kanban_board.labels.begin(), kanban_tuple.kanban_board.labels.end(), [&name_str](const auto& x)
+					{ return x->name == name_str; });
 				std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label;
 				if (it == kanban_tuple.kanban_board.labels.end())
 				{
 					kanban_label = std::make_shared<kanban_markdown::KanbanLabel>();
-					kanban_label->name = label_name;
+					kanban_label->name = name_str;
 					kanban_tuple.kanban_board.labels.push_back(kanban_label);
 				}
 				else {
@@ -260,6 +271,8 @@ namespace server::commands
 					throw std::runtime_error("Unable to find url");
 				}
 				std::string attachment_name = yyjson_get_string_object(name);
+				re2::RE2::GlobalReplace(&attachment_name, constants::vertical_whitespace_regex_pattern, "");
+			
 				std::string attachment_url = yyjson_get_string_object(url);
 				auto kanban_attachment = std::make_shared<kanban_markdown::KanbanAttachment>();
 				kanban_attachment->name = attachment_name;
@@ -280,6 +293,8 @@ namespace server::commands
 					throw std::runtime_error("Unable to find checked");
 				}
 				std::string checklist_item_name = yyjson_get_string_object(name);
+				re2::RE2::GlobalReplace(&checklist_item_name, constants::vertical_whitespace_regex_pattern, "");
+
 				bool checklist_item_checked = yyjson_get_bool(checked);
 				auto kanban_checklist_item = std::make_shared<kanban_markdown::KanbanChecklistItem>();
 				kanban_checklist_item->name = checklist_item_name;

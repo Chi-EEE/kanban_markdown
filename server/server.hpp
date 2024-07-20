@@ -12,6 +12,7 @@
 #include <tobiaslocker_base64/base64.hpp>
 #include <gzip/compress.hpp>
 
+#include "constants.hpp"
 #include "internal.hpp"
 
 #include "commands/create.hpp"

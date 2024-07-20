@@ -63,12 +63,15 @@ namespace server::commands
 			{
 			case hash("name"):
 			{
-				const std::string new_name = yyjson_get_string_object(value);
-				if (kanban_list->name == new_name)
+				std::string name = yyjson_get_string_object(value);
+				re2::RE2::GlobalReplace(&name, constants::vertical_whitespace_regex_pattern, "");
+
+				if (kanban_list->name == name)
 				{
 					return;
 				}
-				kanban_list->name = new_name;
+
+				kanban_list->name = name;
 				break;
 			}
 			default:
@@ -114,7 +117,10 @@ namespace server::commands
 			{
 			case hash("name"):
 			{
-				task->name = yyjson_get_string_object(value);
+				std::string name = yyjson_get_string_object(value);
+				re2::RE2::GlobalReplace(&name, constants::vertical_whitespace_regex_pattern, "");
+
+				task->name = name;
 				break;
 			}
 			case hash("description"):
@@ -177,7 +183,10 @@ namespace server::commands
 			{
 			case hash("name"):
 			{
-				kanban_label->name = yyjson_get_string_object(value);
+				std::string name = yyjson_get_string_object(value);
+				re2::RE2::GlobalReplace(&name, constants::vertical_whitespace_regex_pattern, "");
+
+				kanban_label->name = name;
 				break;
 			}
 			default:
@@ -199,7 +208,10 @@ namespace server::commands
 			{
 			case hash("name"):
 			{
-				kanban_attachment->name = yyjson_get_string_object(value);
+				std::string name = yyjson_get_string_object(value);
+				re2::RE2::GlobalReplace(&name, constants::vertical_whitespace_regex_pattern, "");
+
+				kanban_attachment->name = name;
 				break;
 			}
 			case hash("url"):
@@ -226,7 +238,10 @@ namespace server::commands
 			{
 			case hash("name"):
 			{
-				kanban_checklist_item->name = yyjson_get_string_object(value);
+				std::string name = yyjson_get_string_object(value);
+				re2::RE2::GlobalReplace(&name, constants::vertical_whitespace_regex_pattern, "");
+
+				kanban_checklist_item->name = name;
 				break;
 			}
 			case hash("checked"):
