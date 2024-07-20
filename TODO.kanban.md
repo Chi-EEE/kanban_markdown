@@ -1,9 +1,9 @@
 ---
 Color: "#527ea7"
-Version: 143
+Version: 150
 Created: 2024-07-19 23:35:18 UTC
-Last Modified: 2024-07-20 00:22:24 UTC
-Checksum: 7363dc3b117d24885fd01241c5e85e45f1bffb593d3e6799f0204e39b7af6eef
+Last Modified: 2024-07-20 01:02:36 UTC
+Checksum: 3383c755fc1c21095a26fa02c55219bb66e70c43d829ae4000eca53a70421afb
 ---
 
 > [!NOTE]  
@@ -21,8 +21,14 @@ No description available.
 - [ ] <span id="kanban_md-task-fix_the_dot_in_strings_(spliting)-1" data-counter="1">Fix the dot in strings (spliting)</span>  
 
 ### <span data-checked="false">Doing:</span>  
+- [ ] <span id="kanban_md-task-fix_empty_description-1" data-counter="1">Fix empty description</span>  
+  - **Description**:  
+      
 
 ### <span data-checked="true">Done:</span>  
+- [x] <span id="kanban_md-task-encode_quotation_characters_&quot;&quot;-1" data-counter="1">Encode quotation characters ""</span>  
+  - **Description**:  
+      
 - [x] <span id="kanban_md-task-hide_categories_in_task_if_unused-1" data-counter="1">Hide categories in Task if unused</span>  
 - [x] <span id="kanban_md-task-auto_check_when_in_certain_lists-1" data-counter="1">Auto check when in certain lists</span>  
 

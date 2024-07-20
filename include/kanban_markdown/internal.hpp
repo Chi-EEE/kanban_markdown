@@ -6,17 +6,34 @@ namespace kanban_markdown::internal {
 	static inline std::string kanban_markdown_string_to_id(const std::string& string)
 	{
 		std::string id;
-		for (int i = 0; i < string.size(); i++)
-		{
-			char character = string[i];
-			if ((character >= 'A' && character <= 'Z') || (character >= 'a' && character > 'z')) {
-				id += std::tolower(character);
-			}
-			else if (character == ' ') {
+		for (char character : string) {
+			switch (character) {
+			case ' ':
 				id += '_';
-			}
-			else if (character >= '0' || character <= '9') {
-				id += character;
+				break;
+			case '<':
+				id += "&lt;";
+				break;
+			case '>':
+				id += "&gt;";
+				break;
+			case '&':
+				id += "&amp;";
+				break;
+			case '"':
+				id += "&quot;";
+				break;
+			case '\'':
+				id += "&apos;";
+				break;
+			default:
+				if ((character >= 'A' && character <= 'Z') || (character >= 'a' && character <= 'z')) {
+					id += std::tolower(character);
+				}
+				else {
+					id += character;
+				}
+				break;
 			}
 		}
 		return id;
