@@ -1,9 +1,9 @@
 ---
-Color: "#527ea7"
-Version: 155
+Color: "#5186b8"
+Version: 219
 Created: 2024-07-19 23:35:18 UTC
-Last Modified: 2024-07-20 22:46:16 UTC
-Checksum: 4b0b4606263c64c6e2a43da9a1d1fc294755d4d72c2899b71266582c9504e306
+Last Modified: 2024-07-20 23:27:01 UTC
+Checksum: c7c6582adf2cce32866c21205d706e46a6938b6975f04050afe461429d63f0fe
 ---
 
 > [!NOTE]  
@@ -16,15 +16,26 @@ No description available.
 
 ### <span data-checked="false">To do:</span>  
 - [ ] <span id="kanban_md-task-allow_for_multiple_lists_with_the_same_name-1" data-counter="1">Allow for multiple Lists with the same name</span>  
+- [ ] <span id="kanban_md-task-bug:_double_clicking_on_created_card_opens_card_modal-1" data-counter="1">Bug: Double clicking on created card opens card_modal</span>  
+  - **Description**:  
+      
+
+### <span data-checked="false">Pending:</span>  
+- [ ] <span id="kanban_md-task-fix_empty_description-1" data-counter="1">Fix empty description</span>  
+- [ ] <span id="kanban_md-task-add_close_other_menus-1" data-counter="1">Add close other menus</span>  
+  - **Description**:  
+      
 
 ### <span data-checked="false">Doing:</span>  
-- [ ] <span id="kanban_md-task-fix_empty_description-1" data-counter="1">Fix empty description</span>  
+- [ ] <span id="kanban_md-task-use_solidjs_for_frontend_instead_of_jquery_to_allow_for_reactivity_for_minimal_dom_manipulation-1" data-counter="1">Use SolidJS for Frontend instead of JQuery to allow for Reactivity for minimal DOM manipulation</span>  
+  - **Description**:  
+      
 
 ### <span data-checked="true">Done:</span>  
-- [x] <span id="kanban_md-task-fix_the_dot_in_strings_(spliting)_[maybe]-1" data-counter="1">Fix the dot in strings (spliting) [MAYBE]</span>  
 - [x] <span id="kanban_md-task-allow_for_the_card_to_expand_when_reaching_max_width_size-1" data-counter="1">Allow for the card to expand when reaching max width size</span>  
-- [x] <span id="kanban_md-task-improve_the_path_parser-1" data-counter="1">Improve the Path parser</span>  
+- [x] <span id="kanban_md-task-fix_the_dot_in_strings_(spliting)_[maybe]-1" data-counter="1">Fix the dot in strings (spliting) [MAYBE]</span>  
 - [x] <span id="kanban_md-task-hide_categories_in_task_if_unused-1" data-counter="1">Hide categories in Task if unused</span>  
+- [x] <span id="kanban_md-task-improve_the_path_parser-1" data-counter="1">Improve the Path parser</span>  
 - [x] <span id="kanban_md-task-auto_check_when_in_certain_lists-1" data-counter="1">Auto check when in certain lists</span>  
 - [x] <span id="kanban_md-task-encode_quotation_characters_&quot;&quot;-1" data-counter="1">Encode quotation characters ""</span>  
 

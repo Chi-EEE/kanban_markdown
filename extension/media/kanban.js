@@ -86,6 +86,7 @@ $(document).ready(function () {
         board.lists.forEach(function (list, index) {
             const $list = createListElement(board, list, index + 1);
             $board.append($list);
+            autoResize($list.find('.list-title'));
         });
 
         const $label_list = $('#modal-label-list').empty();
@@ -190,6 +191,7 @@ $(document).ready(function () {
         const $listActionsButton = createListActionsButton($listTitle, $list);
 
         $list.append($listTitle, $listActionsButton, $cards, $addCardButton);
+      
         return $list;
     };
 
