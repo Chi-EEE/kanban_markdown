@@ -26,6 +26,7 @@
 /**
  * @typedef {Object} List
  * @property {string} name - The name of the list.
+ * @property {boolean} checked - The status of the list (checked or not).
  * @property {Task[]} tasks - The tasks within the list.
  */
 
@@ -33,7 +34,7 @@
  * @typedef {Object} Task
  * @property {string} name - The name of the task.
  * @property {number} counter - The counter of the task.
- * @property {boolean} [checked] - The status of the task (checked or not). Optional.
+ * @property {boolean} checked - The status of the task (checked or not).
  * @property {string[]} [description] - The description of the task. Optional.
  * @property {Label[]} [labels] - The labels associated with the task. Optional.
  * @property {any[]} [attachments] - The attachments of the task. Optional.
@@ -131,7 +132,9 @@ $(document).ready(function () {
      * @returns 
      */
     function createListElement(board, list, listIndex) {
-        const $list = $('<div>').addClass('list').attr('id', `list-${listIndex}`).data('name', list.name);
+        const $list = $('<div>').addClass('list').attr('id', `list-${listIndex}`)
+            .data('name', list.name)
+            .data('checked', list.checked);
         const $listTitle = $('<input>').addClass('list-title').attr('placeholder', 'Enter list title').val(list.name);
 
         let previousTitle = $listTitle.val();
