@@ -1,9 +1,9 @@
 ---
 Color: "#527ea7"
-Version: 150
+Version: 155
 Created: 2024-07-19 23:35:18 UTC
-Last Modified: 2024-07-20 01:02:36 UTC
-Checksum: 3383c755fc1c21095a26fa02c55219bb66e70c43d829ae4000eca53a70421afb
+Last Modified: 2024-07-20 22:46:16 UTC
+Checksum: 4b0b4606263c64c6e2a43da9a1d1fc294755d4d72c2899b71266582c9504e306
 ---
 
 > [!NOTE]  
@@ -15,21 +15,17 @@ No description available.
 ## Board:  
 
 ### <span data-checked="false">To do:</span>  
-- [ ] <span id="kanban_md-task-allow_for_the_card_to_expand_when_reaching_max_width_size-1" data-counter="1">Allow for the card to expand when reaching max width size</span>  
-- [ ] <span id="kanban_md-task-improve_the_path_parser-1" data-counter="1">Improve the Path parser</span>  
-- [ ] <span id="kanban_md-task-allow_for_multiple_lists-1" data-counter="1">Allow for multiple Lists</span>  
-- [ ] <span id="kanban_md-task-fix_the_dot_in_strings_(spliting)-1" data-counter="1">Fix the dot in strings (spliting)</span>  
+- [ ] <span id="kanban_md-task-allow_for_multiple_lists_with_the_same_name-1" data-counter="1">Allow for multiple Lists with the same name</span>  
 
 ### <span data-checked="false">Doing:</span>  
 - [ ] <span id="kanban_md-task-fix_empty_description-1" data-counter="1">Fix empty description</span>  
-  - **Description**:  
-      
 
 ### <span data-checked="true">Done:</span>  
-- [x] <span id="kanban_md-task-encode_quotation_characters_&quot;&quot;-1" data-counter="1">Encode quotation characters ""</span>  
-  - **Description**:  
-      
+- [x] <span id="kanban_md-task-fix_the_dot_in_strings_(spliting)_[maybe]-1" data-counter="1">Fix the dot in strings (spliting) [MAYBE]</span>  
+- [x] <span id="kanban_md-task-allow_for_the_card_to_expand_when_reaching_max_width_size-1" data-counter="1">Allow for the card to expand when reaching max width size</span>  
+- [x] <span id="kanban_md-task-improve_the_path_parser-1" data-counter="1">Improve the Path parser</span>  
 - [x] <span id="kanban_md-task-hide_categories_in_task_if_unused-1" data-counter="1">Hide categories in Task if unused</span>  
 - [x] <span id="kanban_md-task-auto_check_when_in_certain_lists-1" data-counter="1">Auto check when in certain lists</span>  
+- [x] <span id="kanban_md-task-encode_quotation_characters_&quot;&quot;-1" data-counter="1">Encode quotation characters ""</span>  
 
 
