@@ -13,6 +13,18 @@ namespace server::commands
 		DeleteCommandVisitor(kanban_markdown::KanbanBoard* kanban_board, std::string path, void* userdata) : KanbanPathVisitor(kanban_board, path, userdata) {}
 
 	private:
+		void editBoardName() final {
+			throw std::runtime_error("Invalid path: KanbanBoard.name is a key and cannot be deleted");
+		}
+
+		void editBoardDescription() final {
+			throw std::runtime_error("Invalid path: KanbanBoard.description is a key and cannot be deleted");
+		}
+
+		void editBoardColor() final {
+			throw std::runtime_error("Invalid path: KanbanBoard.color is a key and cannot be deleted");
+		}
+
 		void visitList(std::vector<std::shared_ptr<kanban_markdown::KanbanList>>::iterator kanban_list_iterator) final {
 			std::shared_ptr<kanban_markdown::KanbanList> kanban_list = *kanban_list_iterator;
 			for (auto& kanban_task : kanban_list->tasks) {
@@ -50,22 +62,22 @@ namespace server::commands
 			kanban_list->tasks.erase(kanban_task_iterator);
 		}
 
-		void editTaskName(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> task) final {
+		void editTaskName(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) final {
 			throw std::runtime_error("Invalid path: KanbanTask.name is a key and cannot be deleted");
 		}
-		void editTaskDescription(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> task) final {
+		void editTaskDescription(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) final {
 			throw std::runtime_error("Invalid path: KanbanTask.description is a key and cannot be deleted");
 		}
-		void editTaskChecked(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> task) final {
+		void editTaskChecked(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) final {
 			throw std::runtime_error("Invalid path: KanbanTask.checked is a key and cannot be deleted");
 		}
-		void editTaskLabels(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> task) final {
+		void editTaskLabels(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) final {
 			throw std::runtime_error("Invalid path: KanbanTask.labels is a key and cannot be deleted");
 		}
-		void editTaskAttachments(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> task) final {
+		void editTaskAttachments(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) final {
 			throw std::runtime_error("Invalid path: KanbanTask.attachments is a key and cannot be deleted");
 		}
-		void editTaskChecklist(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> task) final {
+		void editTaskChecklist(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) final {
 			throw std::runtime_error("Invalid path: KanbanTask.checklist is a key and cannot be deleted");
 		}
 
@@ -77,6 +89,9 @@ namespace server::commands
 
 		void editTaskLabelName(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task, std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label) final {
 			throw std::runtime_error("Invalid path: KanbanLabel.name is a key and cannot be deleted");
+		}
+		void editTaskLabelColor(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task, std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label) final {
+			throw std::runtime_error("Invalid path: KanbanLabel.color is a key and cannot be deleted");
 		}
 
 		void visitTaskAttachment(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task, std::vector<std::shared_ptr<kanban_markdown::KanbanAttachment>>::iterator kanban_attachment_iterator) final {
@@ -112,6 +127,10 @@ namespace server::commands
 
 		void editLabelName(std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label) final {
 			throw std::runtime_error("Invalid path: KanbanLabel.name is a key and cannot be deleted");
+		}
+
+		void editLabelColor(std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label) final {
+			throw std::runtime_error("Invalid path: KanbanLabel.color is a key and cannot be deleted");
 		}
 	};
 

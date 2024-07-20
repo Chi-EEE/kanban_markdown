@@ -29,30 +29,49 @@ namespace server
 		void visitKanbanBoard()
 		{
 			std::string board_item = this->path_split[0];
-
-			static re2::RE2 path_pattern(R"((\w+)\[(.+)\])");
-			std::string board_item_name;
-			std::string board_item_index_name;
-
-			if (!RE2::PartialMatch(board_item, path_pattern, &board_item_name, &board_item_index_name))
+			if (this->path_split.size() == 1)
 			{
-				throw std::runtime_error("Invalid path: The first field must be a vector name with an index");
+				switch (hash(board_item))
+				{
+				case hash("name"):
+					this->editBoardName();
+					break;
+				case hash("description"):
+					this->editBoardDescription();
+					break;
+				case hash("color"):
+					this->editBoardColor();
+					break;
+				default:
+					throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanBoard named "{}")", board_item));
+				}
 			}
+			else
+			{
+				static re2::RE2 path_pattern(R"((\w+)\[(.+)\])");
+				std::string board_item_name;
+				std::string board_item_index_name;
 
-			switch (hash(board_item_name))
-			{
-			case hash("list"):
-			{
-				internal_visitList(board_item_index_name);
-				break;
-			}
-			case hash("labels"):
-			{
-				internal_visitLabels(board_item_index_name);
-				break;
-			}
-			default:
-				throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanBoard named "{}")", board_item_name));
+				if (!RE2::PartialMatch(board_item, path_pattern, &board_item_name, &board_item_index_name))
+				{
+					throw std::runtime_error("Invalid path: The first field must be a vector name with an index");
+				}
+
+				switch (hash(board_item_name))
+				{
+				case hash("list"):
+				{
+					internal_visitList(board_item_index_name);
+					break;
+				}
+				case hash("labels"):
+				{
+					internal_visitLabels(board_item_index_name);
+					break;
+				}
+				default:
+					throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanBoard named "{}")", board_item_name));
+				}
 			}
 		}
 
@@ -62,6 +81,10 @@ namespace server
 		void* userdata;
 
 	private:
+		virtual void editBoardName() = 0;
+		virtual void editBoardDescription() = 0;
+		virtual void editBoardColor() = 0;
+
 		virtual void visitList(std::vector<std::shared_ptr<kanban_markdown::KanbanList>>::iterator kanban_list_iterator) = 0;
 
 		virtual void editListName(std::shared_ptr<kanban_markdown::KanbanList> kanban_list) = 0;
@@ -69,16 +92,17 @@ namespace server
 
 		virtual void visitTask(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::vector<std::shared_ptr<kanban_markdown::KanbanTask>>::iterator kanban_task_iterator) = 0;
 
-		virtual void editTaskName(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> task) = 0;
-		virtual void editTaskDescription(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> task) = 0;
-		virtual void editTaskChecked(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> task) = 0;
-		virtual void editTaskLabels(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> task) = 0;
-		virtual void editTaskAttachments(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> task) = 0;
-		virtual void editTaskChecklist(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> task) = 0;
+		virtual void editTaskName(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) = 0;
+		virtual void editTaskDescription(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) = 0;
+		virtual void editTaskChecked(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) = 0;
+		virtual void editTaskLabels(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) = 0;
+		virtual void editTaskAttachments(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) = 0;
+		virtual void editTaskChecklist(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) = 0;
 
 		virtual void visitTaskLabel(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task, std::vector<std::shared_ptr<kanban_markdown::KanbanLabel>>::iterator kanban_label_iterator) = 0;
 
 		virtual void editTaskLabelName(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task, std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label) = 0;
+		virtual void editTaskLabelColor(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task, std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label) = 0;
 
 		virtual void visitTaskAttachment(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task, std::vector<std::shared_ptr<kanban_markdown::KanbanAttachment>>::iterator kanban_attachment_iterator) = 0;
 
@@ -93,6 +117,7 @@ namespace server
 		virtual void visitLabel(std::vector<std::shared_ptr<kanban_markdown::KanbanLabel>>::iterator kanban_label_iterator) = 0;
 
 		virtual void editLabelName(std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label) = 0;
+		virtual void editLabelColor(std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label) = 0;
 
 	private:
 		std::vector<std::string> parsePathString(const std::string& s, char delimiter = '.')
@@ -270,6 +295,9 @@ namespace server
 				case hash("name"):
 					this->editTaskLabelName(kanban_list, kanban_task, kanban_label);
 					break;
+				case hash("color"):
+					this->editTaskLabelColor(kanban_list, kanban_task, kanban_label);
+					break;
 				case hash("tasks"):
 					throw std::runtime_error("Error: Editing Tasks through labels is not supported. Please edit tasks directly within their respective lists.");
 				default:
@@ -358,6 +386,9 @@ namespace server
 				{
 				case hash("name"):
 					this->editLabelName(kanban_label);
+					break;
+				case hash("color"):
+					this->editLabelColor(kanban_label);
 					break;
 				case hash("tasks"):
 					throw std::runtime_error("Error: Editing Tasks through labels is not supported. Please edit tasks directly within their respective lists.");
