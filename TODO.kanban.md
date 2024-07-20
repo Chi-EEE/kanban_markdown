@@ -1,9 +1,9 @@
 ---
 Color: "#527ea7"
-Version: 130
+Version: 131
 Created: 2024-07-19 23:35:18 UTC
-Last Modified: 2024-07-19 23:43:05 UTC
-Checksum: 21ed6c80c9c9bc9f2e2856046d5abb6d437baeeca42ec1181cbe57dad75549f6
+Last Modified: 2024-07-20 00:11:25 UTC
+Checksum: b27db6eb6f5f1fb86c828fb02218fa0d4832c62151d712c649d665bf3368b047
 ---
 
 > [!NOTE]  
@@ -17,39 +17,34 @@ No description available.
 ## Board:  
 
 ### <span data-checked="false">To do:</span>  
+- [ ] <span id="kanban_md-task-allow_for_the_card_to_expand_when_reaching_max_width_size-1" data-counter="1">Allow for the card to expand when reaching max width size</span>  
+  - **Description**:    
+  - **Labels**:  
+  - **Attachments**:  
+  - **Checklist**:  
 - [ ] <span id="kanban_md-task-improve_the_path_parser-1" data-counter="1">Improve the Path parser</span>  
-  - **Description**:  
-      
+  - **Description**:    
   - **Labels**:  
   - **Attachments**:  
   - **Checklist**:  
 - [ ] <span id="kanban_md-task-allow_for_multiple_lists-1" data-counter="1">Allow for multiple Lists</span>  
-  - **Description**:  
-      
+  - **Description**:    
   - **Labels**:  
   - **Attachments**:  
   - **Checklist**:  
 - [ ] <span id="kanban_md-task-fix_the_dot_in_strings_(spliting)-1" data-counter="1">Fix the dot in strings (spliting)</span>  
-  - **Description**:  
-      
-  - **Labels**:  
-  - **Attachments**:  
-  - **Checklist**:  
-- [ ] <span id="kanban_md-task-allow_for_the_card_to_expand_when_reaching_max_width_size-1" data-counter="1">Allow for the card to expand when reaching max width size</span>  
-  - **Description**:  
-      
+  - **Description**:    
   - **Labels**:  
   - **Attachments**:  
   - **Checklist**:  
 
 ### <span data-checked="false">Doing:</span>  
-- [ ] <span id="kanban_md-task-auto_check_when_in_certain_lists-1" data-counter="1">Auto check when in certain lists</span>  
-  - **Description**:  
-      
+
+### <span data-checked="true">Done:</span>  
+- [x] <span id="kanban_md-task-auto_check_when_in_certain_lists-1" data-counter="1">Auto check when in certain lists</span>  
+  - **Description**:    
   - **Labels**:  
   - **Attachments**:  
   - **Checklist**:  
-
-### <span data-checked="false">Done:</span>  
 
 
