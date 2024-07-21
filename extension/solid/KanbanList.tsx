@@ -44,7 +44,7 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
 
     return (
         <div
-            class="rounded w-64 p-2 mr-2 flex flex-col white relative"
+            class="flex-shrink-0 rounded w-64 p-2 mr-2 flex flex-col white relative"
             style="background-color: rgba(255, 255, 255, 0.1);"
         >
             <TextareaAutosize

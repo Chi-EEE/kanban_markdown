@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+/* 
 body {
   font-family: Arial, sans-serif;
   background-color: var(--background-color);
@@ -30,4 +30,4 @@ a:hover {
 
 ::placeholder {
   color: white;
-}
+} */
