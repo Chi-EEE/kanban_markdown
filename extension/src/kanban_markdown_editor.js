@@ -31,6 +31,7 @@ class KanbanMarkdownEditorProvider {
      */
     constructor(context) {
         this.context = context;
+        this.server = new KanbanMarkdownServer(this.context);
     }
 
     /**
@@ -40,8 +41,6 @@ class KanbanMarkdownEditorProvider {
      * @param {vscode.CancellationToken} token 
      */
     resolveCustomTextEditor(document, webviewPanel, token) {
-        this.server = new KanbanMarkdownServer(this.context);
-
         console.log('Kanban Markdown Editor: ', document.uri.fsPath)
 
         this.server.sendRequest({
@@ -54,6 +53,9 @@ class KanbanMarkdownEditorProvider {
 
             webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
+            /**
+             * @param {any} data
+             */
             function updateWebview(data) {
                 webviewPanel.webview.postMessage({
                     type: 'update',
@@ -106,10 +108,10 @@ class KanbanMarkdownEditorProvider {
     getHtmlForWebview(webview) {
         // Local path to script and css for the webview
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(
-            this.context.extensionUri, 'media', 'kanban.js'));
+            this.context.extensionUri, 'out', 'compiled', 'bundled.js'));
 
         const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(
-            this.context.extensionUri, 'media', 'kanban.css'));
+            this.context.extensionUri, 'out', 'compiled', 'bundled.css'));
 
         // Use a nonce to whitelist which scripts can be run
         const nonce = getNonce();
@@ -117,71 +119,20 @@ class KanbanMarkdownEditorProvider {
         return /* html */`
         <!DOCTYPE html>
         <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <link href="${styleMainUri}" rel="stylesheet" />
-            <title>Kanban Board</title>
-        </head>
-        <body>
-            <div id="title-bar">
-                <div id="editable-title">
-                    <h1 id="kanban-title">Untitled Board</h1>
-                    <input type="text" id="edit-title-input" />
-                </div>
-                <input type="color" id="background-color-picker" value="#A0A0A0">
-            </div>
-            <div id="board">
-                <button id="add-list">Add another list +</button>
-            </div>
-            <div id="card-modal" class="modal">
-                <div id="modal-content">
-                    <span id="modal-close">&times;</span>
-                    <div id="modal-main">
-                        <div id="modal-header">
-                            <h2>Edit Card</h2>
-                            <div id="modal-label-bar"></div>
-                        </div>
-                        <div id="modal-body">
-                            <label for="modal-edit-card-title">Title</label>
-                            <textarea type="text" id="modal-edit-card-title" placeholder="Enter card title"></textarea>
-                            <label for="modal-edit-card-description">Description</label>
-                            <textarea id="modal-edit-card-description" placeholder="Enter card description"></textarea>
-                        </div>
-                        <div id="modal-footer">
-                            <button id="modal-save-card">Save</button>
-                        </div>
-                    </div>
-                    <div id="modal-sidebar">
-                        <button id="modal-label-button">Labels</button>
-                        <button id="modal-attachment-button">Attachments</button>
-                    </div>
-                </div>
-                <div id="modal-label-menu" class="menu">
-                    <div id="modal-label-select">
-                        <h3>Labels</h3>
-                        <div id="modal-label-list"></div>
-                        <button id="modal-create-label-button">Create a new label</button>
-                    </div>
-                    <div id="modal-label-create">
-                        <h3>Create Label</h3>
-                        <label for="modal-new-label-title">Title</label>
-                        <input type="text" id="modal-new-label-title" />
-                        <label for="modal-new-label-color">Color</label>
-                        <input type="color" id="modal-new-label-color" value="#ffffff" />
-                        <button id="modal-create-label">Create</button>
-                        <button id="modal-back-to-label-select">Back</button>
-                    </div>
-                </div>
-                <div id="modal-attachment-menu" class="menu">Attachment menu content</div>
-            </div>
-            <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous" nonce="${nonce}"></script>
-            <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.min.js" defer crossorigin="anonymous" nonce="${nonce}"></script>
-            <script nonce="${nonce}" src="${scriptUri}"></script>
-        </body>
-        </html>
+            <head>
+                <meta charset="UTF-8">
+                <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <script type="module" nonce="${nonce}" crossorigin src="${scriptUri}"></script>
+                <link href="${styleMainUri}" crossorigin rel="stylesheet" />
+                <title>Kanban Markdown</title>
+            </head>
+            <body>
+                <noscript>You need to enable JavaScript to run this app.</noscript>
+                <div id="root"></div>
 
+            </body>
+        </html>
 `;
     }
 
@@ -207,7 +158,7 @@ class KanbanMarkdownEditorProvider {
                 format: 'markdown',
             });
         }).then(data => {
-            this.decompressGzipString(data.markdown, (err, markdown) => {
+            this.decompressGzipString(data.markdown, (/** @type {any} */ err, /** @type {string} */ markdown) => {
                 if (err) {
                     console.error('Error decompressing string:', err);
                     return;
@@ -238,6 +189,7 @@ class KanbanMarkdownEditorProvider {
         return vscode.workspace.applyEdit(edit);
     }
 
+    // @ts-ignore
     decompressGzipString(gzipString, callback) {
         let buffer = Buffer.from(gzipString, 'base64');
         zlib.gunzip(buffer, (err, decompressedBuffer) => {
