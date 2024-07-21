@@ -6,41 +6,14 @@ import { For, Show, createSignal, createEffect, onCleanup } from "solid-js";
 import { TitleBar } from './TitleBar';
 import { KanbanList } from './KanbanList'
 
-const App: Component = () => {
-    const default_kanban_board = {
-        name: '',
-        properties: {
-            color: '',
-            created: 0,
-            last_modified: 0,
-            version: 0,
-            checksum: ''
-        },
-        description: '',
-        labels: [],
-        lists: []
-    }
+type AppProps = {
+    kanban_board: KanbanMarkdown.KanbanBoard;
+};
 
-    const [getKanbanBoard, setKanbanBoard] = createSignal<KanbanMarkdown.KanbanBoard>(default_kanban_board);
+const App: Component<AppProps> = (props) => {
+    const { kanban_board } = props;
 
-    function loadKanbanBoard(data: KanbanMarkdown.KanbanBoard) {
-        setKanbanBoard(data);
-    }
-
-    function handleMessage(event: MessageEvent) {
-        const { type, text: { json: kanbanBoard } } = event.data;
-        if (type === 'update') {
-            loadKanbanBoard(kanbanBoard);
-            // @ts-ignore
-            vscode.setState({ json: kanbanBoard });
-        }
-    }
-
-    window.addEventListener('message', handleMessage);
-
-    onCleanup(() => {
-        window.removeEventListener('message', handleMessage);
-    });
+    const [getKanbanBoard, setKanbanBoard] = createSignal<KanbanMarkdown.KanbanBoard>(kanban_board);
 
     return (
         <div>

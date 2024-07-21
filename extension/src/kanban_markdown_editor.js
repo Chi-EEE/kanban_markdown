@@ -31,7 +31,6 @@ class KanbanMarkdownEditorProvider {
      */
     constructor(context) {
         this.context = context;
-        this.server = new KanbanMarkdownServer(this.context);
     }
 
     /**
@@ -41,12 +40,18 @@ class KanbanMarkdownEditorProvider {
      * @param {vscode.CancellationToken} token 
      */
     resolveCustomTextEditor(document, webviewPanel, token) {
+        // Setup initial content for the webview
+        // This cannot be done in the constructor because the webviewPanel is not available yet
+        this.server = new KanbanMarkdownServer(this.context);
+
         console.log('Kanban Markdown Editor: ', document.uri.fsPath)
 
         this.server.sendRequest({
             type: 'parse',
             file: document.uri.fsPath,
         }).then(() => {
+            console.log('File parsed');
+
             webviewPanel.webview.options = {
                 enableScripts: true,
             };
@@ -133,7 +138,6 @@ class KanbanMarkdownEditorProvider {
                 </script>
                 <noscript>You need to enable JavaScript to run this app.</noscript>
                 <div id="root"></div>
-
             </body>
         </html>
 `;
