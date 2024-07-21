@@ -56,7 +56,6 @@
     },
     "dependencies": {
         "@thisbeyond/solid-dnd": "^0.7.5",
-        "solid-js": "^1.8.11",
-        "solid-textarea-autosize": "^0.0.5"
+        "solid-js": "^1.8.11"
     }
 }
