@@ -1,0 +1,24 @@
+.App {
+    font-family: Arial, sans-serif;
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height: 100vh;
+    color: white;
+    overflow-x: hidden;
+    padding-bottom: 20px;
+}
+
+.kanban_board {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 60px;
+    padding: 20px;
+    width: 100%;
+    height: calc(100% - 60px);
+    overflow-x: auto;
+    white-space: nowrap;
+}

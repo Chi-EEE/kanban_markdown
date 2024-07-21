@@ -1,3 +1,4 @@
+import styles from './TitleBar.module.css';
 
 import { createSignal } from "solid-js";
 import type { Component } from 'solid-js';
@@ -12,12 +13,12 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
     const [getName, setName] = createSignal<string>(kanban_board.name);
 
     return (
-        <div class="text-white w-full p-3 box-border fixed top-0 z-50 flex justify-between items-center" style="background-color: rgba(0, 0, 0, 0.4);">
-            <div id="editable-title">
-                <h1 class="m-0 pl-5">{getName()}</h1>
-                <input type="text" id="edit-title-input" />
+        <div class={styles.title_bar}>
+            <div>
+                <h1 class={styles.kanban_board_name}>{getName()}</h1>
+                <input type="text" class={styles.edit_kanban_board_name_input} />
             </div>
-            <input type="color" id="background-color-picker" value="#A0A0A0" />
+            <input type="color" class={styles.background_color_picker} value={kanban_board.properties.color} />
         </div>
     );
 }

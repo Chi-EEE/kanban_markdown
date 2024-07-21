@@ -1,21 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-/* 
-body {
-  font-family: Arial, sans-serif;
-  background-color: var(--background-color);
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  height: 100vh;
-  color: white;
-  overflow-x: hidden;
-  padding-bottom: 20px;
-}
-
 textarea {
     font-family: Arial, sans-serif;
     resize: none;
@@ -24,10 +6,10 @@ textarea {
 }
 
 a:hover {
-  text-decoration: none;
-  color: white;
+    text-decoration: none;
+    color: white;
 }
 
 ::placeholder {
-  color: white;
-} */
+    color: white;
+}

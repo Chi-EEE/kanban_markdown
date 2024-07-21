@@ -1,0 +1,25 @@
+.kanban_list {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    width: 250px;
+    padding: 10px;
+    margin-right: 10px;
+    display: flex;
+    flex-direction: column;
+    color: white;
+    position: relative;
+}
+
+.kanban_list_title {
+    font-size: 18px;
+    margin-bottom: 10px;
+    padding: 5px;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.kanban_task_list {
+    min-height: 8px;
+    flex-grow: 1;
+}

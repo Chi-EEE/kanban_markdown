@@ -1,3 +1,5 @@
+import styles from './KanbanTask.module.css';
+
 import { KanbanMarkdown } from './types';
 
 import type { Component } from 'solid-js';
@@ -45,13 +47,11 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
 
     return (
         <a
-            class="block rounded-md p-2 mb-2 white relative cursor-pointer"
-            style="background-color: rgba(255, 255, 255, 0.2); width: calc(250px - 20px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);"
+            class={styles.kanban_task}
             onClick={onClick}
         >
             <span
-                class="pointer-events-none w-full bg-transparent border-none outline-none text-white inline-block overflow-hidden break-words whitespace-normal"
-                style="background-color: rgba(255, 255, 255, 0.1);"
+                class={styles.kanban_task_title}
                 onBlur={onBlur}
                 onKeyPress={onKeyPress}
             >

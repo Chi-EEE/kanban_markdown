@@ -1,3 +1,5 @@
+import styles from './KanbanList.module.css';
+
 import { KanbanMarkdown } from './types';
 import TextareaAutosize from "solid-textarea-autosize";
 
@@ -43,20 +45,16 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
     }
 
     return (
-        <div
-            class="flex-shrink-0 rounded w-64 p-2 mr-2 flex flex-col white relative"
-            style="background-color: rgba(255, 255, 255, 0.1);"
-        >
+        <div class={styles.kanban_list}>
             <TextareaAutosize
-                class="text-lg mb-2 p-1 border-none white"
-                style="background-color: rgba(255, 255, 255, 0.1);"
+                class={styles.kanban_list_title}
                 placeholder='Enter list title'
                 onBlur={onBlur}
                 onKeyPress={onKeyPress}
                 textContent={getName()}
             />
             <Show when={kanban_list.tasks}>
-                <div class="min-h-2 flex-grow">
+                <div class={styles.kanban_task_list}>
                     <For each={kanban_list.tasks}>
                         {(kanban_task, index) => (
                             <KanbanTask kanban_list={kanban_list} kanban_task={kanban_task} />
