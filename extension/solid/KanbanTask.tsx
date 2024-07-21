@@ -46,15 +46,8 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
     }
 
     return (
-        <a
-            class={styles.kanban_task}
-            onClick={onClick}
-        >
-            <span
-                class={styles.kanban_task_title}
-                onBlur={onBlur}
-                onKeyPress={onKeyPress}
-            >
+        <a class={styles.kanban_task} onClick={onClick} >
+            <span class={styles.kanban_task_title} onBlur={onBlur} onKeyPress={onKeyPress}>
                 {getName()}
             </span>
         </a>
