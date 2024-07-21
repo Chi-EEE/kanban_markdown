@@ -1,7 +1,7 @@
 import { KanbanMarkdown } from './types';
 
 import type { Component } from 'solid-js';
-import { createSignal, createEffect, For, onCleanup } from "solid-js";
+import { For, Show, createSignal, createEffect, onCleanup } from "solid-js";
 
 import { TitleBar } from './TitleBar';
 import { KanbanList } from './KanbanList'
@@ -36,10 +36,7 @@ const App: Component = () => {
         }
     }
 
-    createEffect(() => {
-        window.addEventListener('message', handleMessage);
-    })
-
+    window.addEventListener('message', handleMessage);
 
     onCleanup(() => {
         window.removeEventListener('message', handleMessage);
@@ -48,16 +45,18 @@ const App: Component = () => {
     return (
         <div>
             <TitleBar kanban_board={getKanbanBoard()} />
-            <div
-                class="flex items-start mt-16 p-5 w-full overflow-x-auto whitespace-nowrap"
-                style="height: calc(100%-60px)"
-            >
-                <For each={getKanbanBoard().lists}>
-                    {(list, index) => (
-                        <KanbanList kanban_list={list} />
-                    )}
-                </For>
-            </div>
+            <Show when={getKanbanBoard().lists}>
+                <div
+                    class="flex items-start mt-16 p-5 w-full overflow-x-auto whitespace-nowrap"
+                    style="height: calc(100%-60px)"
+                >
+                    <For each={getKanbanBoard().lists}>
+                        {(list, index) => (
+                            <KanbanList kanban_list={list} />
+                        )}
+                    </For>
+                </div>
+            </Show>
         </div>
     );
 }

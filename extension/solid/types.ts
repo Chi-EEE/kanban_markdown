@@ -11,8 +11,8 @@ export namespace KanbanMarkdown {
             checksum: string;
         };
         description: string;
-        labels: KanbanLabel[];
-        lists: KanbanList[];
+        labels?: KanbanLabel[];
+        lists?: KanbanList[];
     }
 
     export interface KanbanLabel {

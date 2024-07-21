@@ -1,7 +1,7 @@
 import { KanbanMarkdown } from './types';
 
 import type { Component } from 'solid-js';
-import { createSignal, createEffect, For, onCleanup } from "solid-js";
+import { createSignal, createEffect } from "solid-js";
 
 type KanbanTaskProps = {
     kanban_list: KanbanMarkdown.KanbanList;
@@ -10,7 +10,6 @@ type KanbanTaskProps = {
 
 export const KanbanTask: Component<KanbanTaskProps> = (props) => {
     const { kanban_list, kanban_task } = props;
-
     const [getName, setName] = createSignal<string>(kanban_task.name);
     const [getPreviousName, setPreviousName] = createSignal<string>(kanban_task.name);
 
@@ -55,8 +54,8 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
                 style="background-color: rgba(255, 255, 255, 0.1);"
                 onBlur={onBlur}
                 onKeyPress={onKeyPress}
-                textContent={getName()}
             >
+                {getName()}
             </span>
         </a>
     );

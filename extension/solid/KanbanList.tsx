@@ -2,7 +2,7 @@ import { KanbanMarkdown } from './types';
 import TextareaAutosize from "solid-textarea-autosize";
 
 import type { Component } from 'solid-js';
-import { createSignal, createEffect, For, onCleanup } from "solid-js";
+import { Show, For, createSignal, createEffect, onCleanup } from "solid-js";
 
 import { KanbanTask } from './KanbanTask';
 
@@ -55,13 +55,15 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                 onKeyPress={onKeyPress}
                 textContent={getName()}
             />
-            <div class="min-h-2 flex-grow">
-                <For each={kanban_list.tasks}>
-                    {(kanban_task, index) => (
-                        <KanbanTask kanban_list={kanban_list} kanban_task={kanban_task} />
-                    )}
-                </For>
-            </div>
+            <Show when={kanban_list.tasks}>
+                <div class="min-h-2 flex-grow">
+                    <For each={kanban_list.tasks}>
+                        {(kanban_task, index) => (
+                            <KanbanTask kanban_list={kanban_list} kanban_task={kanban_task} />
+                        )}
+                    </For>
+                </div>
+            </Show>
         </div>
     );
 }

@@ -128,6 +128,9 @@ class KanbanMarkdownEditorProvider {
                 <title>Kanban Markdown</title>
             </head>
             <body>
+                <script nonce="${nonce}">
+                    const vscode = acquireVsCodeApi();
+                </script>
                 <noscript>You need to enable JavaScript to run this app.</noscript>
                 <div id="root"></div>
 
