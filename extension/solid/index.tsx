@@ -15,8 +15,8 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 let rendered: boolean = false;
 
 window.addEventListener('message', function (event) {
-    const { type, text: { json: kanbanBoard } } = event.data;
-    if (type === 'update') {
+    const kanbanBoard = JSON.parse(event.data.text).json;
+    if (event.data.type === 'update') {
         if (rendered) {
             hydrate(() => <App kanban_board={kanbanBoard} />, root!);
         } else {
@@ -24,13 +24,15 @@ window.addEventListener('message', function (event) {
         }
         rendered = true;
         // @ts-ignore
-        vscode.setState({ json: kanbanBoard });
+        vscode.setState({ kanban_board: kanbanBoard });
     }
 });
 
+// @ts-ignore
 const state = vscode.getState();
 if (state) {
-    const { json: kanbanBoard } = state;
+    const kanbanBoard = state.kanban_board;
+    console.log('state', state);
     if (rendered) {
         hydrate(() => <App kanban_board={kanbanBoard} />, root!);
     } else {

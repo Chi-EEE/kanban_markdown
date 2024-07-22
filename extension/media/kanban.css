@@ -30,30 +30,6 @@
     background-color: rgba(255, 255, 255, 0.3);
 }
 
-.add-card {
-    background-color: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 3px;
-    color: white;
-    padding: 10px;
-    cursor: pointer;
-    font-size: 14px;
-    margin-top: 10px;
-    width: 100%;
-}
-
-.add-card:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-}
-
-#color-picker {
-    padding: 10px;
-    background-color: rgba(0, 122, 204, 0.4);
-    color: white;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-}
 
 .card-menu {
     background: none;

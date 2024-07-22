@@ -50,8 +50,6 @@ class KanbanMarkdownEditorProvider {
             type: 'parse',
             file: document.uri.fsPath,
         }).then(() => {
-            console.log('File parsed');
-
             webviewPanel.webview.options = {
                 enableScripts: true,
             };
@@ -64,7 +62,7 @@ class KanbanMarkdownEditorProvider {
             function updateWebview(data) {
                 webviewPanel.webview.postMessage({
                     type: 'update',
-                    text: data,
+                    text: JSON.stringify(data),
                 });
             }
 
@@ -128,6 +126,8 @@ class KanbanMarkdownEditorProvider {
                 <meta charset="UTF-8">
                 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <!-- Issue: https://github.com/withastro/astro/pull/2359 -->
+                <script nonce="${nonce}">window._$HY||(_$HY={events:[],completed:new WeakSet,r:{}})</script>
                 <script type="module" nonce="${nonce}" crossorigin src="${scriptUri}"></script>
                 <link href="${styleMainUri}" crossorigin rel="stylesheet" />
                 <title>Kanban Markdown</title>

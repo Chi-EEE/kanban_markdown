@@ -31,7 +31,7 @@
         ]
     },
     "scripts": {
-		"vscode:prepublish": "pnpm run dev",
+        "vscode:prepublish": "pnpm run dev",
         "start": "vite",
         "dev": "vite",
         "build": "vite build",
@@ -44,7 +44,7 @@
         "@types/jquery": "^3.5.30",
         "@types/jqueryui": "^1.12.23",
         "@types/mocha": "^10.0.7",
-        "@types/node": "20.x",
+        "@types/node": "~20.14.10",
         "@types/vscode": "^1.91.0",
         "@vscode/test-cli": "^0.0.9",
         "@vscode/test-electron": "^2.4.0",

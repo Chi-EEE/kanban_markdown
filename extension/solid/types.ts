@@ -29,7 +29,7 @@ export namespace KanbanMarkdown {
         name: string;
         counter: number;
         checked: boolean;
-        description?: string[];
+        description?: string;
         labels?: KanbanLabel[];
         attachments?: any[];
         checklist?: any[];
