@@ -26,7 +26,7 @@ const App: Component<AppProps> = (props) => {
     // document.documentElement.style.setProperty('--menu-background-color', pSBC(-0.4, kanban_board.properties.color));
 
     return (
-        <div class={styles.App} style="height:100vh;">
+        <div class={styles.App}>
             <TitleBar kanban_board={getKanbanBoard()} />
             <div class={styles.kanban_board}>
                 <Show when={getKanbanBoard().lists}>

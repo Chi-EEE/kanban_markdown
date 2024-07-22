@@ -4,7 +4,6 @@
     width: 100%;
     padding: 10px;
     box-sizing: border-box;
-    position: fixed;
     top: 0;
     z-index: 1000;
     display: flex;
@@ -33,10 +32,6 @@
 }
 
 .background_color_picker {
-    padding: 10px;
-    background-color: rgba(0, 122, 204, 0.4);
-    color: white;
-    border: none;
     border-radius: 3px;
     cursor: pointer;
 }

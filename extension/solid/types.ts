@@ -1,5 +1,3 @@
-// KanbanBoard.ts
-
 export namespace KanbanMarkdown {
     export interface KanbanBoard {
         name: string;
