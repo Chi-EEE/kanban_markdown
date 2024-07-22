@@ -2,7 +2,7 @@
 import './index.css';
 import { render, hydrate } from 'solid-js/web';
 
-import App from './App';
+import App from './layout/App';
 
 const root = document.getElementById('root');
 
@@ -32,7 +32,6 @@ window.addEventListener('message', function (event) {
 const state = vscode.getState();
 if (state) {
     const kanbanBoard = state.kanban_board;
-    console.log('state', state);
     if (rendered) {
         hydrate(() => <App kanban_board={kanbanBoard} />, root!);
     } else {

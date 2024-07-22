@@ -3,17 +3,18 @@ import { Show, For, createSignal, createEffect, onMount } from "solid-js";
 
 import styles from './KanbanList.module.css';
 
-import { KanbanMarkdown } from './types';
+import { KanbanMarkdown } from '../../types';
 import { KanbanTask } from './KanbanTask';
 
-import { applyAutoResize } from './utils';
+import { applyAutoResize } from '../../utils';
 
 type KanbanListProps = {
     kanban_list: KanbanMarkdown.KanbanList;
+    setTaskModalState: (state: boolean) => void;
 };
 
 export const KanbanList: Component<KanbanListProps> = (props) => {
-    const { kanban_list } = props;
+    const { kanban_list, setTaskModalState } = props;
 
     const [getName, setName] = createSignal<string>(kanban_list.name);
     const [getPreviousName, setPreviousName] = createSignal<string>(kanban_list.name);
@@ -76,7 +77,7 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                 <Show when={getKanbanListTasks()}>
                     <For each={getKanbanListTasks()}>
                         {(kanban_task, index) => (
-                            <KanbanTask kanban_list={kanban_list} kanban_task={kanban_task} />
+                            <KanbanTask kanban_list={kanban_list} kanban_task={kanban_task} setTaskModalState={setTaskModalState} />
                         )}
                     </For>
                 </Show>

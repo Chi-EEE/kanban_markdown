@@ -1,36 +1,4 @@
 $(document).ready(function () {
-    /**
-     * Load the Kanban board data into the UI
-     * @param {KanbanBoard} board 
-     */
-    function loadKanbanBoard(board) {
-        const $board = $('#board').empty();
-        board.lists.forEach(function (list, index) {
-            const $list = createListElement(board, list, index + 1);
-            $board.append($list);
-            autoResize($list.find('.list-title'));
-        });
-
-        const $label_list = $('#modal-label-list').empty();
-        console.log(board.labels)
-        board.labels.forEach(function (label) {
-            const $newLabel = $('<button>')
-                .addClass('label-button')
-                .css('background-color', label.color)
-                .text(label.name).on('click', function () {
-                    const $currentCard = $card_modal.data('current-card');
-                    if ($currentCard) {
-                        toggleLabelOnCard(label, $currentCard, $currentCard.find('.label-bar'));
-                    }
-                    $('#modal-label-menu').show();
-                });
-            $label_list.append($newLabel);
-        });
-
-        const $addListButton = $('<button>').attr('id', 'add-list').text('Add another list +');
-        $board.append($addListButton);
-        bindAddListButtonEvent($addListButton);
-    };
 
     window.addEventListener('message', function (event) {
         const { type, text: { json: kanbanBoard } } = event.data;
@@ -113,7 +81,7 @@ $(document).ready(function () {
         const $listActionsButton = createListActionsButton($listTitle, $list);
 
         $list.append($listTitle, $listActionsButton, $cards, $addCardButton);
-      
+
         return $list;
     };
 
@@ -246,47 +214,6 @@ $(document).ready(function () {
         }
 
         $card.data('labels', labels);
-    }
-
-    /**
-     * 
-     * @param {JQuery<HTMLElement>} $card 
-     * @param {JQuery<HTMLElement>} $cardMenuActions 
-     * @returns 
-     */
-    function createCardMenuButton($card, $cardMenuActions) {
-        return $('<button>').addClass('card-menu').text('\u2710').on('click', function (event) {
-            event.stopPropagation();
-            $cardMenuActions.toggle();
-        });
-    };
-
-    /**
-     * 
-     * @param {JQuery<HTMLElement>} $card 
-     * @param {*} $cardTitleInput 
-     * @returns 
-     */
-    function createCardMenuActions($card, $cardTitleInput) {
-        const $cardMenuActions = $('<div>').addClass('card-menu-actions').hide();
-        const $editCardButton = $('<button>').addClass('edit-card').text('Edit').on('click', function (event) {
-            event.stopPropagation();
-            editCard($card, $cardTitleInput);
-            $cardMenuActions.hide();
-        });
-
-        const $deleteCardButton = $('<button>').addClass('delete-card').text('Delete').on('click', function (event) {
-            event.stopPropagation();
-            vscode.postMessage({
-                type: 'delete',
-                path: `list[${$card.closest('.list').data('name')}].tasks[${$card.data('name')}][${$card.data('counter')}]`
-            });
-            $card.remove();
-            $cardMenuActions.hide();
-        });
-
-        $cardMenuActions.append($editCardButton, $deleteCardButton);
-        return $cardMenuActions;
     }
 
     function createAddCardButton($listTitle, $cards) {
@@ -558,34 +485,6 @@ $(document).ready(function () {
         });
     }
 
-    $('#modal-label-button').on('click', function (event) {
-        event.stopPropagation();
-        $('#modal-label-menu').toggle();
-        if ($('#modal-label-menu').is(":visible")) {
-            $('#modal-attachment-menu').hide();
-            positionMenu($('#modal-label-menu'), $(this));
-        }
-    });
-
-    $('#modal-attachment-button').on('click', function (event) {
-        event.stopPropagation();
-        $('#modal-attachment-menu').toggle();
-        if ($('#modal-attachment-menu').is(":visible")) {
-            $('#modal-label-menu').hide();
-            positionMenu($('#modal-attachment-menu'), $(this));
-        }
-    });
-
-    $('#modal-create-label-button').on('click', function () {
-        $('#modal-label-select').hide();
-        $('#modal-label-create').show();
-    });
-
-    $('#modal-back-to-label-select').on('click', function () {
-        $('#modal-label-create').hide();
-        $('#modal-label-select').show();
-    });
-
     $('#modal-create-label').on('click', function () {
         /** @type {string} */
         // @ts-ignore
@@ -644,17 +543,13 @@ $(document).ready(function () {
         $('.card-menu-actions, .list-actions-menu').hide();
     }
 
-    $('#modal-close').on('click', function () {
-        $card_modal.hide();
-    });
+    // $(window).on('click', function () {
+    //     closeAllMenus();
+    // });
 
-    $(window).on('click', function () {
-        closeAllMenus();
-    });
-
-    $(document).on('click', '.menu', function (event) {
-        event.stopPropagation();
-    });
+    // $(document).on('click', '.menu', function (event) {
+    //     event.stopPropagation();
+    // });
 
     $('#modal-save-card').on('click', function () {
         const cardTitle = $('#modal-edit-card-title').val();
