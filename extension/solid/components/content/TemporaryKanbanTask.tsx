@@ -1,4 +1,4 @@
-import styles from './TaskModal.module.css';
+import styles from './KanbanTask.module.css';
 
 import type { Accessor, Component, Setter } from 'solid-js';
 import { KanbanMarkdown } from "../../types";

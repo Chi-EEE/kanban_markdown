@@ -9,13 +9,14 @@ type TaskModalProps = {
     kanban_board: KanbanMarkdown.KanbanBoard;
     setTaskModalState: Setter<boolean>;
 };
+
 export const TaskModal: Component<TaskModalProps> = (props) => {
     const { kanban_board, setTaskModalState } = props;
 
     const [getLabelMenuState, setLabelMenuState] = createSignal<boolean>(false);
     const [getAttachmentMenuState, setAttachmentMenuState] = createSignal<boolean>(false);
 
-    let label_menu_reference: HTMLDivElement;
+    const [getLabelMenuReference, setLabelMenuReference] = createSignal<HTMLDivElement>();
     let attachment_menu_reference: HTMLDivElement;
 
     function positionMenu(menu, button) {
@@ -30,7 +31,6 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
         menu.style.display = 'flex';
         menu.style.flexDirection = 'column'; // Added to make the menu vertical
     }
-
 
     return (
         <div class={styles.modal}>
@@ -63,7 +63,7 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                             setLabelMenuState(b => !b);
                             if (getLabelMenuState()) {
                                 setAttachmentMenuState(false);
-                                positionMenu(label_menu_reference, event.target);
+                                positionMenu(getLabelMenuReference(), event.target);
                             }
                         }}>Labels</button>
                     <button id={styles.modal_attachment_button}
@@ -78,10 +78,10 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                 </div>
             </div>
             <Show when={getLabelMenuState()}>
-                <LabelMenu ref={label_menu_reference} />
+                <LabelMenu setLabelMenuReference={setLabelMenuReference} />
             </Show>
             <Show when={getAttachmentMenuState()}>
-                <div ref={attachment_menu_reference} id="modal-attachment-menu" class="menu">Attachment menu content</div>
+                <div ref={attachment_menu_reference} class={styles.menu}>Attachment menu content</div>
             </Show>
         </div>
     );

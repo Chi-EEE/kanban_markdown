@@ -142,6 +142,10 @@
     flex-direction: column;
 }
 
-#modal-label-create {
-    display: none;
+.menu {
+    position: absolute;
+    background-color: var(--menu-background-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    z-index: 1000;
 }

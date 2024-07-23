@@ -1,26 +1,32 @@
 import styles from '../TaskModal.module.css';
 
 import { createSignal, Show } from "solid-js";
-import type { Component } from 'solid-js';
+import type { Component, Setter } from 'solid-js';
 import { KanbanMarkdown } from "../../../types";
 
-export const LabelMenu: Component = () => {
+type LabelMenuProps = {
+    setLabelMenuReference: Setter<HTMLDivElement>;
+};
+
+export const LabelMenu: Component<LabelMenuProps> = (props) => {
+    const { setLabelMenuReference } = props;
+
     const [getLabelMenuState, setLabelMenuState] = createSignal<string>("select");
 
     return (
-        <div id="modal-label-menu" class="menu">
+        <div ref={(el) => setLabelMenuReference(el)} class={styles.menu}>
             <Show when={getLabelMenuState() === "select"}>
-                <div id="modal-label-select">
+                <div>
                     <h3>Labels</h3>
                     <div id={styles.modal_label_list}></div>
-                    <button id={styles.modal_create_label_button}
+                    <button
                         onClick={() => {
                             setLabelMenuState("create");
                         }}>Create a new label</button>
                 </div>
             </Show>
             <Show when={getLabelMenuState() === "create"}>
-                <div id={styles.modal_label_create}>
+                <div>
                     <h3>Create Label</h3>
                     <label for="modal-new-label-title">Title</label>
                     <input type="text" id="modal-new-label-title" />
