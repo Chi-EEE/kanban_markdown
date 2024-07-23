@@ -18,7 +18,8 @@ window.addEventListener('message', function (event) {
     const kanbanBoard = JSON.parse(event.data.text).json;
     if (event.data.type === 'update') {
         if (rendered) {
-            hydrate(() => <App kanban_board={kanbanBoard} />, root!);
+            // Broken
+            // hydrate(() => <App kanban_board={kanbanBoard} />, root!);
         } else {
             render(() => <App kanban_board={kanbanBoard} />, root!);
         }
@@ -33,7 +34,8 @@ const state = vscode.getState();
 if (state) {
     const kanbanBoard = state.kanban_board;
     if (rendered) {
-        hydrate(() => <App kanban_board={kanbanBoard} />, root!);
+        // Broken
+        // hydrate(() => <App kanban_board={kanbanBoard} />, root!);
     } else {
         render(() => <App kanban_board={kanbanBoard} />, root!);
     }
