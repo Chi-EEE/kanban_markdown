@@ -32,7 +32,7 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
     }
 
 
-    return (<div id="card-modal" class="modal">
+    return (<div class={styles.modal}>
         <div id={styles.modal_content}>
             <span id={styles.modal_close} onClick={() => {
                 setTaskModalState(false);
