@@ -1,4 +1,4 @@
-import type { Component } from 'solid-js';
+import type { Component, Setter } from 'solid-js';
 import { createSignal, createEffect, onMount, Show, For } from "solid-js";
 
 import styles from './KanbanTask.module.css';
@@ -10,7 +10,7 @@ import { applyAutoResize } from '../../utils';
 type KanbanTaskProps = {
     kanban_list: KanbanMarkdown.KanbanList;
     kanban_task: KanbanMarkdown.KanbanTask;
-    setTaskModalState: (state: boolean) => void;
+    setTaskModalState: Setter<boolean>;
 };
 
 export const KanbanTask: Component<KanbanTaskProps> = (props) => {

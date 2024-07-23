@@ -1,16 +1,17 @@
-import type { Component } from 'solid-js';
+import type { Component, Setter } from 'solid-js';
 import { Show, For, createSignal, createEffect, onMount } from "solid-js";
 
 import styles from './KanbanList.module.css';
 
 import { KanbanMarkdown } from '../../types';
 import { KanbanTask } from './KanbanTask';
+import { TemporaryKanbanTask } from './TemporaryKanbanTask';
 
 import { applyAutoResize } from '../../utils';
 
 type KanbanListProps = {
     kanban_list: KanbanMarkdown.KanbanList;
-    setTaskModalState: (state: boolean) => void;
+    setTaskModalState: Setter<boolean>;
 };
 
 export const KanbanList: Component<KanbanListProps> = (props) => {
@@ -22,7 +23,7 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
     const [getKanbanListTasks, setKanbanListTasks] = createSignal<KanbanMarkdown.KanbanTask[]>(kanban_list.tasks);
 
     let kanban_list_name_reference: HTMLTextAreaElement | undefined;
-    let card_textarea_reference: HTMLTextAreaElement | undefined;
+    const [getCardTextAreaReference, setCardTextAreaReference] = createSignal<HTMLTextAreaElement>();
 
     createEffect(() => {
         const currentName = getName();
@@ -82,51 +83,17 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                     </For>
                 </Show>
                 <Show when={getAddButtonVisiblity()} fallback={
-                    <a class={styles.temp_card}>
-                        <textarea
-                            class={styles.temp_card_title}
-                            ref={card_textarea_reference}
-                            placeholder='Enter card title'
-                            onBlur={(event: FocusEvent) => {
-                                const target = event.target as HTMLTextAreaElement;
-                                target.value = target.value.replace(/[\v\n]+/g, '').trim();
-                                if (target.value !== '') {
-                                    const new_task: KanbanMarkdown.KanbanTask = {
-                                        name: target.value,
-                                        checked: false,
-                                        description: '',
-                                        labels: [],
-                                        attachments: [],
-                                        checklist: [],
-                                        counter: 0,
-                                    };
-                                    // @ts-ignore
-                                    vscode.postMessage({
-                                        type: 'create',
-                                        path: `list[${getPreviousName()}].tasks`,
-                                        value: new_task
-                                    });
-                                    setKanbanListTasks([...getKanbanListTasks(), new_task]);
-                                }
-                                target.value = '';
-                                setAddButtonVisiblity(true);
-                            }}
-                            onKeyPress={(event: KeyboardEvent) => {
-                                const target = event.target as HTMLTextAreaElement;
-                                if (event.key === 'Enter' && !event.shiftKey) {
-                                    target.blur();
-                                } else {
-                                    applyAutoResize(target);
-                                }
-                            }}
-                        >
-
-                        </textarea>
-                    </a>
+                    <TemporaryKanbanTask
+                        applyAutoResize={applyAutoResize}
+                        setKanbanListTasks={setKanbanListTasks}
+                        setAddButtonVisiblity={setAddButtonVisiblity}
+                        setCardTextAreaReference={setCardTextAreaReference}
+                        getPreviousName={getPreviousName}
+                    />
                 }>
                     <button class={styles.add_card_button} onClick={() => {
                         setAddButtonVisiblity(false);
-                        card_textarea_reference.focus();
+                        getCardTextAreaReference().focus();
                     }}>Add another card +</button>
                 </Show>
             </div>

@@ -1,12 +1,12 @@
 import styles from './TitleBar.module.css';
 
 import { createSignal } from "solid-js";
-import type { Component } from 'solid-js';
+import type { Component, Setter } from 'solid-js';
 import { KanbanMarkdown } from "../../types";
 
 type TitleBarProps = {
     kanban_board: KanbanMarkdown.KanbanBoard;
-    setColor: (color: string) => void;
+    setColor: Setter<string>;
 };
 export const TitleBar: Component<TitleBarProps> = (props) => {
     const { kanban_board, setColor } = props;

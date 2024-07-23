@@ -5,7 +5,6 @@ import type { Component } from 'solid-js';
 import { KanbanMarkdown } from "../../../types";
 
 export const LabelMenu: Component = () => {
-
     const [getLabelMenuState, setLabelMenuState] = createSignal<string>("select");
 
     return (
