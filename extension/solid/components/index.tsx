@@ -34,8 +34,7 @@ const state = vscode.getState();
 if (state) {
     const kanbanBoard = state.kanban_board;
     if (rendered) {
-        // Broken
-        // hydrate(() => <App kanban_board={kanbanBoard} />, root!);
+        hydrate(() => <App kanban_board={kanbanBoard} />, root!);
     } else {
         render(() => <App kanban_board={kanbanBoard} />, root!);
     }

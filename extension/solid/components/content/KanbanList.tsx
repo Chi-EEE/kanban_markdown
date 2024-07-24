@@ -12,10 +12,12 @@ import { applyAutoResize } from '../../utils';
 type KanbanListProps = {
     kanban_list: KanbanMarkdown.KanbanList;
     setTaskModalState: Setter<boolean>;
+    setSelectedList: Setter<KanbanMarkdown.KanbanList | undefined>;
+    setSelectedTask: Setter<KanbanMarkdown.KanbanTask | undefined>;
 };
 
 export const KanbanList: Component<KanbanListProps> = (props) => {
-    const { kanban_list, setTaskModalState } = props;
+    const { kanban_list, setTaskModalState, setSelectedList, setSelectedTask } = props;
 
     const [getName, setName] = createSignal<string>(kanban_list.name);
     const [getPreviousName, setPreviousName] = createSignal<string>(kanban_list.name);
@@ -31,9 +33,13 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
         if (currentName !== previousName) {
             // @ts-ignore
             vscode.postMessage({
-                type: 'update',
-                path: `list[${previousName}].name`,
-                value: currentName
+                commands: [
+                    {
+                        type: 'update',
+                        path: `list["${encodeURI(previousName)}"].name`,
+                        value: currentName
+                    }
+                ]
             });
             setPreviousName(currentName);
         }
@@ -78,7 +84,13 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                 <Show when={getKanbanListTasks()}>
                     <For each={getKanbanListTasks()}>
                         {(kanban_task, index) => (
-                            <KanbanTask kanban_list={kanban_list} kanban_task={kanban_task} setTaskModalState={setTaskModalState} />
+                            <KanbanTask
+                                kanban_list={kanban_list}
+                                kanban_task={kanban_task}
+                                setTaskModalState={setTaskModalState}
+                                setSelectedList={setSelectedList}
+                                setSelectedTask={setSelectedTask}
+                            />
                         )}
                     </For>
                 </Show>

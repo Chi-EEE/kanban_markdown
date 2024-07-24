@@ -1,17 +1,28 @@
 import styles from './TaskModal.module.css';
 
 import { createSignal, Show } from "solid-js";
-import type { Component, Setter } from 'solid-js';
+import type { Accessor, Component, Setter } from 'solid-js';
 import { KanbanMarkdown } from "../../types";
 import { LabelMenu } from './modal/LabelMenu';
 
 type TaskModalProps = {
-    kanban_board: KanbanMarkdown.KanbanBoard;
+    getKanbanBoard: Accessor<KanbanMarkdown.KanbanBoard>;
+    setKanbanBoard: Setter<KanbanMarkdown.KanbanBoard>;
     setTaskModalState: Setter<boolean>;
+    getSelectedList: Accessor<KanbanMarkdown.KanbanList | undefined>;
+    setSelectedTask: Setter<KanbanMarkdown.KanbanTask | undefined>;
+    getSelectedTask: Accessor<KanbanMarkdown.KanbanTask | undefined>;
 };
 
 export const TaskModal: Component<TaskModalProps> = (props) => {
-    const { kanban_board, setTaskModalState } = props;
+    const {
+        getKanbanBoard,
+        setKanbanBoard,
+        setTaskModalState,
+        getSelectedList,
+        setSelectedTask,
+        getSelectedTask
+    } = props;
 
     const [getLabelMenuState, setLabelMenuState] = createSignal<boolean>(false);
     const [getAttachmentMenuState, setAttachmentMenuState] = createSignal<boolean>(false);
@@ -32,6 +43,9 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
         menu.style.flexDirection = 'column'; // Added to make the menu vertical
     }
 
+    let modal_edit_card_title_reference: HTMLTextAreaElement;
+    let modal_edit_card_description: HTMLTextAreaElement;
+
     return (
         <div class={styles.modal}>
             <div id={styles.modal_content}>
@@ -45,13 +59,39 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                     </div>
                     <div id={styles.modal_body}>
                         <label for="modal_edit_card_title">Title</label>
-                        <textarea id={styles.modal_edit_card_title} placeholder="Enter card title"></textarea>
+                        <textarea ref={modal_edit_card_title_reference} id={styles.modal_edit_card_title} placeholder="Enter card title">{getSelectedTask().name}</textarea>
                         <label for="modal_edit_card_description">Description</label>
-                        <textarea id={styles.modal_edit_card_description} placeholder="Enter card description"></textarea>
+                        <textarea ref={modal_edit_card_description} id={styles.modal_edit_card_description} placeholder="Enter card description">{getSelectedTask().description}</textarea>
                     </div>
                     <div id={styles.modal_footer}>
                         <button id={styles.modal_save_card} onClick={() => {
                             // TODO: Save card
+                            const selectedList = getSelectedList();
+                            const selectedTask = getSelectedTask();
+
+                            selectedTask.name = modal_edit_card_title_reference.value;
+                            selectedTask.description = modal_edit_card_description.value;
+                            // Improve this
+                            // @ts-ignore
+                            vscode.postMessage({
+                                commands: [
+                                    {
+                                        type: 'update',
+                                        path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].name`,
+                                        value: selectedTask.name
+                                    },
+                                    {
+                                        type: 'update',
+                                        path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].description`,
+                                        value: selectedTask.description
+                                    },
+                                    {
+                                        type: 'update',
+                                        path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].checked`,
+                                        value: selectedTask.checked
+                                    },
+                                ]
+                            });
                             setTaskModalState(false);
                         }}>Save</button>
                     </div>
@@ -78,7 +118,14 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                 </div>
             </div>
             <Show when={getLabelMenuState()}>
-                <LabelMenu setLabelMenuReference={setLabelMenuReference} />
+                <LabelMenu
+                    setLabelMenuReference={setLabelMenuReference}
+                    getKanbanBoard={getKanbanBoard}
+                    setKanbanBoard={setKanbanBoard}
+                    getSelectedList={getSelectedList}
+                    setSelectedTask={setSelectedTask}
+                    getSelectedTask={getSelectedTask}
+                />
             </Show>
             <Show when={getAttachmentMenuState()}>
                 <div ref={attachment_menu_reference} class={styles.menu}>Attachment menu content</div>

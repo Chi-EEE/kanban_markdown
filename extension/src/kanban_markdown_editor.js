@@ -84,13 +84,15 @@ class KanbanMarkdownEditorProvider {
             });
 
             webviewPanel.webview.onDidReceiveMessage(e => {
-                switch (e.type) {
-                    case 'update':
-                    case 'create':
-                    case 'delete':
-                    case 'move':
-                        this.sendCommand(document, e);
-                        return;
+                for (const command of e.commands) {
+                    switch (command.type) {
+                        case 'update':
+                        case 'create':
+                        case 'delete':
+                        case 'move':
+                            this.sendCommand(document, command);
+                            return;
+                    }
                 }
             });
 

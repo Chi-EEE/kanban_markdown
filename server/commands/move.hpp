@@ -67,7 +67,7 @@ namespace server::commands
 				kanban_list->tasks.insert(kanban_list->tasks.begin() + move_value->index, kanban_task);
 			}
 			else {
-				static re2::RE2 destination_pattern(R"(\w+\[(.+)\].tasks)");
+				static re2::RE2 destination_pattern(R"(\w+\[\"(.+)\"\].tasks)");
 				std::string destination_list;
 				if (!RE2::PartialMatch(move_value->destination, destination_pattern, &destination_list))
 				{

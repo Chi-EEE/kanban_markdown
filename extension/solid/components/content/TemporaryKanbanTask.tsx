@@ -1,4 +1,4 @@
-import styles from './KanbanTask.module.css';
+import styles from './KanbanList.module.css';
 
 import type { Accessor, Component, Setter } from 'solid-js';
 import { KanbanMarkdown } from "../../types";
@@ -10,6 +10,7 @@ type TemporaryKanbanTaskProps = {
     setCardTextAreaReference: Setter<HTMLTextAreaElement>;
     getPreviousName: Accessor<string>;
 };
+
 export const TemporaryKanbanTask: Component<TemporaryKanbanTaskProps> = (props) => {
     const {
         applyAutoResize,
@@ -40,9 +41,13 @@ export const TemporaryKanbanTask: Component<TemporaryKanbanTaskProps> = (props) 
                         };
                         // @ts-ignore
                         vscode.postMessage({
-                            type: 'create',
-                            path: `list[${getPreviousName()}].tasks`,
-                            value: new_task
+                            commands: [
+                                {
+                                    type: 'create',
+                                    path: `list["${encodeURI(getPreviousName())}"].tasks`,
+                                    value: new_task
+                                }
+                            ]
                         });
                         setKanbanListTasks(tasks => [...tasks, new_task]);
                     }

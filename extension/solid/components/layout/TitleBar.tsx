@@ -1,6 +1,6 @@
 import styles from './TitleBar.module.css';
 
-import { createSignal, Show } from "solid-js";
+import { createSignal, Show, Switch, Match } from "solid-js";
 import type { Component, Setter } from 'solid-js';
 import { KanbanMarkdown } from "../../types";
 
@@ -12,7 +12,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
     const { kanban_board, setColor } = props;
 
     const [getName, setName] = createSignal<string>(kanban_board.name);
-    const [getTitleState, setTitleState] = createSignal<boolean>(false);
+    const [getTitleState, setTitleState] = createSignal<string>("text");
 
     let title_input_reference: HTMLInputElement;
 
@@ -20,23 +20,24 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
         <div class={styles.title_bar}>
             <div
                 onClick={() => {
-                    setTitleState(true);
+                    setTitleState("input");
                     title_input_reference.focus();
                 }}
-                onMouseLeave={() => setTitleState(false)}
+                onMouseLeave={() => setTitleState("text")}
             >
-                <Show
-                    when={getTitleState()}
-                    fallback={
+                <Switch>
+                    <Match when={getTitleState() == "text"}>
                         <h1 class={styles.kanban_board_name}>{getName()}</h1>
-                    }>
-                    <input ref={title_input_reference} type="text" class={styles.edit_kanban_board_name_input}
-                        onInput={(event) => {
-                            setName((event.target as HTMLInputElement).value);
-                        }}
-                        value={getName()}
-                    />
-                </Show>
+                    </Match>
+                    <Match when={getTitleState() === "input"}>
+                        <input ref={title_input_reference} type="text" class={styles.edit_kanban_board_name_input}
+                            onInput={(event) => {
+                                setName((event.target as HTMLInputElement).value);
+                            }}
+                            value={getName()}
+                        />
+                    </Match>
+                </Switch>
             </div>
             <input type="color" class={styles.background_color_picker} value={kanban_board.properties.color}
                 onInput={(event) => {
@@ -44,9 +45,13 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
                     setColor(color)
                     // @ts-ignore
                     vscode.postMessage({
-                        type: 'update',
-                        path: 'color',
-                        value: color
+                        commands: [
+                            {
+                                type: 'update',
+                                path: 'color',
+                                value: color
+                            }
+                        ]
                     });
                 }} />
         </div>

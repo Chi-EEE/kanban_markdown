@@ -11,10 +11,12 @@ type KanbanTaskProps = {
     kanban_list: KanbanMarkdown.KanbanList;
     kanban_task: KanbanMarkdown.KanbanTask;
     setTaskModalState: Setter<boolean>;
+    setSelectedList: Setter<KanbanMarkdown.KanbanList | undefined>;
+    setSelectedTask: Setter<KanbanMarkdown.KanbanTask | undefined>;
 };
 
 export const KanbanTask: Component<KanbanTaskProps> = (props) => {
-    const { kanban_list, kanban_task, setTaskModalState } = props;
+    const { kanban_list, kanban_task, setTaskModalState, setSelectedList, setSelectedTask } = props;
 
     const [getKanbanLabels, setKanbanLabels] = createSignal<KanbanMarkdown.KanbanLabel[] | undefined>(kanban_task.labels);
 
@@ -29,33 +31,17 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
         if (currentName !== previousName) {
             // @ts-ignore
             vscode.postMessage({
-                type: 'update',
-                path: `list[${kanban_list.name}].tasks[${previousName}].name`,
-                value: currentName
+                commands: [
+                    {
+                        type: 'update',
+                        path: `list["${encodeURI(kanban_list.name)}"].tasks["${encodeURI(previousName)}"].name`,
+                        value: currentName
+                    }
+                ]
             });
             setPreviousName(currentName);
         }
     });
-
-    function onBlur(event: FocusEvent) {
-        const target = event.target as HTMLTextAreaElement;
-        target.value = target.value.replace(/[\v\n]+/g, '').trim();
-        setName(target.value);
-    }
-
-    function onKeyPress(event: KeyboardEvent) {
-        const target = event.target as HTMLTextAreaElement;
-        if (event.key === 'Enter' && !event.shiftKey) {
-            target.blur();
-        } else {
-            applyAutoResize(target);
-        }
-    }
-
-    function onClick(event: MouseEvent) {
-        const target = event.target as HTMLTextAreaElement;
-        setTaskModalState(true);
-    }
 
     onMount(() => {
         if (kanban_task_name_reference) {
@@ -67,14 +53,34 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
     const [getTaskMenuActionsState, setTaskMenuActionsState] = createSignal<boolean>(false);
 
     return (
-        <a class={styles.kanban_task} ref={kanban_task_name_reference} onClick={onClick}
+        <a class={styles.kanban_task} ref={kanban_task_name_reference}
+            onClick={(event) => {
+                const target = event.target as HTMLTextAreaElement;
+                setSelectedList(kanban_list);
+                setSelectedTask(kanban_task);
+                setTaskModalState(true);
+            }}
             onMouseOver={() => {
                 setTaskMenuState(true);
             }}
             onMouseLeave={() => {
                 setTaskMenuState(false);
             }}>
-            <span class={styles.kanban_task_title} onBlur={onBlur} onKeyPress={onKeyPress}>
+            <span class={styles.kanban_task_title}
+                onBlur={(event) => {
+                    const target = event.target as HTMLTextAreaElement;
+                    target.value = target.value.replace(/[\v\n]+/g, '').trim();
+                    setName(target.value);
+                }}
+                onKeyPress={(event) => {
+                    const target = event.target as HTMLTextAreaElement;
+                    if (event.key === 'Enter' && !event.shiftKey) {
+                        target.blur();
+                    } else {
+                        applyAutoResize(target);
+                    }
+                }}
+            >
                 {getName()}
             </span>
             <Show when={getTaskMenuState()}>
@@ -101,8 +107,12 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
                             event.stopPropagation();
                             // @ts-ignore
                             vscode.postMessage({
-                                type: 'delete',
-                                path: `list[${kanban_list.name}].tasks[${kanban_task.name}][${kanban_task.counter}]`
+                                commands: [
+                                    {
+                                        type: 'delete',
+                                        path: `list["${encodeURI(kanban_list.name)}"].tasks["${encodeURI(kanban_task.name)}"][${kanban_task.counter}]`
+                                    }
+                                ]
                             });
                             setTaskMenuActionsState(false);
                         }} >
@@ -110,24 +120,28 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
                     </button>
                 </div>
             </Show>
-            <div class={styles.kanban_label_bar}>
-                <Show when={getKanbanLabels()}>
+            <Show when={getKanbanLabels() && getKanbanLabels().length > 0}>
+                <div class={styles.kanban_label_bar}>
                     <For each={getKanbanLabels()}>
                         {label => (
                             <button class={styles.kanban_label_button} style={`background-color: ${label.color};`}
                                 onClick={() => {
                                     // @ts-ignore
                                     vscode.postMessage({
-                                        type: 'delete',
-                                        path: `list[${kanban_list.name}].tasks[${kanban_task.name}].labels[${label.name}]`
+                                        commands: [
+                                            {
+                                                type: 'delete',
+                                                path: `list["${encodeURI(kanban_list.name)}"].tasks["${encodeURI(kanban_task.name)}"].labels["${encodeURI(label.name)}"]`
+                                            }
+                                        ]
                                     });
                                 }}>
                                 {label.name}
                             </button>
                         )}
                     </For>
-                </Show>
-            </div>
+                </div>
+            </Show>
         </a>
     );
 }
