@@ -154,17 +154,6 @@
     flex-direction: column;
 }
 
-.label-button,
-.modal-label-button {
-    display: block;
-    margin: 5px 0;
-    padding: 5px;
-    cursor: pointer;
-    border: none;
-    color: white;
-    text-align: left;
-}
-
 .label {
     display: inline-block;
     padding: 3px 5px;

@@ -28,9 +28,23 @@ export const LabelMenu: Component<LabelMenuProps> = (props) => {
                     <h3>Labels</h3>
                     <div id={styles.modal_label_list}>
                         <Index each={getKanbanBoard().labels}>
-                            {(label, index) => (
-                                <div class={styles.modal_label} style={`background-color: ${label().color}`}>
-                                    {label().name}
+                            {(kanban_label, index) => (
+                                <div class={styles.modal_label} style={`background-color: ${kanban_label().color}`}
+                                    onClick={() => {
+                                        const selectedList = getSelectedList();
+                                        const selectedTask = getSelectedTask();
+                                        // @ts-ignore
+                                        vscode.postMessage({
+                                            commands: [
+                                                {
+                                                    action: 'create',
+                                                    path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].labels`,
+                                                    value: kanban_label(),
+                                                }
+                                            ]
+                                        });
+                                    }}>
+                                    {kanban_label().name}
                                 </div>
                             )}
                         </Index>

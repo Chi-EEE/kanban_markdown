@@ -142,6 +142,16 @@
     flex-direction: column;
 }
 
+.modal_label {
+    display: block;
+    margin: 5px 0;
+    padding: 5px;
+    cursor: pointer;
+    border: none;
+    color: white;
+    text-align: left;
+}
+
 .menu {
     position: absolute;
     background-color: var(--menu-background-color);

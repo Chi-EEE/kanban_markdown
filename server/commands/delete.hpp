@@ -100,6 +100,7 @@ namespace server::commands
 			std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = *kanban_label_iterator;
 			kanban_label->tasks.erase(std::remove_if(kanban_label->tasks.begin(), kanban_label->tasks.end(), [&kanban_task](const std::shared_ptr<kanban_markdown::KanbanTask>& x)
 				{ return *x == *kanban_task; }), kanban_label->tasks.end());
+			kanban_task->labels.erase(kanban_label_iterator);
 		}
 
 		void editTaskLabelName(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task, std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label) final {

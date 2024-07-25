@@ -1,6 +1,6 @@
 import styles from './TaskModal.module.css';
 
-import { createSignal, Show } from "solid-js";
+import { createSignal, Index, Show } from "solid-js";
 import type { Accessor, Component, Setter } from 'solid-js';
 import { KanbanMarkdown } from "../../types";
 import { LabelMenu } from './modal/LabelMenu';
@@ -55,7 +55,34 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                 <div id={styles.modal_main}>
                     <div id={styles.modal_header}>
                         <h2>Edit Card</h2>
-                        <div id={styles.modal_label_bar}></div>
+                        <Show when={getSelectedTask().labels && getSelectedTask().labels.length > 0}>
+                            <div id={styles.modal_label_bar}>
+                                <Index each={getSelectedTask().labels} >
+                                    {(kanban_label, index) => (
+                                        <div class={styles.modal_label} style={`background-color: ${kanban_label().color}`}
+                                            onClick={() => {
+                                                const selectedList = getSelectedList();
+                                                const selectedTask = getSelectedTask();
+                                                // @ts-ignore
+                                                vscode.postMessage({
+                                                    commands: [
+                                                        {
+                                                            action: 'delete',
+                                                            path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].labels["${encodeURI(kanban_label().name)}"]`
+                                                        }
+                                                    ]
+                                                });
+                                                setSelectedTask(selectedTask => {
+                                                    selectedTask.labels = selectedTask.labels.filter(label => label.name !== kanban_label().name);
+                                                    return selectedTask;
+                                                })
+                                            }}>
+                                            {kanban_label().name}
+                                        </div>
+                                    )}
+                                </Index>
+                            </div>
+                        </Show>
                     </div>
                     <div id={styles.modal_body}>
                         <label for="modal_edit_card_title">Title</label>
@@ -65,12 +92,8 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                     </div>
                     <div id={styles.modal_footer}>
                         <button id={styles.modal_save_card} onClick={() => {
-                            // TODO: Save card
                             const selectedList = getSelectedList();
                             const selectedTask = getSelectedTask();
-
-                            selectedTask.name = modal_edit_card_title_reference.value;
-                            selectedTask.description = modal_edit_card_description.value;
                             // Improve this
                             // @ts-ignore
                             vscode.postMessage({
@@ -91,6 +114,11 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                                         value: selectedTask.checked
                                     },
                                 ]
+                            });
+                            setSelectedTask(selectedTask => {
+                                selectedTask.name = modal_edit_card_title_reference.value;
+                                selectedTask.description = modal_edit_card_description.value;
+                                return selectedTask;
                             });
                             setTaskModalState(false);
                         }}>Save</button>
