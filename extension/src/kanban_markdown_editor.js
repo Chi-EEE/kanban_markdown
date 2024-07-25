@@ -84,16 +84,7 @@ class KanbanMarkdownEditorProvider {
             });
 
             webviewPanel.webview.onDidReceiveMessage(e => {
-                for (const command of e.commands) {
-                    switch (command.type) {
-                        case 'update':
-                        case 'create':
-                        case 'delete':
-                        case 'move':
-                            this.sendCommand(document, command);
-                            return;
-                    }
-                }
+                this.sendCommands(document, e);
             });
 
             this.server.sendRequest({
@@ -151,16 +142,10 @@ class KanbanMarkdownEditorProvider {
      * @param {*} e 
      * @returns 
      */
-    sendCommand(document, e) {
+    sendCommands(document, e) {
         this.server.sendRequest({
             type: 'commands',
-            commands: [
-                {
-                    action: e.type,
-                    path: e.path,
-                    value: e.value
-                }
-            ]
+            commands: e.commands,
         }).then(() => {
             return this.server.sendRequest({
                 type: 'get',

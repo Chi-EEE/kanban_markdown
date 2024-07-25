@@ -52,12 +52,13 @@ export const LabelMenu: Component<LabelMenuProps> = (props) => {
                         onClick={() => {
                             const name = modal_new_label_name_input_reference.value;
                             const color = modal_new_label_color_reference.value;
+                            const selectedList = getSelectedList();
                             const selectedTask = getSelectedTask();
                             // @ts-ignore
                             vscode.postMessage({
                                 commands: [
                                     {
-                                        type: 'create',
+                                        action: 'create',
                                         path: `labels`,
                                         value: {
                                             name: name,
@@ -65,8 +66,8 @@ export const LabelMenu: Component<LabelMenuProps> = (props) => {
                                         }
                                     },
                                     {
-                                        type: 'create',
-                                        path: `list["${encodeURI(selectedTask.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].labels`,
+                                        action: 'create',
+                                        path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].labels`,
                                         value: {
                                             name: name,
                                             color: color,

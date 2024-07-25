@@ -1,5 +1,5 @@
 import type { Component, Setter } from 'solid-js';
-import { createSignal, createEffect, onMount, Show, For } from "solid-js";
+import { createSignal, createEffect, onMount, Show, For, Switch, Match } from "solid-js";
 
 import styles from './KanbanTask.module.css';
 
@@ -33,7 +33,7 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
             vscode.postMessage({
                 commands: [
                     {
-                        type: 'update',
+                        action: 'update',
                         path: `list["${encodeURI(kanban_list.name)}"].tasks["${encodeURI(previousName)}"].name`,
                         value: currentName
                     }
@@ -109,7 +109,7 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
                             vscode.postMessage({
                                 commands: [
                                     {
-                                        type: 'delete',
+                                        action: 'delete',
                                         path: `list["${encodeURI(kanban_list.name)}"].tasks["${encodeURI(kanban_task.name)}"][${kanban_task.counter}]`
                                     }
                                 ]
@@ -130,7 +130,7 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
                                     vscode.postMessage({
                                         commands: [
                                             {
-                                                type: 'delete',
+                                                action: 'delete',
                                                 path: `list["${encodeURI(kanban_list.name)}"].tasks["${encodeURI(kanban_task.name)}"].labels["${encodeURI(label.name)}"]`
                                             }
                                         ]

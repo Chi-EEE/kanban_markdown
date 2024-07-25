@@ -171,7 +171,6 @@ namespace server
 					if (s[i] == '\"')
 					{
 						flag = !flag;
-						continue;
 					}
 				}
 

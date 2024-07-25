@@ -76,17 +76,17 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                             vscode.postMessage({
                                 commands: [
                                     {
-                                        type: 'update',
+                                        action: 'update',
                                         path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].name`,
                                         value: selectedTask.name
                                     },
                                     {
-                                        type: 'update',
+                                        action: 'update',
                                         path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].description`,
                                         value: selectedTask.description
                                     },
                                     {
-                                        type: 'update',
+                                        action: 'update',
                                         path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].checked`,
                                         value: selectedTask.checked
                                     },

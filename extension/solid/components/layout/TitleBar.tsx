@@ -47,7 +47,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
                     vscode.postMessage({
                         commands: [
                             {
-                                type: 'update',
+                                action: 'update',
                                 path: 'color',
                                 value: color
                             }

@@ -43,7 +43,7 @@ export const TemporaryKanbanTask: Component<TemporaryKanbanTaskProps> = (props) 
                         vscode.postMessage({
                             commands: [
                                 {
-                                    type: 'create',
+                                    action: 'create',
                                     path: `list["${encodeURI(getPreviousName())}"].tasks`,
                                     value: new_task
                                 }

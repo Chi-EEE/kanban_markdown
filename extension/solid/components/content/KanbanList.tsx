@@ -35,7 +35,7 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
             vscode.postMessage({
                 commands: [
                     {
-                        type: 'update',
+                        action: 'update',
                         path: `list["${encodeURI(previousName)}"].name`,
                         value: currentName
                     }
