@@ -1,4 +1,4 @@
-import type { Component, Setter } from 'solid-js';
+import type { Accessor, Component, Setter } from 'solid-js';
 import { createSignal, createEffect, onMount, Show, For, Switch, Match } from "solid-js";
 
 import styles from './KanbanTask.module.css';
@@ -8,6 +8,9 @@ import { KanbanMarkdown } from '../../types';
 import { applyAutoResize } from '../../utils';
 
 type KanbanTaskProps = {
+    getKanbanBoard: Accessor<KanbanMarkdown.KanbanBoard>;
+    setKanbanBoard: Setter<KanbanMarkdown.KanbanBoard>;
+
     kanban_list: KanbanMarkdown.KanbanList;
     kanban_task: KanbanMarkdown.KanbanTask;
     setTaskModalState: Setter<boolean>;
@@ -16,18 +19,23 @@ type KanbanTaskProps = {
 };
 
 export const KanbanTask: Component<KanbanTaskProps> = (props) => {
-    const { kanban_list, kanban_task, setTaskModalState, setSelectedList, setSelectedTask } = props;
-
-    const [getKanbanLabels, setKanbanLabels] = createSignal<KanbanMarkdown.KanbanLabel[] | undefined>(kanban_task.labels);
+    const {
+        getKanbanBoard,
+        setKanbanBoard,
+        kanban_list,
+        kanban_task,
+        setTaskModalState,
+        setSelectedList,
+        setSelectedTask
+    } = props;
 
     const [getName, setName] = createSignal<string>(kanban_task.name);
-    const [getPreviousName, setPreviousName] = createSignal<string>(kanban_task.name);
 
     let kanban_task_name_reference: HTMLAnchorElement;
 
     createEffect(() => {
         const currentName = getName();
-        const previousName = getPreviousName();
+        const previousName = kanban_task.name;
         if (currentName !== previousName) {
             // @ts-ignore
             vscode.postMessage({
@@ -39,7 +47,21 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
                     }
                 ]
             });
-            setPreviousName(currentName);
+            setKanbanBoard(kanban_board => {
+                const lists = kanban_board.lists.map(list => {
+                    if (list.name === kanban_list.name) {
+                        const tasks = list.tasks.map(task => {
+                            if (task.name === previousName) {
+                                return { ...task, name: currentName };
+                            }
+                            return task;
+                        });
+                        return { ...list, tasks };
+                    }
+                    return list;
+                });
+                return { ...kanban_board, lists };
+            });
         }
     });
 
@@ -120,9 +142,9 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
                     </button>
                 </div>
             </Show>
-            <Show when={getKanbanLabels() && getKanbanLabels().length > 0}>
+            <Show when={kanban_task.labels && kanban_task.labels.length > 0}>
                 <div class={styles.kanban_label_bar}>
-                    <For each={getKanbanLabels()}>
+                    <For each={kanban_task.labels}>
                         {label => (
                             <button class={styles.kanban_label_button} style={`background-color: ${label.color};`}
                                 onClick={() => {

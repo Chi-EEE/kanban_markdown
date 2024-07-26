@@ -1,4 +1,4 @@
-import type { Component, Setter } from 'solid-js';
+import type { Accessor, Component, Setter } from 'solid-js';
 import { Show, For, createSignal, createEffect, onMount } from "solid-js";
 
 import styles from './KanbanList.module.css';
@@ -10,26 +10,27 @@ import { TemporaryKanbanTask } from './TemporaryKanbanTask';
 import { applyAutoResize } from '../../utils';
 
 type KanbanListProps = {
+    getKanbanBoard: Accessor<KanbanMarkdown.KanbanBoard>;
+    setKanbanBoard: Setter<KanbanMarkdown.KanbanBoard>;
+
     kanban_list: KanbanMarkdown.KanbanList;
+
     setTaskModalState: Setter<boolean>;
     setSelectedList: Setter<KanbanMarkdown.KanbanList | undefined>;
     setSelectedTask: Setter<KanbanMarkdown.KanbanTask | undefined>;
 };
 
 export const KanbanList: Component<KanbanListProps> = (props) => {
-    const { kanban_list, setTaskModalState, setSelectedList, setSelectedTask } = props;
+    const { getKanbanBoard, setKanbanBoard, kanban_list, setTaskModalState, setSelectedList, setSelectedTask } = props;
 
     const [getName, setName] = createSignal<string>(kanban_list.name);
-    const [getPreviousName, setPreviousName] = createSignal<string>(kanban_list.name);
-
-    const [getKanbanListTasks, setKanbanListTasks] = createSignal<KanbanMarkdown.KanbanTask[]>(kanban_list.tasks);
 
     let kanban_list_name_reference: HTMLTextAreaElement | undefined;
     const [getCardTextAreaReference, setCardTextAreaReference] = createSignal<HTMLTextAreaElement>();
 
     createEffect(() => {
         const currentName = getName();
-        const previousName = getPreviousName();
+        const previousName = kanban_list.name;
         if (currentName !== previousName) {
             // @ts-ignore
             vscode.postMessage({
@@ -41,7 +42,15 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                     }
                 ]
             });
-            setPreviousName(currentName);
+            setKanbanBoard(kanban_board => {
+                const lists = kanban_board.lists.map(list => {
+                    if (list.name === previousName) {
+                        return { ...list, name: currentName };
+                    }
+                    return list;
+                });
+                return { ...kanban_board, lists };
+            });
         }
     });
 
@@ -81,8 +90,8 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                 {getName()}
             </textarea>
             <div class={styles.kanban_task_list}>
-                <Show when={getKanbanListTasks()}>
-                    <For each={getKanbanListTasks()}>
+                <Show when={kanban_list.tasks.length > 0}>
+                    <For each={kanban_list.tasks}>
                         {(kanban_task, index) => (
                             <KanbanTask
                                 kanban_list={kanban_list}
@@ -96,11 +105,10 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                 </Show>
                 <Show when={getAddButtonVisiblity()} fallback={
                     <TemporaryKanbanTask
+                        kanban_list={kanban_list}
                         applyAutoResize={applyAutoResize}
-                        setKanbanListTasks={setKanbanListTasks}
                         setAddButtonVisiblity={setAddButtonVisiblity}
                         setCardTextAreaReference={setCardTextAreaReference}
-                        getPreviousName={getPreviousName}
                     />
                 }>
                     <button class={styles.add_card_button} onClick={() => {

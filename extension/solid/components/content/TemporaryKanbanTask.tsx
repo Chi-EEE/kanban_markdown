@@ -4,20 +4,19 @@ import type { Accessor, Component, Setter } from 'solid-js';
 import { KanbanMarkdown } from "../../types";
 
 type TemporaryKanbanTaskProps = {
+    kanban_list: KanbanMarkdown.KanbanList;
+
     applyAutoResize: (target: HTMLTextAreaElement) => void;
-    setKanbanListTasks: Setter<KanbanMarkdown.KanbanTask[]>;
     setAddButtonVisiblity: Setter<boolean>;
     setCardTextAreaReference: Setter<HTMLTextAreaElement>;
-    getPreviousName: Accessor<string>;
 };
 
 export const TemporaryKanbanTask: Component<TemporaryKanbanTaskProps> = (props) => {
     const {
+        kanban_list,
         applyAutoResize,
-        setKanbanListTasks,
         setAddButtonVisiblity,
         setCardTextAreaReference,
-        getPreviousName,
     } = props;
 
     return (
@@ -44,12 +43,12 @@ export const TemporaryKanbanTask: Component<TemporaryKanbanTaskProps> = (props) 
                             commands: [
                                 {
                                     action: 'create',
-                                    path: `list["${encodeURI(getPreviousName())}"].tasks`,
+                                    path: `list["${encodeURI(kanban_list.name)}"].tasks`,
                                     value: new_task
                                 }
                             ]
                         });
-                        setKanbanListTasks(tasks => [...tasks, new_task]);
+                        kanban_list.tasks.push(new_task);
                     }
                     target.value = '';
                     setAddButtonVisiblity(true);
