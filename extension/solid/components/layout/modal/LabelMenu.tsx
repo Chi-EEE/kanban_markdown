@@ -42,6 +42,10 @@ export const LabelMenu: Component<LabelMenuProps> = (props) => {
                                                 }
                                             ]
                                         });
+                                        setState(produce((state) => {
+                                            const kanban_task = state.kanban_board.lists.filter((list) => list.name === selectedList.name)[0].tasks.filter((task) => task.name === selectedTask.name && task.counter === selectedTask.counter)[0];
+                                            kanban_task.labels.push(kanban_label);
+                                        }));
                                     }}>
                                     {kanban_label.name}
                                 </div>
@@ -89,21 +93,15 @@ export const LabelMenu: Component<LabelMenuProps> = (props) => {
                                 ]
                             });
                             setState(produce((state) => {
-                                state.kanban_board.labels.push(
-                                    {
-                                        name: name,
-                                        color: color,
-                                        tasks: []
-                                    }
-                                );
-                                state.selectedTask.labels = state.selectedTask.labels || [];
-                                state.selectedTask.labels.push(
-                                    {
-                                        name: name,
-                                        color: color,
-                                        tasks: []
-                                    }
-                                );
+                                const kanban_label = {
+                                    name: name,
+                                    color: color,
+                                    tasks: []
+                                };
+
+                                state.kanban_board.labels.push(kanban_label);
+                                const kanban_task = state.kanban_board.lists.filter((list) => list.name === selectedList.name)[0].tasks.filter((task) => task.name === selectedTask.name && task.counter === selectedTask.counter)[0];
+                                kanban_task.labels.push(kanban_label);
                             }));
                             setLabelMenuState("select");
                         }}>

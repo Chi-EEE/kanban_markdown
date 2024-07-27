@@ -123,27 +123,45 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
                                     }
                                 ]
                             });
+                            setState("kanban_board", "lists", (list, index) => list.name === kanban_list.name, produce((kanban_list) => {
+                                kanban_list.tasks = kanban_list.tasks.filter((task) => task.name !== kanban_task.name || task.counter !== kanban_task.counter);
+                            }));
                             setTaskMenuActionsState(false);
                         }} >
                         Delete
                     </button>
                 </div>
             </Show>
-            <Show when={kanban_task.labels && kanban_task.labels.length > 0}>
+            <Show when={kanban_task.labels.length > 0}>
                 <div class={styles.kanban_label_bar}>
                     <For each={kanban_task.labels}>
                         {label => (
                             <button class={styles.kanban_label_button} style={`background-color: ${label.color};`}
                                 onClick={() => {
+                                    const labelName = label.name;
                                     // @ts-ignore
                                     vscode.postMessage({
                                         commands: [
                                             {
                                                 action: 'delete',
-                                                path: `list["${encodeURI(kanban_list.name)}"].tasks["${encodeURI(kanban_task.name)}"].labels["${encodeURI(label.name)}"]`
+                                                path: `list["${encodeURI(kanban_list.name)}"].tasks["${encodeURI(kanban_task.name)}"][${kanban_task.counter}].labels["${encodeURI(labelName)}"]`
                                             }
                                         ]
                                     });
+                                    setState("kanban_board", "lists", (list, index) => list.name === kanban_list.name, "tasks", (task, index) => task.name === kanban_task.name && task.counter === kanban_task.counter, produce((kanban_task) => {
+                                        // Only filter one label at a time
+                                        let seenLabel = false;
+                                        const updatedLabels = kanban_task.labels.filter((label) => {
+                                            if (seenLabel) {
+                                                return true;
+                                            }
+                                            seenLabel = label.name === labelName;
+                                            return !seenLabel;
+                                        });
+                                        kanban_task.labels = updatedLabels;
+                                        return kanban_task;
+                                    }));
+
                                 }}>
                                 {label.name}
                             </button>

@@ -1,9 +1,13 @@
 import styles from './KanbanList.module.css';
 
-import type { Accessor, Component, Setter } from 'solid-js';
+import type { Component, Setter } from 'solid-js';
 import { KanbanMarkdown } from "../../types";
+import { produce, SetStoreFunction } from 'solid-js/store';
 
 type TemporaryKanbanTaskProps = {
+    state: KanbanMarkdown.State;
+    setState: SetStoreFunction<KanbanMarkdown.State>;
+
     kanban_list: KanbanMarkdown.KanbanList;
 
     applyAutoResize: (target: HTMLTextAreaElement) => void;
@@ -13,6 +17,8 @@ type TemporaryKanbanTaskProps = {
 
 export const TemporaryKanbanTask: Component<TemporaryKanbanTaskProps> = (props) => {
     const {
+        state,
+        setState,
         kanban_list,
         applyAutoResize,
         setAddButtonVisiblity,
@@ -31,12 +37,12 @@ export const TemporaryKanbanTask: Component<TemporaryKanbanTaskProps> = (props) 
                     if (target.value !== '') {
                         const new_task: KanbanMarkdown.KanbanTask = {
                             name: target.value,
+                            counter: 0,
                             checked: false,
                             description: '',
                             labels: [],
                             attachments: [],
                             checklist: [],
-                            counter: 0,
                         };
                         // @ts-ignore
                         vscode.postMessage({
@@ -48,7 +54,9 @@ export const TemporaryKanbanTask: Component<TemporaryKanbanTaskProps> = (props) 
                                 }
                             ]
                         });
-                        kanban_list.tasks.push(new_task);
+                        setState("kanban_board", "lists", (list, index) => list.name === kanban_list.name, "tasks", produce((tasks: KanbanMarkdown.KanbanTask[]) => {
+                            tasks.push(new_task);
+                        }));
                     }
                     target.value = '';
                     setAddButtonVisiblity(true);

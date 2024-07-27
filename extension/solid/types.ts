@@ -15,8 +15,8 @@ export namespace KanbanMarkdown {
             checksum: string;
         };
         description: string;
-        labels?: KanbanLabel[];
-        lists?: KanbanList[];
+        labels: KanbanLabel[];
+        lists: KanbanList[];
     }
 
     export interface KanbanLabel {
@@ -35,9 +35,9 @@ export namespace KanbanMarkdown {
         name: string;
         counter: number;
         checked: boolean;
-        description?: string;
-        labels?: KanbanLabel[];
-        attachments?: any[];
+        description: string;
+        labels: KanbanLabel[];
+        attachments: any[];
         checklist?: any[];
     }
 }

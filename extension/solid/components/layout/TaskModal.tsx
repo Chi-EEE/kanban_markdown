@@ -4,7 +4,7 @@ import { createSignal, For, Show } from "solid-js";
 import type { Accessor, Component, Setter } from 'solid-js';
 import { KanbanMarkdown } from "../../types";
 import { LabelMenu } from './modal/LabelMenu';
-import { SetStoreFunction } from 'solid-js/store';
+import { produce, SetStoreFunction } from 'solid-js/store';
 
 type TaskModalProps = {
     state: KanbanMarkdown.State;
@@ -55,8 +55,16 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                     }
                 ]
             });
-            const updatedLabels = selectedTask.labels.filter(label => label.name !== labelName);
-            setState("selectedList", "tasks", (task, index) => task.name === selectedTask.name, {
+            // Only filter one label at a time
+            let seenLabel = false;
+            const updatedLabels = selectedTask.labels.filter((label) => {
+                if (seenLabel) {
+                    return true;
+                }
+                seenLabel = label.name === labelName;
+                return !seenLabel;
+            });
+            setState("kanban_board", "lists", (list, index) => list.name === selectedList.name, "tasks", (task, index) => task.name === selectedTask.name && task.counter === selectedTask.counter, {
                 labels: updatedLabels
             });
         }
@@ -66,25 +74,28 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
         const selectedList = state.selectedList;
         const selectedTask = state.selectedTask;
         if (selectedTask && selectedList) {
+            const newName = modal_edit_card_title_reference.value
+            const newDescription = modal_edit_card_description.value
             // @ts-ignore
             vscode.postMessage({
                 commands: [
                     {
                         action: 'update',
                         path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].name`,
-                        value: modal_edit_card_title_reference.value
+                        value: newName
                     },
                     {
                         action: 'update',
-                        path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].description`,
-                        value: modal_edit_card_description.value
+                        path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(newName)}"][${selectedTask.counter}].description`,
+                        value: newDescription
                     },
                 ]
             });
-            setState("selectedList", "tasks", (task, index) => task.name === selectedTask.name, {
-                name: modal_edit_card_title_reference.value,
-                description: modal_edit_card_description.value
-            });
+            setState("kanban_board", "lists", (list, index) => list.name === selectedList.name, "tasks", produce((tasks: KanbanMarkdown.KanbanTask[]) => {
+                const task = tasks.filter((task) => task.name === selectedTask.name && task.counter === selectedTask.counter)[0];
+                task.name = newName;
+                task.description = newDescription;
+            }));
             setTaskModalState(false);
         }
     };
@@ -98,7 +109,7 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                 <div id={styles.modal_main}>
                     <div id={styles.modal_header}>
                         <h2>Edit Card</h2>
-                        <Show when={state.selectedTask.labels && state.selectedTask.labels.length > 0}>
+                        <Show when={state.selectedTask.labels.length > 0}>
                             <div id={styles.modal_label_bar}>
                                 <For each={state.selectedTask.labels}>
                                     {(kanban_label) => (

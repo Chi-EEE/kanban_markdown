@@ -99,6 +99,8 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                 </Show>
                 <Show when={getAddButtonVisiblity()} fallback={
                     <TemporaryKanbanTask
+                        state={state}
+                        setState={setState}
                         kanban_list={kanban_list}
                         applyAutoResize={applyAutoResize}
                         setAddButtonVisiblity={setAddButtonVisiblity}
