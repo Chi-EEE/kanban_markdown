@@ -15,19 +15,21 @@ type AppProps = {
 };
 
 const App: Component<AppProps> = (props) => {
-    const [getSelectedList, setSelectedList] = createSignal<KanbanMarkdown.KanbanList | undefined>(undefined);
-    const [getSelectedTask, setSelectedTask] = createSignal<KanbanMarkdown.KanbanTask | undefined>(undefined);
+    const [state, setState] = createStore<KanbanMarkdown.State>({
+        selectedList: undefined,
+        selectedTask: undefined,
+        kanban_board: props.kanban_board,
+    });
 
-    const [kanban_board, setKanbanBoard] = createStore<KanbanMarkdown.KanbanBoard>(props.kanban_board);
     const [getTaskModalState, setTaskModalState] = createSignal<boolean>(false);
 
     function setStyleColor() {
-        document.documentElement.style.setProperty('--background-color', kanban_board.properties.color);
+        document.documentElement.style.setProperty('--background-color', state.kanban_board.properties.color);
         // @ts-ignore
-        document.documentElement.style.setProperty('--menu-background-color', pSBC(-0.4, kanban_board.properties.color));
+        document.documentElement.style.setProperty('--menu-background-color', pSBC(-0.4, state.kanban_board.properties.color));
     }
 
-    createEffect(on(() => kanban_board.properties.color, () => {
+    createEffect(on(() => state.kanban_board.properties.color, () => {
         setStyleColor();
     }))
 
@@ -35,18 +37,16 @@ const App: Component<AppProps> = (props) => {
 
     return (
         <div class={styles.App}>
-            <TitleBar kanban_board={kanban_board} setKanbanBoard={setKanbanBoard} />
+            <TitleBar state={state} setState={setState} />
             <div class={styles.kanban_board}>
-                <Show when={kanban_board.lists}>
-                    <For each={kanban_board.lists}>
+                <Show when={state.kanban_board.lists}>
+                    <For each={state.kanban_board.lists}>
                         {(kanban_list) => {
                             const kanban_list_props = {
-                                kanban_board,
-                                setKanbanBoard,
+                                state,
+                                setState,
                                 kanban_list,
                                 setTaskModalState,
-                                setSelectedList,
-                                setSelectedTask
                             }
                             return <KanbanList {...kanban_list_props} />
                         }}
@@ -55,12 +55,9 @@ const App: Component<AppProps> = (props) => {
             </div>
             <Show when={getTaskModalState()}>
                 <TaskModal
-                    kanban_board={kanban_board}
-                    setKanbanBoard={setKanbanBoard}
+                    state={state}
+                    setState={setState}
                     setTaskModalState={setTaskModalState}
-                    getSelectedList={getSelectedList}
-                    setSelectedTask={setSelectedTask}
-                    getSelectedTask={getSelectedTask}
                 />
             </Show>
         </div>

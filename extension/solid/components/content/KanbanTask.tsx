@@ -6,28 +6,24 @@ import styles from './KanbanTask.module.css';
 import { KanbanMarkdown } from '../../types';
 
 import { applyAutoResize } from '../../utils';
-import { SetStoreFunction } from 'solid-js/store';
+import { produce, SetStoreFunction } from 'solid-js/store';
 
 type KanbanTaskProps = {
-    kanban_board: KanbanMarkdown.KanbanBoard;
-    setKanbanBoard: SetStoreFunction<KanbanMarkdown.KanbanBoard>;
+    state: KanbanMarkdown.State;
+    setState: SetStoreFunction<KanbanMarkdown.State>;
 
     kanban_list: KanbanMarkdown.KanbanList;
     kanban_task: KanbanMarkdown.KanbanTask;
     setTaskModalState: Setter<boolean>;
-    setSelectedList: Setter<KanbanMarkdown.KanbanList | undefined>;
-    setSelectedTask: Setter<KanbanMarkdown.KanbanTask | undefined>;
 };
 
 export const KanbanTask: Component<KanbanTaskProps> = (props) => {
     const {
-        kanban_board,
-        setKanbanBoard,
+        state,
+        setState,
         kanban_list,
         kanban_task,
         setTaskModalState,
-        setSelectedList,
-        setSelectedTask
     } = props;
 
     const [getName, setName] = createSignal<string>(kanban_task.name);
@@ -48,20 +44,8 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
                     }
                 ]
             });
-            setKanbanBoard(kanban_board => {
-                const lists = kanban_board.lists.map(list => {
-                    if (list.name === kanban_list.name) {
-                        const tasks = list.tasks.map(task => {
-                            if (task.name === previousName) {
-                                return { ...task, name: currentName };
-                            }
-                            return task;
-                        });
-                        return { ...list, tasks };
-                    }
-                    return list;
-                });
-                return { ...kanban_board, lists };
+            setState("kanban_board", "lists", (list, index) => list.name === kanban_list.name, "tasks", (task, index) => task.name === previousName, {
+                name: currentName,
             });
         }
     }));
@@ -79,8 +63,10 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
         <a class={styles.kanban_task} ref={kanban_task_name_reference}
             onClick={(event) => {
                 const target = event.target as HTMLTextAreaElement;
-                setSelectedList(kanban_list);
-                setSelectedTask(kanban_task);
+                setState(produce((state) => {
+                    state.selectedList = kanban_list;
+                    state.selectedTask = kanban_task;
+                }))
                 setTaskModalState(true);
             }}
             onMouseOver={() => {

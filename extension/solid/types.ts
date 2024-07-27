@@ -1,4 +1,10 @@
 export namespace KanbanMarkdown {
+    export interface State {
+        selectedList: KanbanList | undefined;
+        selectedTask: KanbanTask | undefined;
+        kanban_board: KanbanBoard;
+    }
+
     export interface KanbanBoard {
         name: string;
         properties: {

@@ -7,23 +7,17 @@ import { LabelMenu } from './modal/LabelMenu';
 import { SetStoreFunction } from 'solid-js/store';
 
 type TaskModalProps = {
-    kanban_board: KanbanMarkdown.KanbanBoard;
-    setKanbanBoard: SetStoreFunction<KanbanMarkdown.KanbanBoard>;
+    state: KanbanMarkdown.State;
+    setState: SetStoreFunction<KanbanMarkdown.State>;
 
     setTaskModalState: Setter<boolean>;
-    getSelectedList: Accessor<KanbanMarkdown.KanbanList | undefined>;
-    setSelectedTask: Setter<KanbanMarkdown.KanbanTask | undefined>;
-    getSelectedTask: Accessor<KanbanMarkdown.KanbanTask | undefined>;
 };
 
 export const TaskModal: Component<TaskModalProps> = (props) => {
     const {
-        kanban_board,
-        setKanbanBoard,
+        state,
+        setState,
         setTaskModalState,
-        getSelectedList,
-        setSelectedTask,
-        getSelectedTask
     } = props;
 
     const [getLabelMenuState, setLabelMenuState] = createSignal<boolean>(false);
@@ -49,8 +43,8 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
     let modal_edit_card_description: HTMLTextAreaElement;
 
     const updateSelectedTaskLabels = (labelName: string) => {
-        const selectedList = getSelectedList();
-        const selectedTask = getSelectedTask();
+        const selectedList = state.selectedList;
+        const selectedTask = state.selectedTask;
         if (selectedTask) {
             // @ts-ignore
             vscode.postMessage({
@@ -62,13 +56,15 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                 ]
             });
             const updatedLabels = selectedTask.labels.filter(label => label.name !== labelName);
-            setSelectedTask({ ...selectedTask, labels: updatedLabels });
+            setState("selectedList", "tasks", (task, index) => task.name === selectedTask.name, {
+                labels: updatedLabels
+            });
         }
     };
 
     const saveTask = () => {
-        const selectedList = getSelectedList();
-        const selectedTask = getSelectedTask();
+        const selectedList = state.selectedList;
+        const selectedTask = state.selectedTask;
         if (selectedTask && selectedList) {
             // @ts-ignore
             vscode.postMessage({
@@ -85,10 +81,9 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                     },
                 ]
             });
-            setSelectedTask({
-                ...selectedTask,
+            setState("selectedList", "tasks", (task, index) => task.name === selectedTask.name, {
                 name: modal_edit_card_title_reference.value,
-                description: modal_edit_card_description.value,
+                description: modal_edit_card_description.value
             });
             setTaskModalState(false);
         }
@@ -103,9 +98,9 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                 <div id={styles.modal_main}>
                     <div id={styles.modal_header}>
                         <h2>Edit Card</h2>
-                        <Show when={getSelectedTask()?.labels?.length > 0}>
+                        <Show when={state.selectedTask.labels && state.selectedTask.labels.length > 0}>
                             <div id={styles.modal_label_bar}>
-                                <For each={getSelectedTask()?.labels}>
+                                <For each={state.selectedTask.labels}>
                                     {(kanban_label) => (
                                         <div class={styles.modal_label} style={`background-color: ${kanban_label.color}`}
                                             onClick={() => updateSelectedTaskLabels(kanban_label.name)}>
@@ -118,9 +113,9 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                     </div>
                     <div id={styles.modal_body}>
                         <label for="modal_edit_card_title">Title</label>
-                        <textarea ref={modal_edit_card_title_reference} id={styles.modal_edit_card_title} placeholder="Enter card title">{getSelectedTask()?.name}</textarea>
+                        <textarea ref={modal_edit_card_title_reference} id={styles.modal_edit_card_title} placeholder="Enter card title">{state.selectedTask.name}</textarea>
                         <label for="modal_edit_card_description">Description</label>
-                        <textarea ref={modal_edit_card_description} id={styles.modal_edit_card_description} placeholder="Enter card description">{getSelectedTask()?.description}</textarea>
+                        <textarea ref={modal_edit_card_description} id={styles.modal_edit_card_description} placeholder="Enter card description">{state.selectedTask.description}</textarea>
                     </div>
                     <div id={styles.modal_footer}>
                         <button id={styles.modal_save_card} onClick={saveTask}>Save</button>
@@ -150,11 +145,8 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
             <Show when={getLabelMenuState()}>
                 <LabelMenu
                     setLabelMenuReference={setLabelMenuReference}
-                    kanban_board={kanban_board}
-                    setKanbanBoard={setKanbanBoard}
-                    getSelectedList={getSelectedList}
-                    setSelectedTask={setSelectedTask}
-                    getSelectedTask={getSelectedTask}
+                    state={state}
+                    setState={setState}
                 />
             </Show>
             <Show when={getAttachmentMenuState()}>

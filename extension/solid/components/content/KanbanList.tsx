@@ -11,18 +11,16 @@ import { applyAutoResize } from '../../utils';
 import { SetStoreFunction } from 'solid-js/store';
 
 type KanbanListProps = {
-    kanban_board: KanbanMarkdown.KanbanBoard;
-    setKanbanBoard: SetStoreFunction<KanbanMarkdown.KanbanBoard>;
+    state: KanbanMarkdown.State;
+    setState: SetStoreFunction<KanbanMarkdown.State>;
 
     kanban_list: KanbanMarkdown.KanbanList;
 
     setTaskModalState: Setter<boolean>;
-    setSelectedList: Setter<KanbanMarkdown.KanbanList | undefined>;
-    setSelectedTask: Setter<KanbanMarkdown.KanbanTask | undefined>;
 };
 
 export const KanbanList: Component<KanbanListProps> = (props) => {
-    const { kanban_board, setKanbanBoard, kanban_list, setTaskModalState, setSelectedList, setSelectedTask } = props;
+    const { state, setState, kanban_list, setTaskModalState } = props;
 
     const [getName, setName] = createSignal<string>(kanban_list.name);
 
@@ -43,14 +41,8 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                     }
                 ]
             });
-            setKanbanBoard(kanban_board => {
-                const lists = kanban_board.lists.map(list => {
-                    if (list.name === previousName) {
-                        return { ...list, name: currentName };
-                    }
-                    return list;
-                });
-                return { ...kanban_board, lists };
+            setState("kanban_board", "lists", (list, index) => list.name === previousName, {
+                name: currentName,
             });
         }
     });
@@ -95,13 +87,11 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                     <For each={kanban_list.tasks}>
                         {(kanban_task) => {
                             const kanban_task_props = {
-                                kanban_board,
-                                setKanbanBoard,
+                                state,
+                                setState,
                                 kanban_list,
                                 kanban_task,
                                 setTaskModalState,
-                                setSelectedList,
-                                setSelectedTask
                             }
                             return <KanbanTask {...kanban_task_props} />
                         }}
