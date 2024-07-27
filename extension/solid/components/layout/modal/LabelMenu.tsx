@@ -1,20 +1,21 @@
 import styles from '../TaskModal.module.css';
 
-import { createSignal, Index, Show } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 import type { Accessor, Component, Setter } from 'solid-js';
 import { KanbanMarkdown } from "../../../types";
+import { SetStoreFunction, unwrap } from 'solid-js/store';
 
 type LabelMenuProps = {
     setLabelMenuReference: Setter<HTMLDivElement>;
-    getKanbanBoard: Accessor<KanbanMarkdown.KanbanBoard>;
-    setKanbanBoard: Setter<KanbanMarkdown.KanbanBoard>;
+    kanban_board: KanbanMarkdown.KanbanBoard
+    setKanbanBoard: SetStoreFunction<KanbanMarkdown.KanbanBoard>;
     getSelectedList: Accessor<KanbanMarkdown.KanbanList | undefined>;
     getSelectedTask: Accessor<KanbanMarkdown.KanbanTask | undefined>;
     setSelectedTask: Setter<KanbanMarkdown.KanbanTask | undefined>;
 };
 
 export const LabelMenu: Component<LabelMenuProps> = (props) => {
-    const { setLabelMenuReference, getKanbanBoard, setKanbanBoard, getSelectedList, getSelectedTask, setSelectedTask } = props;
+    const { setLabelMenuReference, kanban_board, setKanbanBoard, getSelectedList, getSelectedTask, setSelectedTask } = props;
 
     const [getLabelMenuState, setLabelMenuState] = createSignal<string>("select");
 
@@ -27,9 +28,9 @@ export const LabelMenu: Component<LabelMenuProps> = (props) => {
                 <div>
                     <h3>Labels</h3>
                     <div id={styles.modal_label_list}>
-                        <Index each={getKanbanBoard().labels}>
-                            {(kanban_label, index) => (
-                                <div class={styles.modal_label} style={`background-color: ${kanban_label().color}`}
+                        <For each={kanban_board.labels}>
+                            {(kanban_label) => (
+                                <div class={styles.modal_label} style={`background-color: ${kanban_label.color}`}
                                     onClick={() => {
                                         const selectedList = getSelectedList();
                                         const selectedTask = getSelectedTask();
@@ -39,15 +40,15 @@ export const LabelMenu: Component<LabelMenuProps> = (props) => {
                                                 {
                                                     action: 'create',
                                                     path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].labels`,
-                                                    value: kanban_label(),
+                                                    value: unwrap(kanban_label),
                                                 }
                                             ]
                                         });
                                     }}>
-                                    {kanban_label().name}
+                                    {kanban_label.name}
                                 </div>
                             )}
-                        </Index>
+                        </For>
                     </div>
                     <button
                         onClick={() => {
@@ -66,8 +67,8 @@ export const LabelMenu: Component<LabelMenuProps> = (props) => {
                         onClick={() => {
                             const name = modal_new_label_name_input_reference.value;
                             const color = modal_new_label_color_reference.value;
-                            const selectedList = getSelectedList();
-                            const selectedTask = getSelectedTask();
+                            const selectedList = unwrap(getSelectedList());
+                            const selectedTask = unwrap(getSelectedTask());
                             // @ts-ignore
                             vscode.postMessage({
                                 commands: [
@@ -89,6 +90,7 @@ export const LabelMenu: Component<LabelMenuProps> = (props) => {
                                     }
                                 ]
                             });
+
                             setKanbanBoard(kanban_board => {
                                 kanban_board.labels = kanban_board.labels || [];
                                 kanban_board.labels.push({

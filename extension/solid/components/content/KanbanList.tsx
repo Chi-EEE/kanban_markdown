@@ -8,10 +8,11 @@ import { KanbanTask } from './KanbanTask';
 import { TemporaryKanbanTask } from './TemporaryKanbanTask';
 
 import { applyAutoResize } from '../../utils';
+import { SetStoreFunction } from 'solid-js/store';
 
 type KanbanListProps = {
-    getKanbanBoard: Accessor<KanbanMarkdown.KanbanBoard>;
-    setKanbanBoard: Setter<KanbanMarkdown.KanbanBoard>;
+    kanban_board: KanbanMarkdown.KanbanBoard;
+    setKanbanBoard: SetStoreFunction<KanbanMarkdown.KanbanBoard>;
 
     kanban_list: KanbanMarkdown.KanbanList;
 
@@ -21,7 +22,7 @@ type KanbanListProps = {
 };
 
 export const KanbanList: Component<KanbanListProps> = (props) => {
-    const { getKanbanBoard, setKanbanBoard, kanban_list, setTaskModalState, setSelectedList, setSelectedTask } = props;
+    const { kanban_board, setKanbanBoard, kanban_list, setTaskModalState, setSelectedList, setSelectedTask } = props;
 
     const [getName, setName] = createSignal<string>(kanban_list.name);
 
@@ -92,15 +93,18 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
             <div class={styles.kanban_task_list}>
                 <Show when={kanban_list.tasks.length > 0}>
                     <For each={kanban_list.tasks}>
-                        {(kanban_task, index) => (
-                            <KanbanTask
-                                kanban_list={kanban_list}
-                                kanban_task={kanban_task}
-                                setTaskModalState={setTaskModalState}
-                                setSelectedList={setSelectedList}
-                                setSelectedTask={setSelectedTask}
-                            />
-                        )}
+                        {(kanban_task) => {
+                            const kanban_task_props = {
+                                kanban_board,
+                                setKanbanBoard,
+                                kanban_list,
+                                kanban_task,
+                                setTaskModalState,
+                                setSelectedList,
+                                setSelectedTask
+                            }
+                            return <KanbanTask {...kanban_task_props} />
+                        }}
                     </For>
                 </Show>
                 <Show when={getAddButtonVisiblity()} fallback={

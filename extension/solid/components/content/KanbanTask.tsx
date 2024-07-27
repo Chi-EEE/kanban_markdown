@@ -1,15 +1,16 @@
 import type { Accessor, Component, Setter } from 'solid-js';
-import { createSignal, createEffect, onMount, Show, For, Switch, Match } from "solid-js";
+import { createSignal, createEffect, onMount, Show, For, on } from "solid-js";
 
 import styles from './KanbanTask.module.css';
 
 import { KanbanMarkdown } from '../../types';
 
 import { applyAutoResize } from '../../utils';
+import { SetStoreFunction } from 'solid-js/store';
 
 type KanbanTaskProps = {
-    getKanbanBoard: Accessor<KanbanMarkdown.KanbanBoard>;
-    setKanbanBoard: Setter<KanbanMarkdown.KanbanBoard>;
+    kanban_board: KanbanMarkdown.KanbanBoard;
+    setKanbanBoard: SetStoreFunction<KanbanMarkdown.KanbanBoard>;
 
     kanban_list: KanbanMarkdown.KanbanList;
     kanban_task: KanbanMarkdown.KanbanTask;
@@ -20,7 +21,7 @@ type KanbanTaskProps = {
 
 export const KanbanTask: Component<KanbanTaskProps> = (props) => {
     const {
-        getKanbanBoard,
+        kanban_board,
         setKanbanBoard,
         kanban_list,
         kanban_task,
@@ -33,7 +34,7 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
 
     let kanban_task_name_reference: HTMLAnchorElement;
 
-    createEffect(() => {
+    createEffect(on(() => getName(), () => {
         const currentName = getName();
         const previousName = kanban_task.name;
         if (currentName !== previousName) {
@@ -63,7 +64,7 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
                 return { ...kanban_board, lists };
             });
         }
-    });
+    }));
 
     onMount(() => {
         if (kanban_task_name_reference) {

@@ -4,10 +4,11 @@ import { createSignal, For, Show } from "solid-js";
 import type { Accessor, Component, Setter } from 'solid-js';
 import { KanbanMarkdown } from "../../types";
 import { LabelMenu } from './modal/LabelMenu';
+import { SetStoreFunction } from 'solid-js/store';
 
 type TaskModalProps = {
-    getKanbanBoard: Accessor<KanbanMarkdown.KanbanBoard>;
-    setKanbanBoard: Setter<KanbanMarkdown.KanbanBoard>;
+    kanban_board: KanbanMarkdown.KanbanBoard;
+    setKanbanBoard: SetStoreFunction<KanbanMarkdown.KanbanBoard>;
 
     setTaskModalState: Setter<boolean>;
     getSelectedList: Accessor<KanbanMarkdown.KanbanList | undefined>;
@@ -17,7 +18,7 @@ type TaskModalProps = {
 
 export const TaskModal: Component<TaskModalProps> = (props) => {
     const {
-        getKanbanBoard,
+        kanban_board,
         setKanbanBoard,
         setTaskModalState,
         getSelectedList,
@@ -149,7 +150,7 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
             <Show when={getLabelMenuState()}>
                 <LabelMenu
                     setLabelMenuReference={setLabelMenuReference}
-                    getKanbanBoard={getKanbanBoard}
+                    kanban_board={kanban_board}
                     setKanbanBoard={setKanbanBoard}
                     getSelectedList={getSelectedList}
                     setSelectedTask={setSelectedTask}
