@@ -90,7 +90,7 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
                     }
                 }}
             >
-                {getName()}
+                {kanban_task.name}
             </span>
             <Show when={getTaskMenuState()}>
                 <button class={styles.kanban_task_menu_button}
@@ -105,7 +105,10 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
                     <button class={styles.kanban_task_menu_action_button}
                         onClick={(event) => {
                             event.stopPropagation();
-                            // editCard($card, $cardTitleInput);
+                            setState(produce((state) => {
+                                state.selectedList = kanban_list;
+                                state.selectedTask = kanban_task;
+                            }))
                             setTaskModalState(true);
                             setTaskMenuActionsState(false);
                         }} >

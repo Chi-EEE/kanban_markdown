@@ -1,5 +1,5 @@
 import type { Accessor, Component, Setter } from 'solid-js';
-import { Show, For, createSignal, createEffect, onMount } from "solid-js";
+import { Show, For, createSignal, createEffect, onMount, on } from "solid-js";
 
 import styles from './KanbanList.module.css';
 
@@ -27,7 +27,7 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
     let kanban_list_name_reference: HTMLTextAreaElement | undefined;
     const [getCardTextAreaReference, setCardTextAreaReference] = createSignal<HTMLTextAreaElement>();
 
-    createEffect(() => {
+    createEffect(on(() => getName(), () => {
         const currentName = getName();
         const previousName = kanban_list.name;
         if (currentName !== previousName) {
@@ -45,7 +45,7 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                 name: currentName,
             });
         }
-    });
+    }));
 
     function onBlur(event: FocusEvent) {
         const target = event.target as HTMLTextAreaElement
@@ -80,23 +80,21 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                 onBlur={onBlur}
                 onKeyPress={onKeyPress}
             >
-                {getName()}
+                {kanban_list.name}
             </textarea>
             <div class={styles.kanban_task_list}>
-                <Show when={kanban_list.tasks.length > 0}>
-                    <For each={kanban_list.tasks}>
-                        {(kanban_task) => {
-                            const kanban_task_props = {
-                                state,
-                                setState,
-                                kanban_list,
-                                kanban_task,
-                                setTaskModalState,
-                            }
-                            return <KanbanTask {...kanban_task_props} />
-                        }}
-                    </For>
-                </Show>
+                <For each={kanban_list.tasks}>
+                    {(kanban_task) => {
+                        const kanban_task_props = {
+                            state,
+                            setState,
+                            kanban_list,
+                            kanban_task,
+                            setTaskModalState,
+                        }
+                        return <KanbanTask {...kanban_task_props} />
+                    }}
+                </For>
                 <Show when={getAddButtonVisiblity()} fallback={
                     <TemporaryKanbanTask
                         state={state}

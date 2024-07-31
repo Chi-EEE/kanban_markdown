@@ -4,13 +4,14 @@ import { createSignal, For, Show } from "solid-js";
 import type { Accessor, Component, Setter } from 'solid-js';
 import { KanbanMarkdown } from "../../types";
 import { LabelMenu } from './modal/LabelMenu';
-import { produce, SetStoreFunction } from 'solid-js/store';
+import { SetStoreFunction } from 'solid-js/store';
 
 type TaskModalProps = {
     state: KanbanMarkdown.State;
     setState: SetStoreFunction<KanbanMarkdown.State>;
 
     setTaskModalState: Setter<boolean>;
+    updateTask: (task: KanbanMarkdown.KanbanTask) => void;
 };
 
 export const TaskModal: Component<TaskModalProps> = (props) => {
@@ -18,6 +19,7 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
         state,
         setState,
         setTaskModalState,
+        updateTask,
     } = props;
 
     const [getLabelMenuState, setLabelMenuState] = createSignal<boolean>(false);
@@ -91,11 +93,11 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                     },
                 ]
             });
-            setState("kanban_board", "lists", (list, index) => list.name === selectedList.name, "tasks", produce((tasks: KanbanMarkdown.KanbanTask[]) => {
-                const task = tasks.filter((task) => task.name === selectedTask.name && task.counter === selectedTask.counter)[0];
-                task.name = newName;
-                task.description = newDescription;
-            }));
+            updateTask({
+                ...selectedTask,
+                name: newName,
+                description: newDescription,
+            });
             setTaskModalState(false);
         }
     };

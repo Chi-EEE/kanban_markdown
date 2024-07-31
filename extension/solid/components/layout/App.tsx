@@ -35,29 +35,32 @@ const App: Component<AppProps> = (props) => {
 
     setStyleColor();
 
+    const updateTask = (task: KanbanMarkdown.KanbanTask) => {
+        setState("kanban_board", "lists", (list) => list.name === state.selectedList.name, "tasks", (t) => t.name === state.selectedTask.name, task);
+    }
+
     return (
         <div class={styles.App}>
             <TitleBar state={state} setState={setState} />
             <div class={styles.kanban_board}>
-                <Show when={state.kanban_board.lists}>
-                    <For each={state.kanban_board.lists}>
-                        {(kanban_list) => {
-                            const kanban_list_props = {
-                                state,
-                                setState,
-                                kanban_list,
-                                setTaskModalState,
-                            }
-                            return <KanbanList {...kanban_list_props} />
-                        }}
-                    </For>
-                </Show>
+                <For each={state.kanban_board.lists}>
+                    {(kanban_list) => {
+                        const kanban_list_props = {
+                            state,
+                            setState,
+                            kanban_list,
+                            setTaskModalState,
+                        }
+                        return <KanbanList {...kanban_list_props} />
+                    }}
+                </For>
             </div>
             <Show when={getTaskModalState()}>
                 <TaskModal
                     state={state}
                     setState={setState}
                     setTaskModalState={setTaskModalState}
+                    updateTask={updateTask}
                 />
             </Show>
         </div>
