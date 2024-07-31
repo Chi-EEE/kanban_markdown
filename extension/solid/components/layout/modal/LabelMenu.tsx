@@ -20,6 +20,65 @@ export const LabelMenu: Component<LabelMenuProps> = (props) => {
     let modal_new_label_name_input_reference: HTMLInputElement;
     let modal_new_label_color_reference: HTMLInputElement;
 
+    const addLabelToSelectedTask = (kanban_label: KanbanMarkdown.KanbanLabel) => {
+        const selectedList = state.selectedList;
+        const selectedTask = state.selectedTask;
+        // @ts-ignore
+        vscode.postMessage({
+            commands: [
+                {
+                    action: 'create',
+                    path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].labels`,
+                    value: unwrap(kanban_label),
+                }
+            ]
+        });
+        setState(produce((state) => {
+            const kanban_task = state.kanban_board.lists.filter((list) => list.name === selectedList.name)[0].tasks.filter((task) => task.name === selectedTask.name && task.counter === selectedTask.counter)[0];
+            kanban_task.labels.push(kanban_label);
+        }));
+    }
+
+    const createLabel = () => {
+        const name = modal_new_label_name_input_reference.value;
+        const color = modal_new_label_color_reference.value;
+        const selectedList = state.selectedList;
+        const selectedTask = state.selectedTask;
+        // @ts-ignore
+        vscode.postMessage({
+            commands: [
+                {
+                    action: 'create',
+                    path: `labels`,
+                    value: {
+                        name: name,
+                        color: color,
+                    }
+                },
+                {
+                    action: 'create',
+                    path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].labels`,
+                    value: {
+                        name: name,
+                        color: color,
+                    }
+                }
+            ]
+        });
+        setState(produce((state) => {
+            const kanban_label = {
+                name: name,
+                color: color,
+                tasks: []
+            };
+
+            state.kanban_board.labels.push(kanban_label);
+            const kanban_task = state.kanban_board.lists.filter((list) => list.name === selectedList.name)[0].tasks.filter((task) => task.name === selectedTask.name && task.counter === selectedTask.counter)[0];
+            kanban_task.labels.push(kanban_label);
+        }));
+        setLabelMenuState("select");
+    }
+
     return (
         <div ref={(el) => setLabelMenuReference(el)} class={styles.menu}>
             <Show when={getLabelMenuState() === "select"}>
@@ -29,33 +88,14 @@ export const LabelMenu: Component<LabelMenuProps> = (props) => {
                         <For each={state.kanban_board.labels}>
                             {(kanban_label) => (
                                 <div class={styles.modal_label} style={`background-color: ${kanban_label.color}`}
-                                    onClick={() => {
-                                        const selectedList = state.selectedList;
-                                        const selectedTask = state.selectedTask;
-                                        // @ts-ignore
-                                        vscode.postMessage({
-                                            commands: [
-                                                {
-                                                    action: 'create',
-                                                    path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].labels`,
-                                                    value: unwrap(kanban_label),
-                                                }
-                                            ]
-                                        });
-                                        setState(produce((state) => {
-                                            const kanban_task = state.kanban_board.lists.filter((list) => list.name === selectedList.name)[0].tasks.filter((task) => task.name === selectedTask.name && task.counter === selectedTask.counter)[0];
-                                            kanban_task.labels.push(kanban_label);
-                                        }));
-                                    }}>
+                                    onClick={() => addLabelToSelectedTask(kanban_label)}>
                                     {kanban_label.name}
                                 </div>
                             )}
                         </For>
                     </div>
                     <button
-                        onClick={() => {
-                            setLabelMenuState("create");
-                        }}>Create a new label</button>
+                        onClick={() => setLabelMenuState("create")}>Create a new label</button>
                 </div>
             </Show>
             <Show when={getLabelMenuState() === "create"}>
@@ -66,51 +106,11 @@ export const LabelMenu: Component<LabelMenuProps> = (props) => {
                     <label for="modal-new-label-color">Color</label>
                     <input ref={modal_new_label_color_reference} type="color" id="modal-new-label-color" value="#ffffff" />
                     <button id="modal-create-label"
-                        onClick={() => {
-                            const name = modal_new_label_name_input_reference.value;
-                            const color = modal_new_label_color_reference.value;
-                            const selectedList = state.selectedList;
-                            const selectedTask = state.selectedTask;
-                            // @ts-ignore
-                            vscode.postMessage({
-                                commands: [
-                                    {
-                                        action: 'create',
-                                        path: `labels`,
-                                        value: {
-                                            name: name,
-                                            color: color,
-                                        }
-                                    },
-                                    {
-                                        action: 'create',
-                                        path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].labels`,
-                                        value: {
-                                            name: name,
-                                            color: color,
-                                        }
-                                    }
-                                ]
-                            });
-                            setState(produce((state) => {
-                                const kanban_label = {
-                                    name: name,
-                                    color: color,
-                                    tasks: []
-                                };
-
-                                state.kanban_board.labels.push(kanban_label);
-                                const kanban_task = state.kanban_board.lists.filter((list) => list.name === selectedList.name)[0].tasks.filter((task) => task.name === selectedTask.name && task.counter === selectedTask.counter)[0];
-                                kanban_task.labels.push(kanban_label);
-                            }));
-                            setLabelMenuState("select");
-                        }}>
+                        onClick={() => createLabel()}>
                         Create
                     </button>
                     <button id="modal-back-to-label-select"
-                        onClick={() => {
-                            setLabelMenuState("select");
-                        }}>Back</button>
+                        onClick={() => setLabelMenuState("select")}>Back</button>
                 </div>
             </Show>
         </div>

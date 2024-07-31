@@ -46,7 +46,6 @@ const App: Component<AppProps> = (props) => {
                 <For each={state.kanban_board.lists}>
                     {(kanban_list) => {
                         const kanban_list_props = {
-                            state,
                             setState,
                             kanban_list,
                             setTaskModalState,

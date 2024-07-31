@@ -8,10 +8,9 @@ import { KanbanTask } from './KanbanTask';
 import { TemporaryKanbanTask } from './TemporaryKanbanTask';
 
 import { applyAutoResize } from '../../utils';
-import { SetStoreFunction } from 'solid-js/store';
+import { produce, SetStoreFunction } from 'solid-js/store';
 
 type KanbanListProps = {
-    state: KanbanMarkdown.State;
     setState: SetStoreFunction<KanbanMarkdown.State>;
 
     kanban_list: KanbanMarkdown.KanbanList;
@@ -20,7 +19,11 @@ type KanbanListProps = {
 };
 
 export const KanbanList: Component<KanbanListProps> = (props) => {
-    const { state, setState, kanban_list, setTaskModalState } = props;
+    const {
+        setState,
+        kanban_list,
+        setTaskModalState
+    } = props;
 
     const [getName, setName] = createSignal<string>(kanban_list.name);
 
@@ -86,7 +89,6 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                 <For each={kanban_list.tasks}>
                     {(kanban_task) => {
                         const kanban_task_props = {
-                            state,
                             setState,
                             kanban_list,
                             kanban_task,
@@ -97,7 +99,6 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                 </For>
                 <Show when={getAddButtonVisiblity()} fallback={
                     <TemporaryKanbanTask
-                        state={state}
                         setState={setState}
                         kanban_list={kanban_list}
                         applyAutoResize={applyAutoResize}
