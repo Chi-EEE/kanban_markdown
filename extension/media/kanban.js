@@ -1,114 +1,4 @@
-/**
- * @typedef {Object} KanbanBoard
- * @property {string} name - The name of the kanban board.
- * @property {Properties} properties - The properties of the kanban board.
- * @property {string} description - The description of the kanban board.
- * @property {Label[]} labels - The labels associated with the kanban board.
- * @property {List[]} lists - The lists on the kanban board.
- */
-
-/**
- * @typedef {Object} Properties
- * @property {string} color - The color of the kanban board.
- * @property {number} created - The timestamp when the kanban board was created.
- * @property {number} last_modified - The timestamp when the kanban board was last modified.
- * @property {number} version - The version of the kanban board.
- * @property {string} checksum - The checksum for the kanban board.
- */
-
-/**
- * @typedef {Object} Label
- * @property {string} color - The color of the label.
- * @property {string} name - The name of the label.
- * @property {Task[]} tasks - The tasks associated with the label.
- */
-
-/**
- * @typedef {Object} List
- * @property {string} name - The name of the list.
- * @property {boolean} checked - The status of the list (checked or not).
- * @property {Task[]} tasks - The tasks within the list.
- */
-
-/**
- * @typedef {Object} Task
- * @property {string} name - The name of the task.
- * @property {number} counter - The counter of the task.
- * @property {boolean} checked - The status of the task (checked or not).
- * @property {string[]} [description] - The description of the task. Optional.
- * @property {Label[]} [labels] - The labels associated with the task. Optional.
- * @property {any[]} [attachments] - The attachments of the task. Optional.
- * @property {any[]} [checklist] - The checklist items of the task. Optional.
- */
-
 $(document).ready(function () {
-    // @ts-ignore
-    const vscode = acquireVsCodeApi();
-
-    const pSBC=(p,c0,c1,l)=>{
-        let r,g,b,P,f,t,h,i=parseInt,m=Math.round,a=typeof(c1)=="string";
-        if(typeof(p)!="number"||p<-1||p>1||typeof(c0)!="string"||(c0[0]!='r'&&c0[0]!='#')||(c1&&!a))return null;
-        if(!this.pSBCr)this.pSBCr=(d)=>{
-            let n=d.length,x={};
-            if(n>9){
-                [r,g,b,a]=d=d.split(","),n=d.length;
-                if(n<3||n>4)return null;
-                x.r=i(r[3]=="a"?r.slice(5):r.slice(4)),x.g=i(g),x.b=i(b),x.a=a?parseFloat(a):-1
-            }else{
-                if(n==8||n==6||n<4)return null;
-                if(n<6)d="#"+d[1]+d[1]+d[2]+d[2]+d[3]+d[3]+(n>4?d[4]+d[4]:"");
-                d=i(d.slice(1),16);
-                if(n==9||n==5)x.r=d>>24&255,x.g=d>>16&255,x.b=d>>8&255,x.a=m((d&255)/0.255)/1000;
-                else x.r=d>>16,x.g=d>>8&255,x.b=d&255,x.a=-1
-            }return x};
-        h=c0.length>9,h=a?c1.length>9?true:c1=="c"?!h:false:h,f=this.pSBCr(c0),P=p<0,t=c1&&c1!="c"?this.pSBCr(c1):P?{r:0,g:0,b:0,a:-1}:{r:255,g:255,b:255,a:-1},p=P?p*-1:p,P=1-p;
-        if(!f||!t)return null;
-        if(l)r=m(P*f.r+p*t.r),g=m(P*f.g+p*t.g),b=m(P*f.b+p*t.b);
-        else r=m((P*f.r**2+p*t.r**2)**0.5),g=m((P*f.g**2+p*t.g**2)**0.5),b=m((P*f.b**2+p*t.b**2)**0.5);
-        a=f.a,t=t.a,f=a>=0||t>=0,a=f?a<0?t:t<0?a:a*P+t*p:0;
-        if(h)return"rgb"+(f?"a(":"(")+r+","+g+","+b+(f?","+m(a*1000)/1000:"")+")";
-        else return"#"+(4294967296+r*16777216+g*65536+b*256+(f?m(a*255):0)).toString(16).slice(1,f?undefined:-2)
-    }
-
-    /**
-     * Load the Kanban board data into the UI
-     * @param {KanbanBoard} board 
-     */
-    function loadKanbanBoard(board) {
-        const color = board.properties.color;
-        $('#background-color-picker').val(color);
-        document.documentElement.style.setProperty('--background-color', color);
-        document.documentElement.style.setProperty('--menu-background-color', pSBC(-0.4, color));
-
-        $('#kanban-title').text(board.name);
-
-        const $board = $('#board').empty();
-        board.lists.forEach(function (list, index) {
-            const $list = createListElement(board, list, index + 1);
-            $board.append($list);
-            autoResize($list.find('.list-title'));
-        });
-
-        const $label_list = $('#modal-label-list').empty();
-        console.log(board.labels)
-        board.labels.forEach(function (label) {
-            const $newLabel = $('<button>')
-                .addClass('label-button')
-                .css('background-color', label.color)
-                .text(label.name).on('click', function () {
-                    const $currentCard = $card_modal.data('current-card');
-                    if ($currentCard) {
-                        toggleLabelOnCard(label, $currentCard, $currentCard.find('.label-bar'));
-                    }
-                    $('#modal-label-menu').show();
-                });
-            $label_list.append($newLabel);
-        });
-
-        const $addListButton = $('<button>').attr('id', 'add-list').text('Add another list +');
-        $board.append($addListButton);
-        bindAddListButtonEvent($addListButton);
-    };
 
     window.addEventListener('message', function (event) {
         const { type, text: { json: kanbanBoard } } = event.data;
@@ -191,7 +81,7 @@ $(document).ready(function () {
         const $listActionsButton = createListActionsButton($listTitle, $list);
 
         $list.append($listTitle, $listActionsButton, $cards, $addCardButton);
-      
+
         return $list;
     };
 
@@ -324,47 +214,6 @@ $(document).ready(function () {
         }
 
         $card.data('labels', labels);
-    }
-
-    /**
-     * 
-     * @param {JQuery<HTMLElement>} $card 
-     * @param {JQuery<HTMLElement>} $cardMenuActions 
-     * @returns 
-     */
-    function createCardMenuButton($card, $cardMenuActions) {
-        return $('<button>').addClass('card-menu').text('\u2710').on('click', function (event) {
-            event.stopPropagation();
-            $cardMenuActions.toggle();
-        });
-    };
-
-    /**
-     * 
-     * @param {JQuery<HTMLElement>} $card 
-     * @param {*} $cardTitleInput 
-     * @returns 
-     */
-    function createCardMenuActions($card, $cardTitleInput) {
-        const $cardMenuActions = $('<div>').addClass('card-menu-actions').hide();
-        const $editCardButton = $('<button>').addClass('edit-card').text('Edit').on('click', function (event) {
-            event.stopPropagation();
-            editCard($card, $cardTitleInput);
-            $cardMenuActions.hide();
-        });
-
-        const $deleteCardButton = $('<button>').addClass('delete-card').text('Delete').on('click', function (event) {
-            event.stopPropagation();
-            vscode.postMessage({
-                type: 'delete',
-                path: `list[${$card.closest('.list').data('name')}].tasks[${$card.data('name')}][${$card.data('counter')}]`
-            });
-            $card.remove();
-            $cardMenuActions.hide();
-        });
-
-        $cardMenuActions.append($editCardButton, $deleteCardButton);
-        return $cardMenuActions;
     }
 
     function createAddCardButton($listTitle, $cards) {
@@ -636,34 +485,6 @@ $(document).ready(function () {
         });
     }
 
-    $('#modal-label-button').on('click', function (event) {
-        event.stopPropagation();
-        $('#modal-label-menu').toggle();
-        if ($('#modal-label-menu').is(":visible")) {
-            $('#modal-attachment-menu').hide();
-            positionMenu($('#modal-label-menu'), $(this));
-        }
-    });
-
-    $('#modal-attachment-button').on('click', function (event) {
-        event.stopPropagation();
-        $('#modal-attachment-menu').toggle();
-        if ($('#modal-attachment-menu').is(":visible")) {
-            $('#modal-label-menu').hide();
-            positionMenu($('#modal-attachment-menu'), $(this));
-        }
-    });
-
-    $('#modal-create-label-button').on('click', function () {
-        $('#modal-label-select').hide();
-        $('#modal-label-create').show();
-    });
-
-    $('#modal-back-to-label-select').on('click', function () {
-        $('#modal-label-create').hide();
-        $('#modal-label-select').show();
-    });
-
     $('#modal-create-label').on('click', function () {
         /** @type {string} */
         // @ts-ignore
@@ -722,17 +543,13 @@ $(document).ready(function () {
         $('.card-menu-actions, .list-actions-menu').hide();
     }
 
-    $('#modal-close').on('click', function () {
-        $card_modal.hide();
-    });
+    // $(window).on('click', function () {
+    //     closeAllMenus();
+    // });
 
-    $(window).on('click', function () {
-        closeAllMenus();
-    });
-
-    $(document).on('click', '.menu', function (event) {
-        event.stopPropagation();
-    });
+    // $(document).on('click', '.menu', function (event) {
+    //     event.stopPropagation();
+    // });
 
     $('#modal-save-card').on('click', function () {
         const cardTitle = $('#modal-edit-card-title').val();

@@ -1,0 +1,15 @@
+textarea {
+    font-family: Arial, sans-serif;
+    resize: none;
+    overflow-x: unset;
+    overflow-y: auto;
+}
+
+a:hover {
+    text-decoration: none;
+    color: white;
+}
+
+::placeholder {
+    color: white;
+}

@@ -1,126 +1,3 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: var(--background-color);
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    height: 100vh;
-    color: white;
-    overflow-x: hidden;
-    padding-bottom: 20px;
-}
-
-textarea {
-    font-family: Arial, sans-serif;
-    resize: none;
-    overflow-x: unset;
-    overflow-y: auto;
-    field-sizing: content;
-}
-
-a:hover {
-    text-decoration: none;
-    color: white;
-}
-
-::placeholder {
-    color: white;
-}
-
-#title-bar {
-    background-color: rgba(0, 0, 0, 0.4);
-    color: white;
-    width: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-    position: fixed;
-    top: 0;
-    z-index: 1000;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-#title-bar h1 {
-    margin: 0;
-    padding-left: 20px;
-}
-
-#board {
-    display: flex;
-    align-items: flex-start;
-    margin-top: 60px;
-    padding: 20px;
-    width: 100%;
-    height: calc(100% - 60px);
-    overflow-x: auto;
-    white-space: nowrap;
-}
-
-.list {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-    width: 250px;
-    padding: 10px;
-    margin-right: 10px;
-    display: flex;
-    flex-direction: column;
-    color: white;
-    position: relative;
-}
-
-.list-title {
-    font-size: 18px;
-    margin-bottom: 10px;
-    padding: 5px;
-    border: none;
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-}
-
-.cards {
-    min-height: 8px;
-    flex-grow: 1;
-}
-
-.card {
-    display: block;
-    background-color: rgba(255, 255, 255, 0.2);
-    width: calc(250px - 20px);
-    border-radius: 3px;
-    padding: 10px;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
-    color: white;
-    position: relative;
-    cursor: pointer;
-}
-
-.card-title {
-    width: 100%;
-    border: none;
-    padding: 0;
-    font-size: 16px;
-    background-color: rgba(255, 255, 255, 0);
-    color: white;
-    display: inline-block;
-    overflow: hidden;
-    overflow-wrap: break-word;
-    white-space: normal;
-}
-
-#modal-edit-card-title {
-    min-height: auto;
-    resize: none;
-    display: inline-block;
-    overflow: hidden;
-    overflow-wrap: break-word;
-    white-space: normal;
-    border: none;
-}
-
 #modal-edit-card-description {
     border: none;
 }
@@ -141,64 +18,6 @@ a:hover {
 
 #add-list:hover {
     background-color: rgba(255, 255, 255, 0.3);
-}
-
-.add-card {
-    background-color: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 3px;
-    color: white;
-    padding: 10px;
-    cursor: pointer;
-    font-size: 14px;
-    margin-top: 10px;
-    width: 100%;
-}
-
-.add-card:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-}
-
-#color-picker {
-    padding: 10px;
-    background-color: rgba(0, 122, 204, 0.4);
-    color: white;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-}
-
-.card-menu {
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
-    display: none;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    transform: rotate(180deg);
-}
-
-.card-menu-actions {
-    position: absolute;
-    top: 30px;
-    right: 10px;
-    background-color: var(--menu-background-color);
-    border-radius: 3px;
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
-    display: none;
-}
-
-.card-menu-actions button {
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
-    display: block;
-    padding: 10px;
-    text-align: left;
-    width: 100%;
 }
 
 .list-actions {
@@ -245,19 +64,6 @@ a:hover {
     background-color: rgba(0, 0, 0, 0.3);
 }
 
-#modal-content {
-    display: flex;
-    flex-direction: row;
-    background-color: var(--background-color);
-    margin: 5% auto;
-    padding: 20px;
-    width: 80%;
-    max-width: 900px;
-    height: 80%;
-    box-sizing: border-box;
-    border-radius: 12px;
-}
-
 #modal-sidebar {
     width: 150px;
     padding: 10px;
@@ -269,30 +75,6 @@ a:hover {
 
 #modal-sidebar>* {
     margin: 5px 0;
-}
-
-#modal-main {
-    flex-grow: 1;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-}
-
-#modal-header {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 10px;
-}
-
-#modal-header h2 {
-    margin-top: 0;
-    color: white;
-}
-
-#modal-label-bar {
-    display: flex;
-    flex-wrap: wrap;
-    margin-top: 10px;
 }
 
 .label-bar {
@@ -314,53 +96,10 @@ a:hover {
     background-color: rgba(255, 255, 255, 0.4);
 }
 
-#modal-body {
-    margin-bottom: 20px;
-}
-
-#modal-content label {
-    display: block;
-    margin-bottom: 5px;
-    color: white;
-}
-
-#modal-content textarea::placeholder {
-    color: white;
-}
-
-#modal-content input[type="text"],
-#modal-content textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    box-sizing: border-box;
-    background-color: rgba(255, 255, 255, 0.3);
-    color: white;
-}
-
 #modal-footer {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-}
-
-#modal-label-button,
-#modal-attachment-button,
-#modal-save-card {
-    background-color: rgba(255, 255, 255, 0.4);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 4px;
-    width: 100%;
-}
-
-#modal-label-button:hover,
-#modal-attachment-button:hover,
-#modal-save-card:hover {
-    background-color: rgba(255, 255, 255, 0.5);
 }
 
 #modal-content button {
@@ -375,20 +114,6 @@ a:hover {
 
 #modal-content button:hover {
     background-color: rgba(255, 255, 255, 0.5);
-}
-
-#modal-close {
-    color: white;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-#modal-close:hover,
-#modal-close:focus {
-    color: white;
-    text-decoration: none;
 }
 
 .card-menu-actions,
@@ -429,25 +154,10 @@ a:hover {
     flex-direction: column;
 }
 
-.label-button,
-.modal-label-button {
-    display: block;
-    margin: 5px 0;
-    padding: 5px;
-    cursor: pointer;
-    border: none;
-    color: white;
-    text-align: left;
-}
-
 .label {
     display: inline-block;
     padding: 3px 5px;
     margin: 2px;
     color: white;
     border-radius: 3px;
-}
-
-#modal-label-create {
-    display: none;
 }

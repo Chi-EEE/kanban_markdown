@@ -17,7 +17,7 @@ namespace server
 	public:
 		KanbanPathVisitor(kanban_markdown::KanbanBoard* kanban_board, std::string path, void* userdata) {
 			this->kanban_board = kanban_board;
-			this->path_split = parsePathString(path);
+			this->path_split = parsePathString(urlDecode(path));
 			this->userdata = userdata;
 		}
 
@@ -122,6 +122,34 @@ namespace server
 
 #pragma region Private
 	private:
+		std::string urlDecode(std::string text)
+		{
+			std::string escaped;
+
+			for (auto i = text.begin(), nd = text.end(); i < nd; ++i)
+			{
+				auto c = (*i);
+
+				switch (c)
+				{
+				case '%':
+					if (i[1] && i[2]) {
+						char hs[]{ i[1], i[2] };
+						escaped += static_cast<char>(strtol(hs, nullptr, 16));
+						i += 2;
+					}
+					break;
+				case '+':
+					escaped += ' ';
+					break;
+				default:
+					escaped += c;
+				}
+			}
+
+			return escaped;
+		}
+
 		std::vector<std::string> parsePathString(const std::string& s, char delimiter = '.')
 		{
 			std::vector<std::string> splitted;
@@ -143,7 +171,6 @@ namespace server
 					if (s[i] == '\"')
 					{
 						flag = !flag;
-						continue;
 					}
 				}
 
@@ -181,13 +208,13 @@ namespace server
 				break;
 			default:
 			{
-				static re2::RE2 path_pattern(R"((\w+)\[(.+)\])");
+				static re2::RE2 path_pattern(R"((\w+)\[\"(.+)\"\])");
 				std::string board_item_name;
 				std::string board_item_index_name;
 
 				if (!RE2::PartialMatch(board_item, path_pattern, &board_item_name, &board_item_index_name))
 				{
-					throw std::runtime_error("Invalid path: The first field must be a vector name with an index");
+					throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanBoard named "{}")", board_item));
 				}
 
 				switch (hash(board_item_name))
@@ -239,13 +266,13 @@ namespace server
 					break;
 				default:
 				{
-					static re2::RE2 path_pattern(R"((\w+)\[(.+)\]\[(.+)\])");
+					static re2::RE2 path_pattern(R"((\w+)\[\"(.+)\"\]\[(.+)\])");
 					std::string list_item_name;
 					std::string task_index_name;
 					std::string task_index_counter_str;
 					if (!RE2::PartialMatch(second, path_pattern, &list_item_name, &task_index_name, &task_index_counter_str))
 					{
-						throw std::runtime_error("Invalid path: The first field must be a vector name with an index inside of KanbanList");
+						throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanList named "{}")", second));
 					}
 
 					unsigned int task_index_counter = std::stoi(task_index_counter_str);
@@ -305,12 +332,12 @@ namespace server
 					break;
 				default:
 				{
-					static re2::RE2 path_pattern(R"((\w+)\[(.+)\])");
+					static re2::RE2 path_pattern(R"((\w+)\[\"(.+)\"\])");
 					std::string task_item_name;
 					std::string task_item_index_name;
 					if (!RE2::PartialMatch(third, path_pattern, &task_item_name, &task_item_index_name))
 					{
-						throw std::runtime_error("Invalid path: The first field must be a vector name with an index inside of KanbanTask");
+						throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanTask named "{}")", third));
 					}
 
 					switch (hash(task_item_name))

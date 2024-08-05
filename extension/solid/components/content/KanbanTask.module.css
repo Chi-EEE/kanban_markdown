@@ -1,0 +1,80 @@
+.kanban_task {
+    display: block;
+    background-color: rgba(255, 255, 255, 0.2);
+    width: calc(250px - 20px);
+    height: auto !important;
+    border-radius: 3px;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+    color: white;
+    position: relative;
+    cursor: pointer;
+}
+
+.kanban_task_title {
+    width: 100%;
+    border: none;
+    padding: 0;
+    font-size: 16px;
+    background-color: rgba(255, 255, 255, 0);
+    color: white;
+    display: inline-block;
+    overflow: hidden;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
+.kanban_task_menu_button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+
+    background: none;
+    border: none;
+
+    color: white;
+
+    cursor: pointer;
+    transform: rotate(180deg);
+}
+
+.kanban_task_menu_actions {
+    position: absolute;
+
+    top: 30px;
+    right: 10px;
+
+    z-index: 1000;
+
+    background-color: var(--menu-background-color);
+
+    border-radius: 3px;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.kanban_task_menu_action_button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: block;
+    padding: 10px;
+    text-align: left;
+    width: 100%;
+}
+
+.kanban_label_bar {
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.kanban_label_button {
+    display: block;
+    margin: 5px 0;
+    padding: 5px;
+    cursor: pointer;
+    border: none;
+    color: white;
+    text-align: left;
+}
