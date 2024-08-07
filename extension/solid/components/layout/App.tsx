@@ -149,10 +149,17 @@ const App: Component<AppProps> = (props) => {
         }));
     };
 
-    const onDragOver: DragEventHandler = ({ draggable, droppable }) => {
-        move(draggable, droppable);
+    const onDragStart: DragEventHandler = ({ draggable, droppable }) => {
         setDraggingState(true);
     }
+
+    let lastDragOver = 0;
+    const onDragOver: DragEventHandler = ({ draggable, droppable }) => {
+        if (Date.now() - lastDragOver < 10) return;
+        lastDragOver = Date.now();
+        move(draggable, droppable);
+    }
+
     const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
         move(draggable, droppable, false);
         setDraggingState(false);
@@ -166,6 +173,7 @@ const App: Component<AppProps> = (props) => {
         <div class={styles.App}>
             <TitleBar state={state} setState={setState} />
             <DragDropProvider
+                onDragStart={onDragStart}
                 onDragOver={onDragOver}
                 onDragEnd={onDragEnd}
                 collisionDetector={closestEntity}
