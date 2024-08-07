@@ -15,8 +15,7 @@ import {
     SortableProvider
 } from '@thisbeyond/solid-dnd';
 
-import Big from 'big.js'
-import { arrayMoveImmutable } from 'array-move';
+import { arrayMoveMutable } from 'array-move';
 
 import styles from './App.module.css';
 import { KanbanMarkdown } from '../../types';
@@ -65,7 +64,7 @@ const App: Component<AppProps> = (props) => {
             context
         );
         if (draggable.data.type === 'list') {
-            return closestList
+            return closestList;
         } else if (closestList) {
             const closestTask = closestCenter(
                 draggable,
@@ -77,8 +76,7 @@ const App: Component<AppProps> = (props) => {
             }
             const changingList = draggable.data.list !== closestList.id;
             if (changingList) {
-                const belowLastItem = state.kanban_board.lists.filter((kanban_list) => kanban_list.name === closestList.id)[0].name === closestList.id &&
-                    draggable.transformed.center.y > closestTask.transformed.center.y;
+                const belowLastItem = draggable.transformed.center.y > closestTask.transformed.center.y;
 
                 if (belowLastItem) return closestList;
             }
@@ -91,7 +89,9 @@ const App: Component<AppProps> = (props) => {
         droppable: Droppable,
         onlyWhenChangingGroup = true
     ) => {
-        if (!draggable || !droppable) return;
+        if (!draggable || !droppable) {
+            return;
+        }
 
         const draggableIsList = draggable.data.type === 'list';
         const droppableIsList = droppable.data.type === 'list';
@@ -111,71 +111,42 @@ const App: Component<AppProps> = (props) => {
             return;
         }
 
-        let ids, orders, order;
+
+        let map: Map<string, number>;
 
         if (draggableIsList) {
-            ids = state.kanban_board.lists.map((kanban_list) => kanban_list.name);
-            orders = state.kanban_board.lists.map((_, i) => i);
+            map = new Map(state.kanban_board.lists.map((kanban_list, i) => [kanban_list.name, i]));
         } else {
-            const kanban_list = state.kanban_board.lists.filter((kanban_list) => kanban_list.name === droppableListId)[0];
-            ids = kanban_list.tasks.map((kanban_task) => kanban_task.name + '-' + kanban_task.counter);
-            orders = kanban_list.tasks.map((_, i) => i);
+            const kanban_list = state.kanban_board.lists.find((kanban_list) => kanban_list.name === droppableListId);
+            if (!kanban_list) {
+                return;
+            }
+            map = new Map(kanban_list.tasks.map((kanban_task, i) => [`${kanban_task.name}-${kanban_task.counter}`, i]));
         }
-        console.log(`===========================================`);
-        console.log(`ids: ${ids}`);
-        console.log(`orders: ${orders}`);
 
-        if (!draggableIsList && droppableIsList) {
-            order = new Big(orders.at(-1) ?? -ORDER_DELTA).plus(ORDER_DELTA).round();
-        } else if (draggableIsList && droppableIsList) {
-            const draggableIndex = ids.indexOf(draggable.id);
-            const droppableIndex = ids.indexOf(droppable.id);
-            if (draggableIndex !== droppableIndex) {
-                let orderAfter, orderBefore;
-                if (draggableIndex === -1 || draggableIndex > droppableIndex) {
-                    orderBefore = new Big(orders[droppableIndex]);
-                    orderAfter = new Big(
-                        orders[droppableIndex - 1] ?? orderBefore.minus(ORDER_DELTA * 2)
-                    );
+        setState("kanban_board", "lists", produce((lists: Array<KanbanMarkdown.KanbanList>) => {
+            if (draggableIsList) {
+                const oldIndex = lists.findIndex((list) => list.name === draggableListId);
+                const newIndex = lists.findIndex((list) => list.name === droppableListId);
+                arrayMoveMutable(lists, oldIndex, newIndex);
+            } else {
+                const oldList = lists.find((list) => list.name === draggableListId);
+                if (!oldList) return;
+                if (draggableListId !== droppableListId) {
+                    const task = oldList.tasks.find((task) => task.name + '-' + task.counter === draggable.id);
+                    if (!task) return;
+                    oldList.tasks.splice(oldList.tasks.indexOf(task), 1);
+                    const newList = lists.find((list) => list.name === droppableListId);
+                    if (!newList) return;
+                    const newIndex = map.get(draggable.id as string);
+                    newList.tasks.splice(newIndex, 0, task);
                 } else {
-                    orderAfter = new Big(orders[droppableIndex]);
-                    orderBefore = new Big(
-                        orders[droppableIndex + 1] ?? orderAfter.plus(ORDER_DELTA * 2)
-                    );
-                }
-
-                if (orderAfter !== undefined && orderBefore !== undefined) {
-                    order = orderAfter.plus(orderBefore).div(2.0);
-                    const rounded = order.round();
-                    if (rounded.gt(orderAfter) && rounded.lt(orderBefore)) {
-                        order = rounded;
-                    }
+                    const oldIndex = oldList.tasks.findIndex((task) => task.name + '-' + task.counter === draggable.id);
+                    const newIndex = map.get(droppable.id as string);
+                    arrayMoveMutable(oldList.tasks, oldIndex, newIndex);
                 }
             }
-        }
-
-        if (order !== undefined) {
-            setState("kanban_board", "lists", produce((lists: Array<KanbanMarkdown.KanbanList>) => {
-                if (draggableIsList) {
-                    const oldIndex = lists.findIndex((list) => list.name === draggableListId);
-                    const newIndex = Math.min(Math.max(Number(order.toString()), 0), lists.length - 1);
-                    lists = arrayMoveImmutable(lists, oldIndex, newIndex);
-                } else {
-                    const oldList = lists.filter((list) => list.name === draggableListId)[0];
-                    if (draggableListId !== droppableListId) {
-                        const task = oldList.tasks.filter((task) => task.name + '-' + task.counter === draggable.id)[0];
-                        oldList.tasks.splice(oldList.tasks.indexOf(task), 1);
-                        const newList = lists.filter((list) => list.name === droppableListId)[0];
-                        const newIndex = Math.min(Math.max(Number(order.toString()), 0), newList.tasks.length - 1);
-                        newList.tasks.splice(newIndex, 0, task);
-                    } else {
-                        const oldIndex = oldList.tasks.findIndex((task) => task.name + '-' + task.counter === draggable.id);
-                        const newIndex = Math.min(Math.max(Number(order.toString()), 0), oldList.tasks.length - 1);
-                        oldList.tasks = arrayMoveImmutable(oldList.tasks, oldIndex, newIndex);
-                    }
-                }
-            }));
-        }
+        }));
     };
 
     const onDragOver: DragEventHandler = ({ draggable, droppable }) => {
@@ -197,7 +168,8 @@ const App: Component<AppProps> = (props) => {
             <DragDropProvider
                 onDragOver={onDragOver}
                 onDragEnd={onDragEnd}
-                collisionDetector={closestEntity}>
+                collisionDetector={closestEntity}
+            >
                 <DragDropSensors />
                 <div class={styles.kanban_board}>
                     <SortableProvider ids={listNames()}>
@@ -225,15 +197,6 @@ const App: Component<AppProps> = (props) => {
                     </SortableProvider>
                 </div>
             </DragDropProvider>
-            {/* <DragOverlay>
-                {(draggable) => {
-                    return draggable.data.type === 'list' ? (
-                        <GroupOverlay name={entity.name} items={groupItems(entity.id)} />
-                    ) : (
-                        <ItemOverlay name={entity.name} />
-                    );
-                }}
-            </DragOverlay> */}
             <Show when={getTaskModalState()}>
                 <TaskModal
                     state={state}

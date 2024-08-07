@@ -122,11 +122,11 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
         list: kanban_list.name,
     });
 
-    let isBeingHeld = false;
+    let isHoldingOn = false;
 
     createEffect(on(() => draggingState(), () => {
         if (draggingState()) {
-            isBeingHeld = false;
+            isHoldingOn = false;
         }
     }));
 
@@ -138,17 +138,19 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
             class={styles.kanban_task}
             ref={kanban_task_name_reference}
             onMouseDown={() => {
-                isBeingHeld = true;
+                isHoldingOn = true;
             }}
             onMouseUp={(event) => {
-                if (isBeingHeld)
+                if (isHoldingOn)
                     setSelected(event);
             }}
             onMouseOver={() => {
-                setTaskMenuState(true);
+                if (isHoldingOn)
+                    setTaskMenuState(true);
             }}
             onMouseLeave={() => {
-                setTaskMenuState(false);
+                if (isHoldingOn)
+                    setTaskMenuState(false);
             }}>
             <span class={styles.kanban_task_title}
                 onBlur={(event) => {
