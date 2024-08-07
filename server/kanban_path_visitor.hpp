@@ -216,6 +216,7 @@ namespace server
 				{
 					throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanBoard named "{}")", board_item));
 				}
+				board_item_index_name = urlDecode(board_item_index_name);
 
 				switch (hash(board_item_name))
 				{
@@ -274,6 +275,7 @@ namespace server
 					{
 						throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanList named "{}")", second));
 					}
+					task_index_name = urlDecode(task_index_name);
 
 					unsigned int task_index_counter = std::stoi(task_index_counter_str);
 
@@ -339,6 +341,7 @@ namespace server
 					{
 						throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanTask named "{}")", third));
 					}
+					task_item_index_name = urlDecode(task_item_index_name);
 
 					switch (hash(task_item_name))
 					{
