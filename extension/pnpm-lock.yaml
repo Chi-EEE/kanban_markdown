@@ -11,6 +11,12 @@ importers:
       '@thisbeyond/solid-dnd':
         specifier: ^0.7.5
         version: 0.7.5(solid-js@1.8.18)
+      array-move:
+        specifier: ^4.0.0
+        version: 4.0.0
+      big.js:
+        specifier: ^6.2.1
+        version: 6.2.1
       solid-js:
         specifier: ^1.8.11
         version: 1.8.18
@@ -40,7 +46,7 @@ importers:
         specifier: ^8.57.0
         version: 8.57.0
       solid-devtools:
-        specifier: ^0.29.2
+        specifier: ^0.29.3
         version: 0.29.3(solid-js@1.8.18)(vite@5.3.4(@types/node@20.14.10))
       typescript:
         specifier: ^5.4.5
@@ -649,6 +655,10 @@ packages:
   argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
 
+  array-move@4.0.0:
+    resolution: {integrity: sha512-+RY54S8OuVvg94THpneQvFRmqWdAHeqtMzgMW6JNurHxe8rsS07cHQdfGkXnTUXiBcyZ0j3SiDIxxj0RPiqCkQ==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
   babel-plugin-jsx-dom-expressions@0.37.23:
     resolution: {integrity: sha512-Y/r8LyLi/njnwPTaDuPEReWk30FJ1KplloYvcFUhHmiH1F7yVVj5mWojD7mbO/IruKyvOs9OIPUoeMi3Z++J4w==}
     peerDependencies:
@@ -664,6 +674,9 @@ packages:
 
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
+
+  big.js@6.2.1:
+    resolution: {integrity: sha512-bCtHMwL9LeDIozFn+oNhhFoq+yQ3BNdnsLSASUxLciOb1vgvpHsIO1dsENiGMgbb4SkP5TrzWzRiLddn8ahVOQ==}
 
   binary-extensions@2.3.0:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
@@ -2156,6 +2169,8 @@ snapshots:
 
   argparse@2.0.1: {}
 
+  array-move@4.0.0: {}
+
   babel-plugin-jsx-dom-expressions@0.37.23(@babel/core@7.24.9):
     dependencies:
       '@babel/core': 7.24.9
@@ -2173,6 +2188,8 @@ snapshots:
   balanced-match@1.0.2: {}
 
   base64-js@1.5.1: {}
+
+  big.js@6.2.1: {}
 
   binary-extensions@2.3.0: {}
 

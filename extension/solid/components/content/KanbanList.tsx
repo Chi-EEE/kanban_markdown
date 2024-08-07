@@ -1,28 +1,27 @@
-import type { Accessor, Component, Setter } from 'solid-js';
-import { Show, For, createSignal, createEffect, onMount, on } from "solid-js";
+import type { Accessor, Component, JSX, JSXElement, Setter } from 'solid-js';
+import { Show, For, createSignal, createEffect, onMount, on, children } from "solid-js";
 
 import styles from './KanbanList.module.css';
 
 import { KanbanMarkdown } from '../../types';
-import { KanbanTask } from './KanbanTask';
 import { TemporaryKanbanTask } from './TemporaryKanbanTask';
 
 import { applyAutoResize } from '../../utils';
-import { produce, SetStoreFunction } from 'solid-js/store';
+import { SetStoreFunction } from 'solid-js/store';
+import { createSortable, maybeTransformStyle } from '@thisbeyond/solid-dnd';
 
 type KanbanListProps = {
+    children: JSXElement;
+
     setState: SetStoreFunction<KanbanMarkdown.State>;
 
     kanban_list: KanbanMarkdown.KanbanList;
-
-    setTaskModalState: Setter<boolean>;
 };
 
 export const KanbanList: Component<KanbanListProps> = (props) => {
     const {
         setState,
         kanban_list,
-        setTaskModalState
     } = props;
 
     const [getName, setName] = createSignal<string>(kanban_list.name);
@@ -74,9 +73,15 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
 
     const [getAddButtonVisiblity, setAddButtonVisiblity] = createSignal<boolean>(true);
 
+    const sortable = createSortable(kanban_list.name, { type: "list" });
     return (
-        <div class={styles.kanban_list}>
+        <div
+            ref={sortable.ref}
+            style={{ ...maybeTransformStyle(sortable.transform), opacity: sortable.isActiveDraggable ? 0.25 : 1 }}
+            class={styles.kanban_list}
+        >
             <textarea
+                {...sortable.dragActivators}
                 ref={kanban_list_name_reference}
                 class={styles.kanban_list_name}
                 placeholder='Enter list name'
@@ -86,17 +91,7 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                 {kanban_list.name}
             </textarea>
             <div class={styles.kanban_task_list}>
-                <For each={kanban_list.tasks}>
-                    {(kanban_task) => {
-                        const kanban_task_props = {
-                            setState,
-                            kanban_list,
-                            kanban_task,
-                            setTaskModalState,
-                        }
-                        return <KanbanTask {...kanban_task_props} />
-                    }}
-                </For>
+                {props.children}
                 <Show when={getAddButtonVisiblity()} fallback={
                     <TemporaryKanbanTask
                         setState={setState}
