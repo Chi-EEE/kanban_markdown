@@ -21,3 +21,7 @@ solid/**
 pnpm-lock.yaml
 vite.config.mjs
 index.html
+
+# Markdown files
+CHANGELOG.md
+README.md

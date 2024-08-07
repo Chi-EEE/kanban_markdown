@@ -42,6 +42,7 @@
         "test": "vscode-test"
     },
     "devDependencies": {
+        "@thisbeyond/solid-dnd": "^0.7.5",
         "@types/jquery": "^3.5.30",
         "@types/jqueryui": "^1.12.23",
         "@types/mocha": "^10.0.7",
@@ -49,18 +50,17 @@
         "@types/vscode": "^1.91.0",
         "@vscode/test-cli": "^0.0.9",
         "@vscode/test-electron": "^2.4.0",
+        "array-move": "^4.0.0",
         "eslint": "^8.57.0",
+        "javascript-obfuscator": "^4.1.1",
+        "rollup-obfuscator": "^4.1.1",
+        "solid-js": "^1.8.19",
         "ts-loader": "^9.5.1",
         "typescript": "^5.4.5",
         "vite": "^5.3.5",
         "vite-plugin-solid": "^2.10.2",
         "webpack": "^5.93.0",
-        "webpack-cli": "^5.1.4"
-    },
-    "dependencies": {
-        "@thisbeyond/solid-dnd": "^0.7.5",
-        "array-move": "^4.0.0",
-        "node-polyfill-webpack-plugin": "^4.0.0",
-        "solid-js": "^1.8.19"
+        "webpack-cli": "^5.1.4",
+        "webpack-obfuscator": "^3.5.1"
     }
 }

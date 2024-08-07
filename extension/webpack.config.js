@@ -4,7 +4,7 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+const WebpackObfuscator = require('webpack-obfuscator');
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -44,8 +44,10 @@ const config = {
             }
         ]
     },
-    "plugins": [
-        new NodePolyfillPlugin()
+    plugins: [
+        new WebpackObfuscator({
+            rotateStringArray: true,
+        }, ['node_modules/**/*'])
     ]
 };
 module.exports = config;
