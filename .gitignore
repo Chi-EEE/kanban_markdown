@@ -41,6 +41,9 @@ build/
 # MacOS Cache
 .DS_Store
 
+# Hash file
+*.sha256
+
 vsxmake*/
 .vscode/compile_commands.json
 .vscode/settings.json

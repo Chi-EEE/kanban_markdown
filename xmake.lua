@@ -57,7 +57,10 @@ target("kanban-markdown_server")
     add_files("server/*.cpp")
 
     after_build(function (target) 
-        os.cp(path.join(target:targetdir(), "kanban-markdown_server.exe"), path.join("$(scriptdir)", "extension", "server", "kanban-markdown_server.exe"))
+        local target_extension_path = path.join("$(scriptdir)", "extension", "server", "kanban-markdown_server.exe")
+        os.cp(path.join(target:targetdir(), "kanban-markdown_server.exe"), target_extension_path)
+        local verifiedHash = import("xmake.hash").sha256(io.readfile(target_extension_path, {encoding = "binary"}))
+        io.writefile(target_extension_path .. ".sha256", verifiedHash)
     end)
 
     set_targetdir("$(buildir)/$(plat)/$(arch)/$(mode)/server")

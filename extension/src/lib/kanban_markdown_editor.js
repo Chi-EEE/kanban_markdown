@@ -42,58 +42,62 @@ class KanbanMarkdownEditorProvider {
     resolveCustomTextEditor(document, webviewPanel, token) {
         // Setup initial content for the webview
         // This cannot be done in the constructor because the webviewPanel is not available yet
-        this.server = new KanbanMarkdownServer(this.context);
+        KanbanMarkdownServer.new(this.context).then(server => {
+            console.log('Kanban Markdown Editor: ', document.uri.fsPath)
 
-        console.log('Kanban Markdown Editor: ', document.uri.fsPath)
+            server.sendRequest({
+                type: 'parse',
+                file: document.uri.fsPath,
+            }).then(() => {
+                webviewPanel.webview.options = {
+                    enableScripts: true,
+                };
 
-        this.server.sendRequest({
-            type: 'parse',
-            file: document.uri.fsPath,
-        }).then(() => {
-            webviewPanel.webview.options = {
-                enableScripts: true,
-            };
+                webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
-            webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
-
-            /**
-             * @param {any} data
-             */
-            function updateWebview(data) {
-                webviewPanel.webview.postMessage({
-                    type: 'update',
-                    text: JSON.stringify(data),
-                });
-            }
-
-            const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument(e => {
-                if (e.document.uri.toString() === document.uri.toString()) {
-                    this.server.sendRequest({
-                        type: 'get',
-                        format: 'json',
-                    }).then(data => {
-                        updateWebview(data);
+                /**
+                 * @param {any} data
+                 */
+                function updateWebview(data) {
+                    webviewPanel.webview.postMessage({
+                        type: 'update',
+                        text: JSON.stringify(data),
                     });
                 }
-            });
 
-            // Make sure we get rid of the listener when our editor is closed.
-            webviewPanel.onDidDispose(() => {
-                this.server.close();
-                changeDocumentSubscription.dispose();
-            });
+                const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument(e => {
+                    if (e.document.uri.toString() === document.uri.toString()) {
+                        server.sendRequest({
+                            type: 'get',
+                            format: 'json',
+                        }).then(data => {
+                            updateWebview(data);
+                        });
+                    }
+                });
 
-            webviewPanel.webview.onDidReceiveMessage(e => {
-                this.sendCommands(document, e);
-            });
+                // Make sure we get rid of the listener when our editor is closed.
+                webviewPanel.onDidDispose(() => {
+                    server.close();
+                    changeDocumentSubscription.dispose();
+                });
 
-            this.server.sendRequest({
-                type: 'get',
-                format: 'json',
-            }).then(data => {
-                updateWebview(data);
+                webviewPanel.webview.onDidReceiveMessage(e => {
+                    this.sendCommands(server, document, e);
+                });
+
+                server.sendRequest({
+                    type: 'get',
+                    format: 'json',
+                }).then(data => {
+                    updateWebview(data);
+                });
             });
+        }).catch(error => {
+
         });
+
+
     }
 
     /**
@@ -137,17 +141,17 @@ class KanbanMarkdownEditorProvider {
     }
 
     /**
-     * 
+     * @param {KanbanMarkdownServer} server
      * @param {vscode.TextDocument} document 
      * @param {*} e 
      * @returns 
      */
-    sendCommands(document, e) {
-        this.server.sendRequest({
+    sendCommands(server, document, e) {
+        server.sendRequest({
             type: 'commands',
             commands: e.commands,
         }).then(() => {
-            return this.server.sendRequest({
+            return server.sendRequest({
                 type: 'get',
                 format: 'markdown',
             });

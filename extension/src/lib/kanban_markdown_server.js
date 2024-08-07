@@ -1,12 +1,21 @@
 const fs = require('fs');
 const { spawn } = require('child_process');
 const vscode = require('vscode');
+const crypto = require('crypto');
 
 function uuidv4() {
     return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
         (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
     );
 }
+
+const getHash = path => new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha256');
+    const rs = fs.createReadStream(path);
+    rs.on('error', reject);
+    rs.on('data', chunk => hash.update(chunk));
+    rs.on('end', () => resolve(hash.digest('hex')));
+})
 
 class KanbanMarkdownServer {
     /**
@@ -15,7 +24,15 @@ class KanbanMarkdownServer {
     constructor(context) {
         this.context = context;
         this.requestMap = new Map();
+    }
 
+    static async new(context) {
+        const server = new KanbanMarkdownServer(context);
+        await server.initializeServer();
+        return server;
+    }
+
+    async initializeServer() {
         // Check if server exists
         const server_path = vscode.Uri.joinPath(this.context.extensionUri, 'server', 'kanban-markdown_server.exe');
         if (!fs.existsSync(server_path.fsPath)) {
@@ -23,9 +40,26 @@ class KanbanMarkdownServer {
             return;
         }
 
-        const server = spawn(server_path.fsPath);
+        const server_hash_path = vscode.Uri.joinPath(this.context.extensionUri, 'server', 'kanban-markdown_server.exe.sha256');
+        if (!fs.existsSync(server_hash_path.fsPath)) {
+            console.log("Server hash not found");
+            return;
+        }
 
-        this.server = server;
+        try {
+            const hashValue = await getHash(server_path.fsPath);
+            const correctHash = fs.readFileSync(server_hash_path.fsPath, 'utf-8').trim();
+            if (hashValue !== correctHash) {
+                console.error(`Failed to verify hash: ${hashValue}`);
+                return;
+            }
+            console.log(`Successfully verified hash: ${hashValue}`);
+        } catch (error) {
+            console.error(`Failed to verify hash: ${error}`);
+            return;
+        }
+
+        this.server = spawn(server_path.fsPath);
 
         this.server.stdout.on('data', (data) => {
             data = data.toString();
@@ -49,6 +83,10 @@ class KanbanMarkdownServer {
                     console.error('Response:', line);
                 }
             }
+        });
+
+        this.server.on('error', (error) => {
+            console.error("Unexpected error:", error);
         });
     }
 
