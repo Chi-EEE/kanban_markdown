@@ -12,9 +12,9 @@ export default defineConfig({
         target: 'esnext',
         rollupOptions: {
             output: {
-                dir: 'out/',
-                entryFileNames: 'compiled/bundled.js',
-                assetFileNames: 'compiled/bundled.css',
+                dir: 'dist/frontend/',
+                entryFileNames: 'bundled.js',
+                assetFileNames: 'bundled.css',
                 chunkFileNames: "chunk.js",
                 manualChunks: undefined,
             }

@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "npm: build",
+            "type": "shell",
+            "command": "npm run build",
+            "problemMatcher": []
+        },
+        {
+            "label": "npm: package",
+            "type": "shell",
+            "command": "npm run package",
+            "problemMatcher": []
+        },
+        {
+            "label": "npm: build and package",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "npm: build",
+                "npm: package"
+            ]
+        }
+    ]
+}

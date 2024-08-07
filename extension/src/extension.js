@@ -1,6 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 
-const { KanbanMarkdownEditorProvider } = require('./src/kanban_markdown_editor');
+const { KanbanMarkdownEditorProvider } = require('./lib/kanban_markdown_editor');
 
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');

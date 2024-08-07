@@ -10,7 +10,7 @@
         "Other"
     ],
     "activationEvents": [],
-    "main": "./extension.js",
+    "main": "./dist/extension.js",
     "contributes": {
         "commands": [
             {
@@ -31,9 +31,10 @@
         ]
     },
     "scripts": {
-        "vscode:prepublish": "pnpm run dev",
-        "start": "vite",
-        "dev": "vite",
+        "compile": "webpack --mode development",
+        "watch": "webpack --mode development --watch",
+        "vscode:prepublish": "npm run build && npm run package",
+        "package": "webpack --mode production --devtool hidden-source-map",
         "build": "vite build",
         "serve": "vite preview",
         "lint": "eslint .",
@@ -49,13 +50,17 @@
         "@vscode/test-cli": "^0.0.9",
         "@vscode/test-electron": "^2.4.0",
         "eslint": "^8.57.0",
+        "ts-loader": "^9.5.1",
         "typescript": "^5.4.5",
         "vite": "^5.3.5",
-        "vite-plugin-solid": "^2.10.2"
+        "vite-plugin-solid": "^2.10.2",
+        "webpack": "^5.93.0",
+        "webpack-cli": "^5.1.4"
     },
     "dependencies": {
         "@thisbeyond/solid-dnd": "^0.7.5",
         "array-move": "^4.0.0",
+        "node-polyfill-webpack-plugin": "^4.0.0",
         "solid-js": "^1.8.19"
     }
 }

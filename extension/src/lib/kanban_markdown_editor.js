@@ -104,10 +104,10 @@ class KanbanMarkdownEditorProvider {
     getHtmlForWebview(webview) {
         // Local path to script and css for the webview
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(
-            this.context.extensionUri, 'out', 'compiled', 'bundled.js'));
+            this.context.extensionUri, 'dist', 'frontend', 'bundled.js'));
 
         const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(
-            this.context.extensionUri, 'out', 'compiled', 'bundled.css'));
+            this.context.extensionUri, 'dist', 'frontend', 'bundled.css'));
 
         // Use a nonce to whitelist which scripts can be run
         const nonce = getNonce();
