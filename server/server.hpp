@@ -131,7 +131,7 @@ namespace server
 			case hash("get"):
 				return KanbanServer::get(kanban_tuple_, root, id_str);
 			default:
-				throw std::runtime_error("Unknown command");
+				throw std::runtime_error(fmt::format(R"(Error: Unknown command type "{}".)", type_str));
 				return false;
 			}
 		}
@@ -140,7 +140,7 @@ namespace server
 			yyjson_val* format = yyjson_obj_get(root, "format");
 			if (format == NULL)
 			{
-				throw std::runtime_error("Unable to find format");
+				throw std::runtime_error("Error: Missing required 'format' field in root object.");
 			}
 
 			std::string format_str = yyjson_get_string_object(format);
@@ -151,7 +151,7 @@ namespace server
 			case hash("markdown"):
 				return KanbanServer::get_markdown(kanban_tuple_, id_str);
 			default:
-				throw std::runtime_error("Unknown format");
+				throw std::runtime_error(fmt::format(R"(Error: Unknown format type "{}".)", format_str));
 			}
 			return false;
 		}
@@ -219,7 +219,7 @@ namespace server
 				yyjson_val* action = yyjson_obj_get(command, "action");
 				if (action == NULL)
 				{
-					throw std::runtime_error("Unable to find action");
+					throw std::runtime_error(fmt::format(R"(Error: Missing required 'action' field in command object at index "{}")", idx));
 				}
 				std::string action_str = yyjson_get_string_object(action);
 				bool success = false;
@@ -277,13 +277,13 @@ namespace server
 			yyjson_val* file = yyjson_obj_get(root, "file");
 			if (file == NULL)
 			{
-				throw std::runtime_error("Unable to find file");
+				throw std::runtime_error("Error: Missing required 'file' field in root object.");
 			}
 			std::string file_path = yyjson_get_string_object(file);
 
 			if (!std::filesystem::exists(file_path))
 			{
-				throw std::runtime_error("File does not exist");
+				throw std::runtime_error(fmt::format(R"(Error: File path "{}" does not exist.)", file_path));
 			}
 
 			std::ifstream file_stream(file_path);
