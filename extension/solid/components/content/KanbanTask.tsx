@@ -1,4 +1,4 @@
-import type { Component, Setter } from 'solid-js';
+import type { Accessor, Setter, VoidComponent } from 'solid-js';
 import { createSignal, createEffect, onMount, Show, For, on } from "solid-js";
 import { produce, SetStoreFunction } from 'solid-js/store';
 
@@ -7,6 +7,7 @@ import styles from './KanbanTask.module.css';
 import { KanbanMarkdown } from '../../types';
 
 import { applyAutoResize } from '../../utils';
+import { createSortable } from '@thisbeyond/solid-dnd';
 
 type KanbanTaskProps = {
     setState: SetStoreFunction<KanbanMarkdown.State>;
@@ -14,16 +15,18 @@ type KanbanTaskProps = {
     kanban_list: KanbanMarkdown.KanbanList;
     kanban_task: KanbanMarkdown.KanbanTask;
 
+    draggingState: Accessor<boolean>;
     setTaskModalState: Setter<boolean>;
 };
 
-export const KanbanTask: Component<KanbanTaskProps> = (props) => {
+export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
     const {
         setState,
 
         kanban_list,
         kanban_task,
-        
+
+        draggingState,
         setTaskModalState,
     } = props;
 
@@ -114,14 +117,42 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
         }));
     }
 
+    const sortable = createSortable(kanban_task.name + '-' + kanban_task.counter, {
+        name: kanban_task.name,
+        counter: kanban_task.counter,
+        type: "task",
+        list: kanban_list.name,
+    });
+
+    let isHoldingOn = false;
+
+    createEffect(on(() => draggingState(), () => {
+        if (draggingState()) {
+            isHoldingOn = false;
+        }
+    }));
+
     return (
-        <a class={styles.kanban_task} ref={kanban_task_name_reference}
-            onClick={(event) => setSelected(event)}
+        <a
+            // @ts-ignore
+            use:sortable
+            style={{ opacity: sortable.isActiveDraggable ? 0.25 : 1 }}
+            class={styles.kanban_task}
+            ref={kanban_task_name_reference}
+            onMouseDown={() => {
+                isHoldingOn = true;
+            }}
+            onMouseUp={(event) => {
+                if (isHoldingOn)
+                    setSelected(event);
+            }}
             onMouseOver={() => {
-                setTaskMenuState(true);
+                if (isHoldingOn)
+                    setTaskMenuState(true);
             }}
             onMouseLeave={() => {
-                setTaskMenuState(false);
+                if (isHoldingOn)
+                    setTaskMenuState(false);
             }}>
             <span class={styles.kanban_task_title}
                 onBlur={(event) => {
@@ -172,6 +203,6 @@ export const KanbanTask: Component<KanbanTaskProps> = (props) => {
                     </For>
                 </div>
             </Show>
-        </a>
+        </a >
     );
 }

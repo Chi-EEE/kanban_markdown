@@ -17,7 +17,11 @@ namespace server
 	public:
 		KanbanPathVisitor(kanban_markdown::KanbanBoard* kanban_board, std::string path, void* userdata) {
 			this->kanban_board = kanban_board;
-			this->path_split = parsePathString(urlDecode(path));
+			this->path_split = parsePathString(path);
+			for (auto& s : this->path_split)
+			{
+				s = urlDecode(s);
+			}
 			this->userdata = userdata;
 		}
 
