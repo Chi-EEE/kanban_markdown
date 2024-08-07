@@ -164,8 +164,8 @@ const App: Component<AppProps> = (props) => {
                         ]
                     });
                 } else {
-                    const oldIndex = oldList.tasks.findIndex((task) => task.name + '-' + task.counter === draggable.id);
-                    const newIndex = map.get(droppable.id as string) || map.size;
+                    const oldIndex = oldList.tasks.findIndex((task) => `${task.name}-${task.counter}` === draggable.id);
+                    const newIndex = map.get(droppable.id as string);
                     arrayMoveMutable(oldList.tasks, oldIndex, newIndex);
                     // @ts-ignore
                     vscode.postMessage({
