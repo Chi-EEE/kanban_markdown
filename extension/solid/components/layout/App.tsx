@@ -26,8 +26,6 @@ import { KanbanList } from '../content/KanbanList'
 import { TaskModal } from './TaskModal';
 import { KanbanTask } from '../content/KanbanTask';
 
-export const ORDER_DELTA = 1000;
-
 type AppProps = {
     kanban_board: KanbanMarkdown.KanbanBoard;
 };
@@ -129,21 +127,58 @@ const App: Component<AppProps> = (props) => {
                 const oldIndex = lists.findIndex((list) => list.name === draggableListId);
                 const newIndex = lists.findIndex((list) => list.name === droppableListId);
                 arrayMoveMutable(lists, oldIndex, newIndex);
+                // @ts-ignore
+                vscode.postMessage({
+                    commands: [
+                        {
+                            action: 'move',
+                            path: `list["${encodeURI(draggableListId)}"]`,
+                            value: {
+                                index: newIndex,
+                            }
+                        }
+                    ]
+                });
             } else {
                 const oldList = lists.find((list) => list.name === draggableListId);
                 if (!oldList) return;
                 if (draggableListId !== droppableListId) {
-                    const task = oldList.tasks.find((task) => task.name + '-' + task.counter === draggable.id);
+                    const task = oldList.tasks.find((task) => `${task.name}-${task.counter}` === draggable.id);
                     if (!task) return;
                     oldList.tasks.splice(oldList.tasks.indexOf(task), 1);
                     const newList = lists.find((list) => list.name === droppableListId);
                     if (!newList) return;
-                    const newIndex = map.get(draggable.id as string);
+                    const newIndex = map.get(droppable.id as string) || map.size;
                     newList.tasks.splice(newIndex, 0, task);
+                    // @ts-ignore
+                    vscode.postMessage({
+                        commands: [
+                            {
+                                action: 'move',
+                                path: `list["${encodeURI(draggableListId)}"].tasks["${encodeURI(draggable.data.name)}"][${draggable.data.counter}]`,
+                                value: {
+                                    index: newIndex,
+                                    destination: `list["${droppableListId}"].tasks`
+                                }
+                            }
+                        ]
+                    });
                 } else {
                     const oldIndex = oldList.tasks.findIndex((task) => task.name + '-' + task.counter === draggable.id);
-                    const newIndex = map.get(droppable.id as string);
+                    const newIndex = map.get(droppable.id as string) || map.size;
                     arrayMoveMutable(oldList.tasks, oldIndex, newIndex);
+                    // @ts-ignore
+                    vscode.postMessage({
+                        commands: [
+                            {
+                                action: 'move',
+                                path: `list["${encodeURI(draggableListId)}"].tasks["${encodeURI(draggable.data.name)}"][${draggable.data.counter}]`,
+                                value: {
+                                    index: newIndex,
+                                }
+                            }
+                        ]
+                    });
                 }
             }
         }));

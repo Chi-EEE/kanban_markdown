@@ -308,12 +308,12 @@ namespace server::commands
 		yyjson_val* path = yyjson_obj_get(command, "path");
 		if (path == NULL)
 		{
-			throw std::runtime_error("Unable to find path");
+			throw std::runtime_error("Error: Missing required 'path' field in command object");
 		}
 		yyjson_val* value = yyjson_obj_get(command, "value");
 		if (value == NULL)
 		{
-			throw std::runtime_error("Unable to find value");
+			throw std::runtime_error("Error: Missing required 'value' field in command object");
 		}
 		std::string path_str = yyjson_get_string_object(path);
 

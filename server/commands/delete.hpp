@@ -155,7 +155,7 @@ namespace server::commands
 		yyjson_val* path = yyjson_obj_get(command, "path");
 		if (path == NULL)
 		{
-			throw std::runtime_error("Unable to find path");
+			throw std::runtime_error("Error: Missing required 'path' field in command object");
 		}
 		std::string path_str = yyjson_get_string_object(path);
 		DeleteCommandVisitor visitor(&kanban_tuple.kanban_board, path_str, (void*)nullptr);

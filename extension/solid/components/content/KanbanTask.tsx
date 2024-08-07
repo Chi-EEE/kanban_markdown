@@ -118,6 +118,8 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
     }
 
     const sortable = createSortable(kanban_task.name + '-' + kanban_task.counter, {
+        name: kanban_task.name,
+        counter: kanban_task.counter,
         type: "task",
         list: kanban_list.name,
     });

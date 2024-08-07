@@ -73,7 +73,10 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
 
     const [getAddButtonVisiblity, setAddButtonVisiblity] = createSignal<boolean>(true);
 
-    const sortable = createSortable(kanban_list.name, { type: "list" });
+    const sortable = createSortable(kanban_list.name, {
+        name: kanban_list.name,
+        type: "list",
+     });
     return (
         <div
             ref={sortable.ref}

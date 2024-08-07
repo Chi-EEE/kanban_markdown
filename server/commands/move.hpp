@@ -46,7 +46,14 @@ namespace server::commands
 			const MoveValue* move_value = (MoveValue*)userdata;
 			std::shared_ptr<kanban_markdown::KanbanList> kanban_list = *kanban_list_iterator;
 			kanban_list_iterator = this->kanban_board->list.erase(kanban_list_iterator);
-			this->kanban_board->list.insert(this->kanban_board->list.begin() + move_value->index, kanban_list);
+			if (move_value->index >= this->kanban_board->list.size())
+			{
+				this->kanban_board->list.push_back(kanban_list);
+			}
+			else
+			{
+				this->kanban_board->list.insert(this->kanban_board->list.begin() + move_value->index, kanban_list);
+			}
 		}
 
 		void editListName(std::shared_ptr<kanban_markdown::KanbanList> kanban_list) final {
@@ -64,7 +71,12 @@ namespace server::commands
 			if (move_value->destination.empty()) {
 				std::shared_ptr<kanban_markdown::KanbanTask> kanban_task = *kanban_task_iterator;
 				kanban_task_iterator = kanban_list->tasks.erase(kanban_task_iterator);
-				kanban_list->tasks.insert(kanban_list->tasks.begin() + move_value->index, kanban_task);
+				if (move_value->index >= kanban_list->tasks.size()) {
+					kanban_list->tasks.push_back(kanban_task);
+				}
+				else {
+					kanban_list->tasks.insert(kanban_list->tasks.begin() + move_value->index, kanban_task);
+				}
 			}
 			else {
 				static re2::RE2 destination_pattern(R"(\w+\[\"(.+)\"\].tasks)");
@@ -86,8 +98,14 @@ namespace server::commands
 
 				std::shared_ptr<kanban_markdown::KanbanTask> task = kanban_list->tasks[old_index];
 				task->checked = parent_list->checked;
-
-				parent_list->tasks.insert(parent_list->tasks.begin() + move_value->index, task);
+				if (move_value->index >= parent_list->tasks.size())
+				{
+					parent_list->tasks.push_back(task);
+				}
+				else
+				{
+					parent_list->tasks.insert(parent_list->tasks.begin() + move_value->index, task);
+				}
 				kanban_list->tasks.erase(kanban_list->tasks.begin() + old_index);
 			}
 		}
@@ -163,18 +181,18 @@ namespace server::commands
 		yyjson_val* path = yyjson_obj_get(command, "path");
 		if (path == NULL)
 		{
-			throw std::runtime_error("Unable to find path");
+			throw std::runtime_error("Error: Missing required 'path' field in command object");
 		}
 		yyjson_val* value = yyjson_obj_get(command, "value");
 		if (value == NULL)
 		{
-			throw std::runtime_error("Unable to find value");
+			throw std::runtime_error("Error: Missing required 'value' field in command object.");
 		}
 
 		yyjson_val* index = yyjson_obj_get(value, "index");
 		if (index == NULL)
 		{
-			throw std::runtime_error("Unable to find index");
+			throw std::runtime_error("Error: Missing required 'index' field in 'value' object.");
 		}
 
 		yyjson_val* destination = yyjson_obj_get(value, "destination");
