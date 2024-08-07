@@ -18,10 +18,6 @@ namespace server
 		KanbanPathVisitor(kanban_markdown::KanbanBoard* kanban_board, std::string path, void* userdata) {
 			this->kanban_board = kanban_board;
 			this->path_split = parsePathString(path);
-			for (auto& s : this->path_split)
-			{
-				s = urlDecode(s);
-			}
 			this->userdata = userdata;
 		}
 
@@ -192,7 +188,7 @@ namespace server
 
 		void internal_visitBoard()
 		{
-			std::string board_item = this->path_split[0];
+			std::string board_item = urlDecode(this->path_split[0]);
 			switch (hash(board_item))
 			{
 			case hash("name"):
@@ -256,7 +252,7 @@ namespace server
 			else
 			{
 				std::shared_ptr<kanban_markdown::KanbanList> kanban_list = *it;
-				std::string second = this->path_split[1];
+				std::string second = urlDecode(this->path_split[1]);
 				switch (hash(second))
 				{
 				case hash("name"):
@@ -313,7 +309,7 @@ namespace server
 			else
 			{
 				std::shared_ptr<kanban_markdown::KanbanTask>& kanban_task = *it;
-				std::string third = this->path_split[2];
+				std::string third = urlDecode(this->path_split[2]);
 				switch (hash(third))
 				{
 				case hash("name"):
@@ -379,7 +375,7 @@ namespace server
 			else
 			{
 				std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = *it;
-				std::string fourth = this->path_split[3];
+				std::string fourth = urlDecode(this->path_split[3]);
 				switch (hash(fourth))
 				{
 				case hash("name"):
@@ -411,7 +407,7 @@ namespace server
 			else
 			{
 				std::shared_ptr<kanban_markdown::KanbanAttachment> kanban_attachment = *it;
-				std::string fourth = this->path_split[3];
+				std::string fourth = urlDecode(this->path_split[3]);
 				switch (hash(fourth))
 				{
 				case hash("name"):
@@ -441,7 +437,7 @@ namespace server
 			else
 			{
 				std::shared_ptr<kanban_markdown::KanbanChecklistItem> kanban_checklist_item = *it;
-				std::string fourth = this->path_split[3];
+				std::string fourth = urlDecode(this->path_split[3]);
 				switch (hash(fourth))
 				{
 				case hash("name"):
@@ -471,7 +467,7 @@ namespace server
 			else
 			{
 				std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = *it;
-				std::string second = this->path_split[1];
+				std::string second = urlDecode(this->path_split[1]);
 				switch (hash(second))
 				{
 				case hash("name"):
