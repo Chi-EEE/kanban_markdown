@@ -79,7 +79,7 @@ namespace server::commands
 				}
 			}
 			else {
-				static re2::RE2 destination_pattern(R"(\w+\[\"([\w\%\+]+)\"\]\[(\d+)\].tasks)");
+				static re2::RE2 destination_pattern(R"(\w+\[\"(.+)\"\]\[(\d+)\].tasks)");
 				std::string destination_list_name;
 				std::string destination_list_counter_str;
 				if (!RE2::PartialMatch(move_value->destination, destination_pattern, &destination_list_name, &destination_list_counter_str))
