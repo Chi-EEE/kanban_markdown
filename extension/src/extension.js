@@ -13,12 +13,6 @@ const vscode = require('vscode');
  */
 function activate(context) {
 	context.subscriptions.push(KanbanMarkdownEditorProvider.register(context));
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	// console.log('Congratulations, your extension "kanban-markdown" is now active!');
-
-	context.subscriptions.push(disposable);
 }
 
 // This method is called when your extension is deactivated

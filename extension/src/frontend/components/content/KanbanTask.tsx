@@ -48,7 +48,7 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
                     }
                 ]
             }); {
-                setState("kanban_board", "lists", (list, index) => list.name === kanban_list.name, "tasks", (task, index) => task.name === kanban_task.name, {
+                setState("kanban_board", "lists", (list, index) => list.name === kanban_list.name && list.counter === kanban_list.counter, "tasks", (task, index) => task.name === kanban_task.name, {
                     name: currentName,
                 });
             }
@@ -85,8 +85,13 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
                 }
             ]
         });
-        setState("kanban_board", "lists", (list, index) => list.name === kanban_list.name, produce((kanban_list) => {
-            kanban_list.tasks = kanban_list.tasks.filter((task) => task.name !== kanban_task.name || task.counter !== kanban_task.counter);
+        setState(produce((state) => {
+            const kanban_list: KanbanMarkdown.KanbanList = state.kanban_board.lists.find((list) => list.name === kanban_list.name && list.counter === kanban_list.counter);
+            const kanban_task: KanbanMarkdown.KanbanTask = kanban_list.tasks.find((task) => task.name === kanban_task.name && task.counter === kanban_task.counter);
+            state.kanban_board.task_name_tracker_map.get(kanban_task.name).removeHash(kanban_task.counter);
+            const index = kanban_list.tasks.indexOf(kanban_task);
+            kanban_list.tasks.splice(index, 1);
+            return state;
         }));
         setTaskMenuActionsState(false);
     }
@@ -98,11 +103,11 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
             commands: [
                 {
                     action: 'delete',
-                    path: `list["${encodeURI(kanban_list.name)}"].tasks["${encodeURI(kanban_task.name)}"][${kanban_task.counter}].labels["${encodeURI(labelName)}"]`
+                    path: `list["${encodeURI(kanban_list.name)}"][${kanban_list.counter}].tasks["${encodeURI(kanban_task.name)}"][${kanban_task.counter}].labels["${encodeURI(labelName)}"]`
                 }
             ]
         });
-        setState("kanban_board", "lists", (list, index) => list.name === kanban_list.name, "tasks", (task, index) => task.name === kanban_task.name && task.counter === kanban_task.counter, produce((kanban_task) => {
+        setState("kanban_board", "lists", (list, index) => list.name === kanban_list.name && list.counter === kanban_list.counter, "tasks", (task, index) => task.name === kanban_task.name && task.counter === kanban_task.counter, produce((kanban_task) => {
             // Only filter one label at a time
             let seenLabel = false;
             const updatedLabels = kanban_task.labels.filter((label) => {
@@ -117,11 +122,11 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
         }));
     }
 
-    const sortable = createSortable(kanban_task.name + '-' + kanban_task.counter, {
+    const sortable = createSortable(`task-${kanban_task.name}-${kanban_task.counter}`, {
         name: kanban_task.name,
         counter: kanban_task.counter,
         type: "task",
-        list: kanban_list.name,
+        list: `list-${kanban_list.name}-${kanban_list.counter}`,
     });
 
     let isHoldingOn = false;

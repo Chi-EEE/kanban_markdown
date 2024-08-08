@@ -13,6 +13,7 @@ import { createSortable, maybeTransformStyle } from '@thisbeyond/solid-dnd';
 type KanbanListProps = {
     children: JSXElement;
 
+    state: KanbanMarkdown.State;
     setState: SetStoreFunction<KanbanMarkdown.State>;
 
     kanban_list: KanbanMarkdown.KanbanList;
@@ -20,7 +21,9 @@ type KanbanListProps = {
 
 export const KanbanList: Component<KanbanListProps> = (props) => {
     const {
+        state,
         setState,
+
         kanban_list,
     } = props;
 
@@ -38,12 +41,12 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                 commands: [
                     {
                         action: 'update',
-                        path: `list["${encodeURI(previousName)}"].name`,
+                        path: `list["${encodeURI(previousName)}"][${kanban_list.counter}].name`,
                         value: currentName
                     }
                 ]
             });
-            setState("kanban_board", "lists", (list, index) => list.name === previousName, {
+            setState("kanban_board", "lists", (list, index) => list.name === previousName && list.counter === kanban_list.counter, {
                 name: currentName,
             });
         }
@@ -73,10 +76,12 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
 
     const [getAddButtonVisiblity, setAddButtonVisiblity] = createSignal<boolean>(true);
 
-    const sortable = createSortable(kanban_list.name, {
+    const sortable = createSortable(`list-${kanban_list.name}-${kanban_list.counter}`, {
         name: kanban_list.name,
+        counter: kanban_list.counter,
         type: "list",
-     });
+    });
+
     return (
         <div
             ref={sortable.ref}
@@ -97,9 +102,9 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                 {props.children}
                 <Show when={getAddButtonVisiblity()} fallback={
                     <TemporaryKanbanTask
+                        state={state}
                         setState={setState}
                         kanban_list={kanban_list}
-                        applyAutoResize={applyAutoResize}
                         setAddButtonVisiblity={setAddButtonVisiblity}
                         setCardTextAreaReference={setCardTextAreaReference}
                     />

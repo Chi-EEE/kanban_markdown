@@ -25,6 +25,7 @@ import { TitleBar } from './TitleBar';
 import { KanbanList } from '../content/KanbanList'
 import { TaskModal } from './TaskModal';
 import { KanbanTask } from '../content/KanbanTask';
+import { TemporaryKanbanList } from '../content/TemporaryKanbanList';
 
 type AppProps = {
     kanban_board: KanbanMarkdown.KanbanBoard;
@@ -52,7 +53,10 @@ const App: Component<AppProps> = (props) => {
     setStyleColor();
 
     const updateTask = (task: KanbanMarkdown.KanbanTask) => {
-        setState("kanban_board", "lists", (list) => list.name === state.selectedList.name, "tasks", (t) => t.name === state.selectedTask.name, task);
+        setState("kanban_board", "lists", (list) =>
+            list.name === state.selectedList.name &&
+            list.counter == state.selectedList.counter,
+            "tasks", (t) => t.name === state.selectedTask.name, task);
     }
 
     const closestEntity: CollisionDetector = (draggable, droppables, context) => {
@@ -113,26 +117,29 @@ const App: Component<AppProps> = (props) => {
         let map: Map<string, number>;
 
         if (draggableIsList) {
-            map = new Map(state.kanban_board.lists.map((kanban_list, i) => [kanban_list.name, i]));
+            map = new Map(state.kanban_board.lists.map((kanban_list, i) => [`list-${kanban_list.name}-${kanban_list.counter}`, i]));
         } else {
-            const kanban_list = state.kanban_board.lists.find((kanban_list) => kanban_list.name === droppableListId);
+            const kanban_list = state.kanban_board.lists.find((kanban_list) => `list-${kanban_list.name}-${kanban_list.counter}` === droppableListId);
             if (!kanban_list) {
                 return;
             }
-            map = new Map(kanban_list.tasks.map((kanban_task, i) => [`${kanban_task.name}-${kanban_task.counter}`, i]));
+            map = new Map(kanban_list.tasks.map((kanban_task, i) => [`task-${kanban_task.name}-${kanban_task.counter}`, i]));
         }
 
         setState("kanban_board", "lists", produce((lists: Array<KanbanMarkdown.KanbanList>) => {
             if (draggableIsList) {
-                const oldIndex = lists.findIndex((list) => list.name === draggableListId);
-                const newIndex = lists.findIndex((list) => list.name === droppableListId);
+                console.log(draggableIsList)
+                const list = lists.find((list) => `list-${list.name}-${list.counter}` === draggableListId);
+                const oldIndex = lists.findIndex((list) => `list-${list.name}-${list.counter}` === draggableListId);
+                const newIndex = lists.findIndex((list) => `list-${list.name}-${list.counter}` === droppableListId);
+                console.log(list, oldIndex, newIndex)
                 arrayMoveMutable(lists, oldIndex, newIndex);
                 // @ts-ignore
                 vscode.postMessage({
                     commands: [
                         {
                             action: 'move',
-                            path: `list["${encodeURI(draggableListId)}"]`,
+                            path: `list["${encodeURI(list.name)}"][${list.counter}]`,
                             value: {
                                 index: newIndex,
                             }
@@ -140,13 +147,13 @@ const App: Component<AppProps> = (props) => {
                     ]
                 });
             } else {
-                const oldList = lists.find((list) => list.name === draggableListId);
-                if (!oldList) return;
+                const list = lists.find((list) => `list-${list.name}-${list.counter}` === draggableListId);
+                if (!list) return;
                 if (draggableListId !== droppableListId) {
-                    const task = oldList.tasks.find((task) => `${task.name}-${task.counter}` === draggable.id);
+                    const task = list.tasks.find((task) => `task-${task.name}-${task.counter}` === draggable.id);
                     if (!task) return;
-                    oldList.tasks.splice(oldList.tasks.indexOf(task), 1);
-                    const newList = lists.find((list) => list.name === droppableListId);
+                    list.tasks.splice(list.tasks.indexOf(task), 1);
+                    const newList = lists.find((list) => `list-${list.name}-${list.counter}` === droppableListId);
                     if (!newList) return;
                     const newIndex = map.get(droppable.id as string) || map.size;
                     newList.tasks.splice(newIndex, 0, task);
@@ -155,24 +162,24 @@ const App: Component<AppProps> = (props) => {
                         commands: [
                             {
                                 action: 'move',
-                                path: `list["${encodeURI(draggableListId)}"].tasks["${encodeURI(draggable.data.name)}"][${draggable.data.counter}]`,
+                                path: `list["${encodeURI(list.name)}"][${list.counter}].tasks["${encodeURI(draggable.data.name)}"][${draggable.data.counter}]`,
                                 value: {
                                     index: newIndex,
-                                    destination: `list["${droppableListId}"].tasks`
+                                    destination: `list["${encodeURI(newList.name)}"][${newList.counter}].tasks`
                                 }
                             }
                         ]
                     });
                 } else {
-                    const oldIndex = oldList.tasks.findIndex((task) => `${task.name}-${task.counter}` === draggable.id);
+                    const oldIndex = list.tasks.findIndex((task) => `task-${task.name}-${task.counter}` === draggable.id);
                     const newIndex = map.get(droppable.id as string);
-                    arrayMoveMutable(oldList.tasks, oldIndex, newIndex);
+                    arrayMoveMutable(list.tasks, oldIndex, newIndex);
                     // @ts-ignore
                     vscode.postMessage({
                         commands: [
                             {
                                 action: 'move',
-                                path: `list["${encodeURI(draggableListId)}"].tasks["${encodeURI(draggable.data.name)}"][${draggable.data.counter}]`,
+                                path: `list["${encodeURI(list.name)}"][${list.counter}].tasks["${encodeURI(draggable.data.name)}"][${draggable.data.counter}]`,
                                 value: {
                                     index: newIndex,
                                 }
@@ -204,6 +211,9 @@ const App: Component<AppProps> = (props) => {
 
     const [draggingState, setDraggingState] = createSignal<boolean>(false);
 
+    const [getAddButtonVisiblity, setAddButtonVisiblity] = createSignal<boolean>(true);
+    const [getListTextAreaReference, setListTextAreaReference] = createSignal<HTMLTextAreaElement>();
+
     return (
         <div class={styles.App}>
             <TitleBar state={state} setState={setState} />
@@ -220,7 +230,7 @@ const App: Component<AppProps> = (props) => {
                             {(kanban_list) => {
                                 const sortedKanbanIds = () => kanban_list.tasks.map((kanban_task) => kanban_task.name + '-' + kanban_task.counter);
 
-                                return (<KanbanList setState={setState} kanban_list={kanban_list} >
+                                return (<KanbanList state={state} setState={setState} kanban_list={kanban_list} >
                                     <SortableProvider ids={sortedKanbanIds()}>
                                         <For each={kanban_list.tasks}>
                                             {(kanban_task) => (
@@ -238,6 +248,19 @@ const App: Component<AppProps> = (props) => {
                             }}
                         </For>
                     </SortableProvider>
+                    <Show when={getAddButtonVisiblity()} fallback={
+                        <TemporaryKanbanList
+                            state={state}
+                            setState={setState}
+                            setAddButtonVisiblity={setAddButtonVisiblity}
+                            setListTextAreaReference={setListTextAreaReference}
+                        />
+                    }>
+                        <button id={styles.add_list_button} onClick={() => {
+                            setAddButtonVisiblity(false);
+                            getListTextAreaReference().focus();
+                        }}>Add another list +</button>
+                    </Show>
                 </div>
             </DragDropProvider>
             <Show when={getTaskModalState()}>

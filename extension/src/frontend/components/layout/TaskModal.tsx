@@ -53,7 +53,7 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                 commands: [
                     {
                         action: 'delete',
-                        path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].labels["${encodeURI(labelName)}"]`
+                        path: `list["${encodeURI(selectedList.name)}"][${selectedList.counter}].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].labels["${encodeURI(labelName)}"]`
                     }
                 ]
             });
@@ -66,7 +66,13 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                 seenLabel = label.name === labelName;
                 return !seenLabel;
             });
-            setState("kanban_board", "lists", (list, index) => list.name === selectedList.name, "tasks", (task, index) => task.name === selectedTask.name && task.counter === selectedTask.counter, {
+            setState("kanban_board", "lists",
+                (list, index) =>
+                    list.name === selectedList.name &&
+                    list.counter === selectedList.counter, "tasks",
+                (task, index) =>
+                    task.name === selectedTask.name &&
+                    task.counter === selectedTask.counter, {
                 labels: updatedLabels
             });
         }
@@ -83,12 +89,12 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                 commands: [
                     {
                         action: 'update',
-                        path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].name`,
+                        path: `list["${encodeURI(selectedList.name)}"][${selectedList.counter}].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].name`,
                         value: newName
                     },
                     {
                         action: 'update',
-                        path: `list["${encodeURI(selectedList.name)}"].tasks["${encodeURI(newName)}"][${selectedTask.counter}].description`,
+                        path: `list["${encodeURI(selectedList.name)}"][${selectedList.counter}].tasks["${encodeURI(newName)}"][${selectedTask.counter}].description`,
                         value: newDescription
                     },
                 ]

@@ -9,60 +9,51 @@ type TemporaryKanbanTaskProps = {
     state: KanbanMarkdown.State;
     setState: SetStoreFunction<KanbanMarkdown.State>;
 
-    kanban_list: KanbanMarkdown.KanbanList;
-
     setAddButtonVisiblity: Setter<boolean>;
-    setCardTextAreaReference: Setter<HTMLTextAreaElement>;
+    setListTextAreaReference: Setter<HTMLTextAreaElement>;
 };
 
-export const TemporaryKanbanTask: Component<TemporaryKanbanTaskProps> = (props) => {
+export const TemporaryKanbanList: Component<TemporaryKanbanTaskProps> = (props) => {
     const {
         state,
         setState,
 
-        kanban_list,
-
         setAddButtonVisiblity,
-        setCardTextAreaReference,
+        setListTextAreaReference,
     } = props;
 
     const createTask = (event: FocusEvent) => {
         const target = event.target as HTMLTextAreaElement;
         target.value = target.value.replace(/[\v\n]+/g, '').trim();
         if (target.value !== '') {
-            const new_task: KanbanMarkdown.KanbanTask = {
+            const new_list: KanbanMarkdown.KanbanList = {
                 name: target.value,
-                counter: KanbanMarkdown.DuplicateNameTracker.GetCounterWithName(target.value, state.kanban_board.task_name_tracker_map),
+                counter: KanbanMarkdown.DuplicateNameTracker.GetCounterWithName(target.value, state.kanban_board.list_name_tracker_map),
                 checked: false,
-                description: '',
-                labels: [],
-                attachments: [],
-                checklist: [],
+                tasks: [],
             };
             // @ts-ignore
             vscode.postMessage({
                 commands: [
                     {
                         action: 'create',
-                        path: `list["${encodeURI(kanban_list.name)}"][${kanban_list.counter}].tasks`,
-                        value: new_task
+                        path: `list`,
+                        value: new_list
                     }
                 ]
             });
-            setState("kanban_board", "lists", (list, index) => list.name === kanban_list.name && list.counter === kanban_list.counter, "tasks", produce((tasks: KanbanMarkdown.KanbanTask[]) => {
-                tasks.push(new_task);
-            }));
+            setState("kanban_board", "lists", state.kanban_board.lists.length, new_list);
         }
         target.value = '';
         setAddButtonVisiblity(true);
     }
 
     return (
-        <a class={styles.temp_card}>
+        <a class={styles.kanban_list}>
             <textarea
-                class={styles.temp_card_title}
-                ref={(el) => setCardTextAreaReference(el)}
-                placeholder='Enter card title'
+                class={styles.kanban_list_name}
+                ref={(el) => setListTextAreaReference(el)}
+                placeholder='Enter list title'
                 onBlur={(event) => createTask(event)}
                 onKeyPress={(event: KeyboardEvent) => {
                     const target = event.target as HTMLTextAreaElement;

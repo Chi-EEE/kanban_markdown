@@ -42,7 +42,11 @@ namespace server::commands
 		}
 
 		void editListName(std::shared_ptr<kanban_markdown::KanbanList> kanban_list) final {
-			kanban_list->name = yyjson_get_string_object((yyjson_val*)userdata);
+			std::string previous_list_name = kanban_list->name;
+			this->kanban_board->list_name_tracker_map[previous_list_name].removeHash(kanban_list->counter);
+			std::string new_list_name = yyjson_get_string_object((yyjson_val*)userdata);
+			kanban_list->name = new_list_name;
+			kanban_list->counter = kanban_markdown::utils::kanban_get_counter_with_name(new_list_name, this->kanban_board->list_name_tracker_map);
 		}
 		void editListChecked(std::shared_ptr<kanban_markdown::KanbanList> kanban_list) final {
 			kanban_list->checked = yyjson_get_bool((yyjson_val*)userdata);
@@ -56,7 +60,11 @@ namespace server::commands
 		}
 
 		void editTaskName(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) final {
-			kanban_task->name = yyjson_get_string_object((yyjson_val*)userdata);
+			std::string previous_task_name = kanban_task->name;
+			this->kanban_board->task_name_tracker_map[previous_task_name].removeHash(kanban_task->counter);
+			std::string new_task_name = yyjson_get_string_object((yyjson_val*)userdata);
+			kanban_task->name = new_task_name;
+			kanban_task->counter = kanban_markdown::utils::kanban_get_counter_with_name(new_task_name, this->kanban_board->task_name_tracker_map);
 		}
 		void editTaskDescription(std::shared_ptr<kanban_markdown::KanbanList> kanban_list, std::shared_ptr<kanban_markdown::KanbanTask> kanban_task) final {
 			kanban_task->description = split(yyjson_get_string_object((yyjson_val*)userdata), "\n");

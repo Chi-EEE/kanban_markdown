@@ -13,8 +13,25 @@
 #include "internal.hpp"
 
 namespace kanban_markdown {
-	struct TaskNameTracker {
-		unsigned int counter;
+	class DuplicateNameTracker {
+	public:
+		unsigned int getHash() {
+			unsigned int counter;
+			do {
+				counter = ++this->counter;
+			} while (this->used_hash.contains(this->counter));
+			this->used_hash.insert(this->counter);
+			return counter;
+		}
+
+		void removeHash(unsigned int counter) {
+			if (counter == this->counter) {
+				this->counter--;
+			}
+			this->used_hash.erase(counter);
+		}
+
+		unsigned int counter = 1;
 		tsl::robin_set<unsigned int> used_hash;
 	};
 
@@ -117,7 +134,7 @@ namespace kanban_markdown {
 	struct KanbanList
 	{
 		bool operator==(const KanbanList& other) const {
-			if (this->name != other.name || this->tasks.size() != other.tasks.size()) {
+			if (this->counter != other.counter || this->name != other.name || this->tasks.size() != other.tasks.size()) {
 				return false;
 			}
 			for (size_t i = 0; i < this->tasks.size(); i++) {
@@ -133,6 +150,7 @@ namespace kanban_markdown {
 		}
 
 		bool checked;
+		unsigned int counter;
 		std::string name;
 		std::vector<std::shared_ptr<KanbanTask>> tasks;
 	};
@@ -170,7 +188,8 @@ namespace kanban_markdown {
 		std::string description;
 		std::vector<std::shared_ptr<KanbanLabel>> labels;
 		std::vector<std::shared_ptr<KanbanList>> list;
-		tsl::robin_map<std::string, TaskNameTracker> task_name_tracker_map;
+		tsl::robin_map<std::string, DuplicateNameTracker> list_name_tracker_map;
+		tsl::robin_map<std::string, DuplicateNameTracker> task_name_tracker_map;
 	};
 }
 CPP_DUMP_DEFINE_EXPORT_OBJECT(asap::datetime, when);

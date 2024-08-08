@@ -79,19 +79,21 @@ namespace server::commands
 				}
 			}
 			else {
-				static re2::RE2 destination_pattern(R"(\w+\[\"(.+)\"\].tasks)");
-				std::string destination_list;
-				if (!RE2::PartialMatch(move_value->destination, destination_pattern, &destination_list))
+				static re2::RE2 destination_pattern(R"(\w+\[\"(.+)\"\]\[(\d+)\].tasks)");
+				std::string destination_list_name;
+				std::string destination_list_counter_str;
+				if (!RE2::PartialMatch(move_value->destination, destination_pattern, &destination_list_name, &destination_list_counter_str))
 				{
 					throw std::runtime_error("Invalid path: The destination must be a list name");
 				}
+				unsigned int destination_list_counter = std::stoul(destination_list_counter_str);
 
-				auto parent_it = std::find_if(this->kanban_board->list.begin(), this->kanban_board->list.end(), [&destination_list](const auto& x)
-					{ return x->name == destination_list; });
+				auto parent_it = std::find_if(this->kanban_board->list.begin(), this->kanban_board->list.end(), [&destination_list_name, &destination_list_counter](const auto& x)
+					{ return x->name == destination_list_name && x->counter == destination_list_counter; });
 
 				if (parent_it == this->kanban_board->list.end())
 				{
-					throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanBoard.list named "{}")", destination_list));
+					throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanBoard.list named "{}" [{}])", destination_list_name, destination_list_counter));
 				}
 				std::shared_ptr<kanban_markdown::KanbanList> parent_list = *parent_it;
 				int old_index = std::distance(kanban_list->tasks.begin(), kanban_task_iterator);

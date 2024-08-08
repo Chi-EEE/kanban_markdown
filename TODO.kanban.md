@@ -14,13 +14,13 @@ No description available.
 
 ## Board:  
 
-### <span data-checked="false">To do:</span>  
+### <span data-checked="false" data-counter="1">To do:</span>  
 - [ ] <span id="kanban_md-task-allow_for_multiple_lists_with_the_same_name-1" data-counter="1">Allow for multiple Lists with the same name</span>  
 - [ ] <span id="kanban_md-task-bug:_double_clicking_on_created_card_opens_card_modal-1" data-counter="1">Bug: Double clicking on created card opens card_modal</span>  
   - **Description**:  
       
 
-### <span data-checked="false">Pending:</span>  
+### <span data-checked="false" data-counter="1">Pending:</span>  
 - [ ] <span id="kanban_md-task-fix_empty_description-1" data-counter="1">Fix empty description</span>  
 - [ ] <span id="kanban_md-task-add_close_other_menus-1" data-counter="1">Add close other menus</span>  
   - **Description**:  
@@ -31,7 +31,7 @@ No description available.
   - **Description**:  
       
 
-### <span data-checked="true">Done:</span>  
+### <span data-checked="true" data-counter="1">Done:</span>  
 - [x] <span id="kanban_md-task-allow_for_the_card_to_expand_when_reaching_max_width_size-1" data-counter="1">Allow for the card to expand when reaching max width size</span>  
 - [x] <span id="kanban_md-task-fix_the_dot_in_strings_(spliting)_[maybe]-1" data-counter="1">Fix the dot in strings (spliting) [MAYBE]</span>  
 - [x] <span id="kanban_md-task-hide_categories_in_task_if_unused-1" data-counter="1">Hide categories in Task if unused</span>  

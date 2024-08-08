@@ -208,11 +208,12 @@ namespace server
 				break;
 			default:
 			{
-				static re2::RE2 path_pattern(R"((\w+)\[\"(.+)\"\])");
+				static re2::RE2 path_pattern(R"((\w+)\[\"(.+)\"\](?:\[(\d+)\])?)");
 				std::string board_item_name;
 				std::string board_item_index_name;
+				std::string board_optional_index_counter_str;
 
-				if (!RE2::PartialMatch(board_item, path_pattern, &board_item_name, &board_item_index_name))
+				if (!RE2::PartialMatch(board_item, path_pattern, &board_item_name, &board_item_index_name, &board_optional_index_counter_str))
 				{
 					throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanBoard named "{}")", board_item));
 				}
@@ -222,7 +223,8 @@ namespace server
 				{
 				case hash("list"):
 				{
-					internal_visitList(board_item_index_name);
+					unsigned int board_index_counter = std::stoul(board_optional_index_counter_str);
+					internal_visitList(board_item_index_name, board_index_counter);
 					break;
 				}
 				case hash("labels"):
@@ -238,13 +240,13 @@ namespace server
 			}
 		}
 
-		void internal_visitList(std::string board_item_index_name)
+		void internal_visitList(std::string board_item_index_name, unsigned int board_index_counter)
 		{
-			auto it = std::find_if(this->kanban_board->list.begin(), this->kanban_board->list.end(), [&board_item_index_name](const auto& x)
-				{ return x->name == board_item_index_name; });
+			auto it = std::find_if(this->kanban_board->list.begin(), this->kanban_board->list.end(), [&board_item_index_name, &board_index_counter](const auto& x)
+				{ return x->name == board_item_index_name && x->counter == board_index_counter; });
 			if (it == this->kanban_board->list.end())
 			{
-				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanBoard.list named "{}")", board_item_index_name));
+				throw std::runtime_error(fmt::format(R"(Invalid path: There are no keys inside KanbanBoard.list named "{}" [{}])", board_item_index_name, board_index_counter));
 			}
 			if (this->path_split.size() == 1)
 			{
@@ -267,7 +269,7 @@ namespace server
 					break;
 				default:
 				{
-					static re2::RE2 path_pattern(R"((\w+)\[\"(.+)\"\]\[(.+)\])");
+					static re2::RE2 path_pattern(R"((\w+)\[\"(.+)\"\]\[(\d+)\])");
 					std::string list_item_name;
 					std::string task_index_name;
 					std::string task_index_counter_str;
@@ -277,7 +279,7 @@ namespace server
 					}
 					task_index_name = urlDecode(task_index_name);
 
-					unsigned int task_index_counter = std::stoi(task_index_counter_str);
+					unsigned int task_index_counter = std::stoul(task_index_counter_str);
 
 					switch (hash(list_item_name))
 					{

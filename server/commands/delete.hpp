@@ -44,7 +44,11 @@ namespace server::commands
 					kanban_label->tasks.erase(std::remove_if(kanban_label->tasks.begin(), kanban_label->tasks.end(), [&kanban_task](const std::shared_ptr<kanban_markdown::KanbanTask>& x)
 						{ return *x == *kanban_task; }), kanban_label->tasks.end());
 				}
+				auto& task_name_tracker = this->kanban_board->task_name_tracker_map[kanban_task->name];
+				task_name_tracker.removeHash(kanban_task->counter);
 			}
+			auto& list_name_tracker = this->kanban_board->list_name_tracker_map[kanban_list->name];
+			list_name_tracker.removeHash(kanban_list->counter);
 			this->kanban_board->list.erase(kanban_list_iterator);
 		}
 
@@ -65,15 +69,7 @@ namespace server::commands
 					{ return *x == *kanban_task; }), kanban_label->tasks.end());
 			}
 			auto& task_name_tracker = this->kanban_board->task_name_tracker_map[kanban_task->name];
-			task_name_tracker.used_hash.erase(kanban_task->counter);
-			if (task_name_tracker.counter == kanban_task->counter)
-			{
-				task_name_tracker.counter--;
-			}
-			else if (task_name_tracker.counter > kanban_task->counter)
-			{
-				task_name_tracker.counter = kanban_task->counter - 1;
-			}
+			task_name_tracker.removeHash(kanban_task->counter);
 			kanban_list->tasks.erase(kanban_task_iterator);
 		}
 

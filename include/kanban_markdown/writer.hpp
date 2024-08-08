@@ -67,8 +67,9 @@ namespace kanban_markdown {
 			markdown_file += "## Board:" + constants::END_OF_MARKDOWN_LINE;
 			markdown_file += '\n';
 			for (auto& kanban_list : kanban_board.list) {
-				markdown_file += fmt::format(R"(### <span data-checked="{checked}">{name}</span>{eol})",
+				markdown_file += fmt::format(R"(### <span data-checked="{checked}" data-counter="{counter}">{name}</span>{eol})",
 					fmt::arg("checked", kanban_list->checked),
+					fmt::arg("counter", kanban_list->counter),
 					fmt::arg("name", kanban_list->name),
 					fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 				);
@@ -173,6 +174,38 @@ namespace kanban_markdown {
 
 		yyjson_mut_obj_add_val(doc, root, "properties", properties_obj);
 
+		yyjson_mut_val* task_name_tracker_map_obj = yyjson_mut_obj(doc);
+		for (const auto& [name, task_name_tracker] : kanban_board.task_name_tracker_map) {
+			yyjson_mut_val* tracker_obj = yyjson_mut_obj(doc);
+			yyjson_mut_obj_add_uint(doc, tracker_obj, "counter", task_name_tracker.counter);
+
+			yyjson_mut_val* used_hash_arr = yyjson_mut_arr(doc);
+			for (const auto& hash : task_name_tracker.used_hash) {
+				yyjson_mut_arr_add_uint(doc, used_hash_arr, hash);
+			}
+			yyjson_mut_obj_add_val(doc, tracker_obj, "used_hash", used_hash_arr);
+
+			yyjson_mut_val* name_val = yyjson_mut_strncpy(doc, name.c_str(), name.length());
+			yyjson_mut_obj_add(task_name_tracker_map_obj, name_val, tracker_obj);
+		}
+		yyjson_mut_obj_add_val(doc, root, "task_name_tracker_map", task_name_tracker_map_obj);
+
+		yyjson_mut_val* list_name_tracker_map_obj = yyjson_mut_obj(doc);
+		for (const auto& [name, list_name_tracker] : kanban_board.list_name_tracker_map) {
+			yyjson_mut_val* tracker_obj = yyjson_mut_obj(doc);
+			yyjson_mut_obj_add_uint(doc, tracker_obj, "counter", list_name_tracker.counter);
+
+			yyjson_mut_val* used_hash_arr = yyjson_mut_arr(doc);
+			for (const auto& hash : list_name_tracker.used_hash) {
+				yyjson_mut_arr_add_uint(doc, used_hash_arr, hash);
+			}
+			yyjson_mut_obj_add_val(doc, tracker_obj, "used_hash", used_hash_arr);
+
+			yyjson_mut_val* name_val = yyjson_mut_strncpy(doc, name.c_str(), name.length());
+			yyjson_mut_obj_add(list_name_tracker_map_obj, name_val, tracker_obj);
+		}
+		yyjson_mut_obj_add_val(doc, root, "list_name_tracker_map", list_name_tracker_map_obj);
+
 		yyjson_mut_val* labels_arr = yyjson_mut_arr(doc);
 		for (const auto& kanban_label : kanban_board.labels) {
 			yyjson_mut_val* label_obj = yyjson_mut_obj(doc);
@@ -195,6 +228,7 @@ namespace kanban_markdown {
 		for (const auto& kanban_list : kanban_board.list) {
 			yyjson_mut_val* list_obj = yyjson_mut_obj(doc);
 			yyjson_mut_obj_add_strncpy(doc, list_obj, "name", kanban_list->name.c_str(), kanban_list->name.length());
+			yyjson_mut_obj_add_uint(doc, list_obj, "counter", kanban_list->counter);
 
 			yyjson_mut_val* tasks_arr = yyjson_mut_arr(doc);
 			for (const auto& kanban_task : kanban_list->tasks) {

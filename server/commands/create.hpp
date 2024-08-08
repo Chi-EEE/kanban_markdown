@@ -46,6 +46,7 @@ namespace server::commands
 			re2::RE2::GlobalReplace(&name_str, constants::vertical_whitespace_regex_pattern, "");
 
 			std::shared_ptr<kanban_markdown::KanbanList> kanban_list = std::make_shared<kanban_markdown::KanbanList>();
+			kanban_list->counter = kanban_markdown::utils::kanban_get_counter_with_name(name_str, this->kanban_board->list_name_tracker_map);
 			kanban_list->name = name_str;
 			kanban_list->checked = yyjson_get_bool(checked);
 			this->kanban_board->list.push_back(kanban_list);
