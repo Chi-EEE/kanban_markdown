@@ -49,15 +49,6 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
         const selectedList = state.selectedList;
         const selectedTask = state.selectedTask;
         if (selectedTask) {
-            // @ts-ignore
-            vscode.postMessage({
-                commands: [
-                    {
-                        action: 'delete',
-                        path: `list["${encodeURI(selectedList.name)}"][${selectedList.counter}].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].labels["${encodeURI(labelName)}"]`
-                    }
-                ]
-            });
             // Only filter one label at a time
             let seenLabel = false;
             const updatedLabels = selectedTask.labels.filter((label) => {
@@ -75,6 +66,15 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                     task.name === selectedTask.name &&
                     task.counter === selectedTask.counter, {
                 labels: updatedLabels
+            });
+            // @ts-ignore
+            vscode.postMessage({
+                commands: [
+                    {
+                        action: 'delete',
+                        path: `list["${encodeURI(selectedList.name)}"][${selectedList.counter}].tasks["${encodeURI(selectedTask.name)}"][${selectedTask.counter}].labels["${encodeURI(labelName)}"]`
+                    }
+                ]
             });
         }
     };

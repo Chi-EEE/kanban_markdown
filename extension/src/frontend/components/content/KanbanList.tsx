@@ -35,6 +35,12 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
     createEffect(on(() => getName(), (currentName) => {
         const previousName = kanban_list.name;
         if (currentName !== previousName) {
+            setState("kanban_board", "lists", (list, index) => list.name === previousName && list.counter === kanban_list.counter,
+                produce((kanban_list) => {
+                    kanban_list.name = currentName;
+                    state.kanban_board.list_name_tracker_map.get(previousName).removeHash(kanban_list.counter);
+                    kanban_list.counter = KanbanMarkdown.DuplicateNameTracker.GetCounterWithName(currentName, state.kanban_board.list_name_tracker_map);
+                }));
             // @ts-ignore
             vscode.postMessage({
                 commands: [
@@ -45,12 +51,6 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                     }
                 ]
             });
-            setState("kanban_board", "lists", (list, index) => list.name === previousName && list.counter === kanban_list.counter,
-                produce((kanban_list) => {
-                    kanban_list.name = currentName;
-                    state.kanban_board.list_name_tracker_map.get(previousName).removeHash(kanban_list.counter);
-                    kanban_list.counter = KanbanMarkdown.DuplicateNameTracker.GetCounterWithName(currentName, state.kanban_board.list_name_tracker_map);
-                }));
         }
     }));
 

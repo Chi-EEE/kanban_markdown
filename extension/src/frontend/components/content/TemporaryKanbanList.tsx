@@ -32,6 +32,7 @@ export const TemporaryKanbanList: Component<TemporaryKanbanTaskProps> = (props) 
                 checked: false,
                 tasks: [],
             };
+            setState("kanban_board", "lists", state.kanban_board.lists.length, new_list);
             // @ts-ignore
             vscode.postMessage({
                 commands: [
@@ -42,7 +43,6 @@ export const TemporaryKanbanList: Component<TemporaryKanbanTaskProps> = (props) 
                     }
                 ]
             });
-            setState("kanban_board", "lists", state.kanban_board.lists.length, new_list);
         }
         target.value = '';
         setAddButtonVisiblity(true);

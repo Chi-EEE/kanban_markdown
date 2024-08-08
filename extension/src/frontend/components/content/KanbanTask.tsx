@@ -39,6 +39,12 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
     createEffect(on(() => getName(), (currentName) => {
         const previousName = kanban_task.name;
         if (currentName !== previousName) {
+            setState("kanban_board", "lists", (list, index) => list.name === kanban_list.name && list.counter === kanban_list.counter, "tasks", (task, index) => task.name === kanban_task.name,
+                produce((kanban_task) => {
+                    kanban_task.name = currentName;
+                    state.kanban_board.task_name_tracker_map.get(previousName).removeHash(kanban_task.counter);
+                    kanban_task.counter = KanbanMarkdown.DuplicateNameTracker.GetCounterWithName(currentName, state.kanban_board.task_name_tracker_map);
+                }));
             // @ts-ignore
             vscode.postMessage({
                 commands: [
@@ -48,14 +54,7 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
                         value: currentName
                     }
                 ]
-            }); {
-                setState("kanban_board", "lists", (list, index) => list.name === kanban_list.name && list.counter === kanban_list.counter, "tasks", (task, index) => task.name === kanban_task.name,
-                    produce((kanban_task) => {
-                        kanban_task.name = currentName;
-                        state.kanban_board.task_name_tracker_map.get(previousName).removeHash(kanban_task.counter);
-                        kanban_task.counter = KanbanMarkdown.DuplicateNameTracker.GetCounterWithName(currentName, state.kanban_board.task_name_tracker_map);
-                    }));
-            }
+            });
         }
     }));
 
@@ -80,6 +79,14 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
 
     const removeCurrentTask = (event: MouseEvent) => {
         event.stopPropagation();
+        setState(produce((state) => {
+            const kanban_list: KanbanMarkdown.KanbanList = state.kanban_board.lists.find((list) => list.name === kanban_list.name && list.counter === kanban_list.counter);
+            const kanban_task: KanbanMarkdown.KanbanTask = kanban_list.tasks.find((task) => task.name === kanban_task.name && task.counter === kanban_task.counter);
+            state.kanban_board.task_name_tracker_map.get(kanban_task.name).removeHash(kanban_task.counter);
+            const index = kanban_list.tasks.indexOf(kanban_task);
+            kanban_list.tasks.splice(index, 1);
+            return state;
+        }));
         // @ts-ignore
         vscode.postMessage({
             commands: [
@@ -89,28 +96,11 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
                 }
             ]
         });
-        setState(produce((state) => {
-            const kanban_list: KanbanMarkdown.KanbanList = state.kanban_board.lists.find((list) => list.name === kanban_list.name && list.counter === kanban_list.counter);
-            const kanban_task: KanbanMarkdown.KanbanTask = kanban_list.tasks.find((task) => task.name === kanban_task.name && task.counter === kanban_task.counter);
-            state.kanban_board.task_name_tracker_map.get(kanban_task.name).removeHash(kanban_task.counter);
-            const index = kanban_list.tasks.indexOf(kanban_task);
-            kanban_list.tasks.splice(index, 1);
-            return state;
-        }));
         setTaskMenuActionsState(false);
     }
 
     const removeLabel = (kanban_label: KanbanMarkdown.KanbanLabel) => {
         const labelName = kanban_label.name;
-        // @ts-ignore
-        vscode.postMessage({
-            commands: [
-                {
-                    action: 'delete',
-                    path: `list["${encodeURI(kanban_list.name)}"][${kanban_list.counter}].tasks["${encodeURI(kanban_task.name)}"][${kanban_task.counter}].labels["${encodeURI(labelName)}"]`
-                }
-            ]
-        });
         setState("kanban_board", "lists", (list, index) => list.name === kanban_list.name && list.counter === kanban_list.counter, "tasks", (task, index) => task.name === kanban_task.name && task.counter === kanban_task.counter, produce((kanban_task) => {
             // Only filter one label at a time
             let seenLabel = false;
@@ -124,6 +114,15 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
             kanban_task.labels = updatedLabels;
             return kanban_task;
         }));
+        // @ts-ignore
+        vscode.postMessage({
+            commands: [
+                {
+                    action: 'delete',
+                    path: `list["${encodeURI(kanban_list.name)}"][${kanban_list.counter}].tasks["${encodeURI(kanban_task.name)}"][${kanban_task.counter}].labels["${encodeURI(labelName)}"]`
+                }
+            ]
+        });
     }
 
     const sortable = createSortable(`task-${kanban_task.name}-${kanban_task.counter}`, {

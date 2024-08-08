@@ -23,6 +23,12 @@ export const LabelMenu: Component<LabelMenuProps> = (props) => {
     const addLabelToSelectedTask = (kanban_label: KanbanMarkdown.KanbanLabel) => {
         const selectedList = state.selectedList;
         const selectedTask = state.selectedTask;
+        setState(produce((state) => {
+            const kanban_task = state.kanban_board.lists
+                .find((list) => list.name === selectedList.name && list.counter === selectedList.counter).tasks
+                .find((task) => task.name === selectedTask.name && task.counter === selectedTask.counter);
+            kanban_task.labels.push(kanban_label);
+        }));
         // @ts-ignore
         vscode.postMessage({
             commands: [
@@ -33,12 +39,6 @@ export const LabelMenu: Component<LabelMenuProps> = (props) => {
                 }
             ]
         });
-        setState(produce((state) => {
-            const kanban_task = state.kanban_board.lists
-                .find((list) => list.name === selectedList.name && list.counter === selectedList.counter).tasks
-                .find((task) => task.name === selectedTask.name && task.counter === selectedTask.counter);
-            kanban_task.labels.push(kanban_label);
-        }));
     }
 
     const createLabel = () => {
@@ -46,6 +46,19 @@ export const LabelMenu: Component<LabelMenuProps> = (props) => {
         const color = modal_new_label_color_reference.value;
         const selectedList = state.selectedList;
         const selectedTask = state.selectedTask;
+        setState(produce((state) => {
+            const kanban_label = {
+                name: name,
+                color: color,
+                tasks: []
+            };
+
+            state.kanban_board.labels.push(kanban_label);
+            const kanban_task = state.kanban_board.lists
+                .find((list) => list.name === selectedList.name && list.counter === selectedList.counter).tasks
+                .find((task) => task.name === selectedTask.name && task.counter === selectedTask.counter);
+            kanban_task.labels.push(kanban_label);
+        }));
         // @ts-ignore
         vscode.postMessage({
             commands: [
@@ -67,19 +80,6 @@ export const LabelMenu: Component<LabelMenuProps> = (props) => {
                 }
             ]
         });
-        setState(produce((state) => {
-            const kanban_label = {
-                name: name,
-                color: color,
-                tasks: []
-            };
-
-            state.kanban_board.labels.push(kanban_label);
-            const kanban_task = state.kanban_board.lists
-                .find((list) => list.name === selectedList.name && list.counter === selectedList.counter).tasks
-                .find((task) => task.name === selectedTask.name && task.counter === selectedTask.counter);
-            kanban_task.labels.push(kanban_label);
-        }));
         setLabelMenuState("select");
     }
 

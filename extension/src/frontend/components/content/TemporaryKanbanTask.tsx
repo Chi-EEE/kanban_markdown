@@ -39,6 +39,9 @@ export const TemporaryKanbanTask: Component<TemporaryKanbanTaskProps> = (props) 
                 attachments: [],
                 checklist: [],
             };
+            setState("kanban_board", "lists", (list, index) => list.name === kanban_list.name && list.counter === kanban_list.counter, "tasks", produce((tasks: KanbanMarkdown.KanbanTask[]) => {
+                tasks.push(new_task);
+            }));
             // @ts-ignore
             vscode.postMessage({
                 commands: [
@@ -49,9 +52,6 @@ export const TemporaryKanbanTask: Component<TemporaryKanbanTaskProps> = (props) 
                     }
                 ]
             });
-            setState("kanban_board", "lists", (list, index) => list.name === kanban_list.name && list.counter === kanban_list.counter, "tasks", produce((tasks: KanbanMarkdown.KanbanTask[]) => {
-                tasks.push(new_task);
-            }));
         }
         target.value = '';
         setAddButtonVisiblity(true);
