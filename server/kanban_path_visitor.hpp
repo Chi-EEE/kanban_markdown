@@ -208,7 +208,7 @@ namespace server
 				break;
 			default:
 			{
-				static re2::RE2 path_pattern(R"((\w+)\[\"(.+)\"\](?:\[(\d+)\])?)");
+				static re2::RE2 path_pattern(R"((\w+)\[\"([\w\%\+]+)\"\](?:\[(\d+)\])?)");
 				std::string board_item_name;
 				std::string board_item_index_name;
 				std::string board_optional_index_counter_str;
@@ -269,7 +269,7 @@ namespace server
 					break;
 				default:
 				{
-					static re2::RE2 path_pattern(R"((\w+)\[\"(.+)\"\]\[(\d+)\])");
+					static re2::RE2 path_pattern(R"((\w+)\[\"([\w\%\+]+)\"\]\[(\d+)\])");
 					std::string list_item_name;
 					std::string task_index_name;
 					std::string task_index_counter_str;
@@ -336,7 +336,7 @@ namespace server
 					break;
 				default:
 				{
-					static re2::RE2 path_pattern(R"((\w+)\[\"(.+)\"\])");
+					static re2::RE2 path_pattern(R"((\w+)\[\"([\w\%\+]+)\"\])");
 					std::string task_item_name;
 					std::string task_item_index_name;
 					if (!RE2::PartialMatch(third, path_pattern, &task_item_name, &task_item_index_name))
