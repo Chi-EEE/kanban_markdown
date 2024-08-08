@@ -220,7 +220,7 @@ const App: Component<AppProps> = (props) => {
         setDraggingState(false);
     }
 
-    const listNames = () => state.kanban_board.lists.map((kanban_list) => kanban_list.name);
+    const listNames = () => state.kanban_board.lists.map((kanban_list) => `list-${kanban_list.name}-${kanban_list.counter}`);
 
     const [draggingState, setDraggingState] = createSignal<boolean>(false);
 
@@ -241,13 +241,14 @@ const App: Component<AppProps> = (props) => {
                     <SortableProvider ids={listNames()}>
                         <For each={state.kanban_board.lists}>
                             {(kanban_list) => {
-                                const sortedKanbanIds = () => kanban_list.tasks.map((kanban_task) => kanban_task.name + '-' + kanban_task.counter);
+                                const sortedKanbanIds = () => kanban_list.tasks.map((kanban_task) => `task-${kanban_task.name}-${kanban_task.counter}`);
 
                                 return (<KanbanList state={state} setState={setState} kanban_list={kanban_list} >
                                     <SortableProvider ids={sortedKanbanIds()}>
                                         <For each={kanban_list.tasks}>
                                             {(kanban_task) => (
                                                 <KanbanTask
+                                                    state={state}
                                                     setState={setState}
                                                     kanban_list={kanban_list}
                                                     kanban_task={kanban_task}

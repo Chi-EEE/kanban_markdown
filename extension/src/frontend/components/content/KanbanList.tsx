@@ -7,7 +7,7 @@ import { KanbanMarkdown } from '../../types';
 import { TemporaryKanbanTask } from './TemporaryKanbanTask';
 
 import { applyAutoResize } from '../../utils';
-import { SetStoreFunction } from 'solid-js/store';
+import { produce, SetStoreFunction } from 'solid-js/store';
 import { createSortable, maybeTransformStyle } from '@thisbeyond/solid-dnd';
 
 type KanbanListProps = {
@@ -45,9 +45,12 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
                     }
                 ]
             });
-            setState("kanban_board", "lists", (list, index) => list.name === previousName && list.counter === kanban_list.counter, {
-                name: currentName,
-            });
+            setState("kanban_board", "lists", (list, index) => list.name === previousName && list.counter === kanban_list.counter,
+                produce((kanban_list) => {
+                    kanban_list.name = currentName;
+                    state.kanban_board.list_name_tracker_map.get(previousName).removeHash(kanban_list.counter);
+                    kanban_list.counter = KanbanMarkdown.DuplicateNameTracker.GetCounterWithName(currentName, state.kanban_board.list_name_tracker_map);
+                }));
         }
     }));
 

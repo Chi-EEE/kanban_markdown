@@ -10,6 +10,7 @@ import { applyAutoResize } from '../../utils';
 import { createSortable } from '@thisbeyond/solid-dnd';
 
 type KanbanTaskProps = {
+    state: KanbanMarkdown.State;
     setState: SetStoreFunction<KanbanMarkdown.State>;
 
     kanban_list: KanbanMarkdown.KanbanList;
@@ -21,6 +22,7 @@ type KanbanTaskProps = {
 
 export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
     const {
+        state,
         setState,
 
         kanban_list,
@@ -47,9 +49,12 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
                     }
                 ]
             }); {
-                setState("kanban_board", "lists", (list, index) => list.name === kanban_list.name && list.counter === kanban_list.counter, "tasks", (task, index) => task.name === kanban_task.name, {
-                    name: currentName,
-                });
+                setState("kanban_board", "lists", (list, index) => list.name === kanban_list.name && list.counter === kanban_list.counter, "tasks", (task, index) => task.name === kanban_task.name,
+                    produce((kanban_task) => {
+                        kanban_task.name = currentName;
+                        state.kanban_board.task_name_tracker_map.get(previousName).removeHash(kanban_task.counter);
+                        kanban_task.counter = KanbanMarkdown.DuplicateNameTracker.GetCounterWithName(currentName, state.kanban_board.task_name_tracker_map);
+                    }));
             }
         }
     }));
