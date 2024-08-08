@@ -2,9 +2,10 @@ import styles from './TaskModal.module.css';
 
 import { createSignal, For, Show } from "solid-js";
 import type { Accessor, Component, Setter } from 'solid-js';
-import { KanbanMarkdown } from "../../types";
-import { LabelMenu } from './modal/LabelMenu';
 import { SetStoreFunction } from 'solid-js/store';
+import { LabelMenu } from './modal/LabelMenu';
+
+import { KanbanMarkdown } from "../../types";
 
 type TaskModalProps = {
     state: KanbanMarkdown.State;
@@ -67,10 +68,10 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                 return !seenLabel;
             });
             setState("kanban_board", "lists",
-                (list, index) =>
+                (list, _) =>
                     list.name === selectedList.name &&
                     list.counter === selectedList.counter, "tasks",
-                (task, index) =>
+                (task, _) =>
                     task.name === selectedTask.name &&
                     task.counter === selectedTask.counter, {
                 labels: updatedLabels

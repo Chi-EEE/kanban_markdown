@@ -129,7 +129,6 @@ const App: Component<AppProps> = (props) => {
             return;
         }
 
-
         let map: Map<string, number>;
 
         if (draggableIsList) {
@@ -144,11 +143,9 @@ const App: Component<AppProps> = (props) => {
 
         setState("kanban_board", "lists", produce((lists: Array<KanbanMarkdown.KanbanList>) => {
             if (draggableIsList) {
-                console.log(draggableIsList)
                 const list = lists.find((list) => `list-${list.name}-${list.counter}` === draggableListId);
                 const oldIndex = lists.findIndex((list) => `list-${list.name}-${list.counter}` === draggableListId);
                 const newIndex = lists.findIndex((list) => `list-${list.name}-${list.counter}` === droppableListId);
-                console.log(list, oldIndex, newIndex)
                 arrayMoveMutable(lists, oldIndex, newIndex);
                 // @ts-ignore
                 vscode.postMessage({
@@ -213,7 +210,7 @@ const App: Component<AppProps> = (props) => {
 
     let lastDragOver = 0;
     const onDragOver: DragEventHandler = ({ draggable, droppable }) => {
-        if (Date.now() - lastDragOver < 10) return;
+        if (Date.now() - lastDragOver < 5) return;
         lastDragOver = Date.now();
         move(draggable, droppable);
     }
