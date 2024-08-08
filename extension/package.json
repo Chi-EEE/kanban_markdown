@@ -1,7 +1,10 @@
 {
     "name": "kanban-markdown",
     "displayName": "Kanban Markdown",
-    "description": "",
+    "author": {
+        "name": "Chi Huu Huynh"
+    },
+    "description": "A Visual Studio Code extension for creating and managing Kanban boards using Markdown.",
     "version": "0.0.1",
     "engines": {
         "vscode": "^1.91.0"
@@ -12,12 +15,6 @@
     "activationEvents": [],
     "main": "./dist/extension.js",
     "contributes": {
-        "commands": [
-            {
-                "command": "kanban-markdown.helloWorld",
-                "title": "Hello World"
-            }
-        ],
         "customEditors": [
             {
                 "viewType": "kanban-markdown.editor",
