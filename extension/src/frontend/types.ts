@@ -24,12 +24,12 @@ export namespace KanbanMarkdown {
     }
 
     export class DuplicateNameTracker {
-        private counter: number;
-        private used_hash: Set<number>;
+        public counter: number;
+        public used_hash: Set<number>;
 
-        constructor() {
-            this.counter = 0;
-            this.used_hash = new Set<number>();
+        constructor(counter: number = 0, used_hash: Set<number> = new Set<number>()) {
+            this.counter = counter;
+            this.used_hash = used_hash;
         }
 
         getHash(): number {

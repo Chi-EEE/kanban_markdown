@@ -32,6 +32,22 @@ type AppProps = {
 };
 
 const App: Component<AppProps> = (props) => {
+    const list_name_tracker_map = new Map<string, KanbanMarkdown.DuplicateNameTracker>();
+    for (let entry of Object.entries(props.kanban_board.list_name_tracker_map)) {
+        let key = entry[0];
+        let value: KanbanMarkdown.DuplicateNameTracker = entry[1];
+        list_name_tracker_map.set(key, new KanbanMarkdown.DuplicateNameTracker(value.counter, new Set<number>(value.used_hash)));
+    }
+    props.kanban_board.list_name_tracker_map = list_name_tracker_map;
+
+    const task_name_tracker_map = new Map<string, KanbanMarkdown.DuplicateNameTracker>();
+    for (let entry of Object.entries(props.kanban_board.task_name_tracker_map)) {
+        let key = entry[0];
+        let value: KanbanMarkdown.DuplicateNameTracker = entry[1];
+        task_name_tracker_map.set(key, new KanbanMarkdown.DuplicateNameTracker(value.counter, new Set<number>(value.used_hash)));
+    }
+    props.kanban_board.task_name_tracker_map = task_name_tracker_map;
+
     const [state, setState] = createStore<KanbanMarkdown.State>({
         selectedList: undefined,
         selectedTask: undefined,
