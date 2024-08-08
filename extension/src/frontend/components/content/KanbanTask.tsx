@@ -129,8 +129,8 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
         list: `list-${kanban_list.name}-${kanban_list.counter}`,
     });
 
-    createEffect(on(() => draggingState(), () => {
-        if (draggingState()) {
+    createEffect(on(() => draggingState(), (state) => {
+        if (state) {
             setTaskMenuState(false);
         }
     }));
