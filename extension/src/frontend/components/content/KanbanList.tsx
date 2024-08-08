@@ -32,8 +32,7 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
     let kanban_list_name_reference: HTMLTextAreaElement | undefined;
     const [getCardTextAreaReference, setCardTextAreaReference] = createSignal<HTMLTextAreaElement>();
 
-    createEffect(on(() => getName(), () => {
-        const currentName = getName();
+    createEffect(on(() => getName(), (currentName) => {
         const previousName = kanban_list.name;
         if (currentName !== previousName) {
             // @ts-ignore

@@ -34,8 +34,7 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
 
     let kanban_task_name_reference: HTMLAnchorElement;
 
-    createEffect(on(() => getName(), () => {
-        const currentName = getName();
+    createEffect(on(() => getName(), (currentName) => {
         const previousName = kanban_task.name;
         if (currentName !== previousName) {
             // @ts-ignore

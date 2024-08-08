@@ -56,17 +56,17 @@ const App: Component<AppProps> = (props) => {
 
     const [getTaskModalState, setTaskModalState] = createSignal<boolean>(false);
 
-    function setStyleColor() {
-        document.documentElement.style.setProperty('--background-color', state.kanban_board.properties.color);
+    function setStyleColor(color) {
+        document.documentElement.style.setProperty('--background-color', color);
         // @ts-ignore
-        document.documentElement.style.setProperty('--menu-background-color', pSBC(-0.4, state.kanban_board.properties.color));
+        document.documentElement.style.setProperty('--menu-background-color', pSBC(-0.4, color));
     }
 
-    createEffect(on(() => state.kanban_board.properties.color, () => {
-        setStyleColor();
+    createEffect(on(() => state.kanban_board.properties.color, (color) => {
+        setStyleColor(color);
     }))
 
-    setStyleColor();
+    setStyleColor(state.kanban_board.properties.color);
 
     const updateTask = (task: KanbanMarkdown.KanbanTask) => {
         setState("kanban_board", "lists", (list) =>
