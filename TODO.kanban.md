@@ -1,9 +1,9 @@
 ---
 Color: "#5186b8"
-Version: 235
+Version: 247
 Created: 2024-07-19 23:35:18 UTC
-Last Modified: 2024-08-08 22:29:53 UTC
-Checksum: 39406af57c2933b2a2d137cb68a4f65d87c5879c34d8f9ca906e06733af1b3f0
+Last Modified: 2024-08-08 22:46:13 UTC
+Checksum: 85dadc8b4f8766b42d0abc1c488ac4cba37099a79dfb190e81fa34e39092474f
 ---
 
 > [!NOTE]  
@@ -17,6 +17,7 @@ No description available.
 ### <span data-checked="false" data-counter="1">To do:</span>  
 - [ ] <span id="kanban_md-task-allow_for_multiple_lists_with_the_same_name-1" data-counter="1">Allow for multiple Lists with the same name</span>  
 - [ ] <span id="kanban_md-task-bug:_double_clicking_on_created_card_opens_card_modal-1" data-counter="1">Bug: Double clicking on created card opens card_modal</span>  
+- [ ] <span id="kanban_md-task-bug:_fix_the_use_of_html_tags_in_this-1" data-counter="1">Bug: Fix the use of html tags in this</span>  
 
 ### <span data-checked="false" data-counter="1">Pending:</span>  
 - [ ] <span id="kanban_md-task-add_close_other_menus-1" data-counter="1">Add close other menus</span>  
