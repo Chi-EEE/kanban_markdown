@@ -2,8 +2,12 @@ import styles from './TitleBar.module.css';
 
 import { createSignal, Show, Switch, Match } from "solid-js";
 import type { Accessor, Component, Setter } from 'solid-js';
-import { KanbanMarkdown } from "../../types";
 import { SetStoreFunction } from 'solid-js/store';
+
+import { useTippy } from 'solid-tippy';
+import 'tippy.js/themes/translucent.css';
+
+import { KanbanMarkdown } from "../../types";
 
 type TitleBarProps = {
     state: KanbanMarkdown.State;
@@ -16,6 +20,24 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
 
     let title_input_reference: HTMLInputElement;
 
+    const [anchor, setAnchor] = createSignal<HTMLDivElement>();
+
+    useTippy(anchor, {
+        hidden: getTitleState() === "text",
+        props: {
+            content: state.kanban_board.description,
+            arrow: true,
+            interactive: true,
+            theme: 'translucent',
+            animation: 'shift-away',
+            showOnCreate: false,
+            sticky: 'reference',
+            popperOptions: {
+                placement: 'bottom',
+            }
+        },
+    });
+
     return (
         <div class={styles.title_bar}>
             <div
@@ -27,7 +49,10 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
             >
                 <Switch>
                     <Match when={getTitleState() == "text"}>
-                        <h1 class={styles.kanban_board_name}>{state.kanban_board.name}</h1>
+                        <h1
+                            ref={setAnchor}
+                            class={styles.kanban_board_name}
+                        >{state.kanban_board.name}</h1>
                     </Match>
                     <Match when={getTitleState() === "input"}>
                         <input ref={title_input_reference} type="text" class={styles.edit_kanban_board_name_input}
