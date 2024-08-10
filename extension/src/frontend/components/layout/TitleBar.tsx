@@ -1,6 +1,6 @@
 import styles from './TitleBar.module.css';
 
-import { createSignal, Show, Switch, Match } from "solid-js";
+import { createSignal, Show, Switch, Match, createEffect, on } from "solid-js";
 import type { Accessor, Component, Setter } from 'solid-js';
 import { SetStoreFunction } from 'solid-js/store';
 
@@ -38,6 +38,22 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
         },
     });
 
+    createEffect(on(() => getTitleState(), (titleState) => {
+        if (titleState === "text") {
+            // @ts-ignore
+            vscode.postMessage({
+                commands: [
+                    {
+                        action: 'update',
+                        path: 'name',
+                        value: state.kanban_board.name
+                    }
+                ]
+            });
+        }
+    }));
+
+
     return (
         <div class={styles.title_bar}>
             <div
@@ -59,16 +75,6 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
                             onInput={(event) => {
                                 const kanban_board_name = (event.target as HTMLInputElement).value;
                                 setState("kanban_board", "name", kanban_board_name);
-                                // @ts-ignore
-                                vscode.postMessage({
-                                    commands: [
-                                        {
-                                            action: 'update',
-                                            path: 'name',
-                                            value: kanban_board_name
-                                        }
-                                    ]
-                                });
                             }}
                             value={state.kanban_board.name}
                         />
