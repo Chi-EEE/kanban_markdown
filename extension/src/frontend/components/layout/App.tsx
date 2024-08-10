@@ -119,11 +119,7 @@ const App: Component<AppProps> = (props) => {
         };
     };
 
-    const StringFormat = (str: string, ...args: string[]) =>
-        str.replace(/{(\d+)}/g, (match, index) => args[index] || '')
-
     let draggableItem: DraggingTask | DraggingList | undefined = undefined;
-    let pathFormat: string = '';
     let value = {
         index: 0,
         destination: undefined
@@ -173,7 +169,6 @@ const App: Component<AppProps> = (props) => {
                 const oldIndex = lists.findIndex((list) => `list-${list.name}-${list.counter}` === draggableListId);
                 const newIndex = lists.findIndex((list) => `list-${list.name}-${list.counter}` === droppableListId);
                 arrayMoveMutable(lists, oldIndex, newIndex);
-                pathFormat = `list["{0}"][{1}]`;
                 value.index = newIndex;
             } else {
                 const list = lists.find((list) => `list-${list.name}-${list.counter}` === draggableListId);
@@ -186,14 +181,12 @@ const App: Component<AppProps> = (props) => {
                     if (!newList) return;
                     const newIndex = map.get(droppable.id as string) || map.size;
                     newList.tasks.splice(newIndex, 0, task);
-                    pathFormat = `list["{0}"][{1}].tasks["{2}"][{3}]`;
                     value.index = newIndex;
                     value.destination = `list["${encodeURI(newList.name)}"][${newList.counter}].tasks`;
                 } else {
                     const oldIndex = list.tasks.findIndex((task) => `task-${task.name}-${task.counter}` === draggable.id);
                     const newIndex = map.get(droppable.id as string);
                     arrayMoveMutable(list.tasks, oldIndex, newIndex);
-                    pathFormat = `list["{0}"][{1}].tasks["{2}"][{3}]`;
                     value.index = newIndex;
                 }
             }
@@ -238,7 +231,7 @@ const App: Component<AppProps> = (props) => {
                 const draggableList = draggableItem as DraggingList;
                 command = {
                     action: 'move',
-                    path: StringFormat(pathFormat, draggableList.data.name, (draggableList.data.counter).toString()),
+                    path: `list["${draggableList.data.name}"][${draggableList.data.counter}]`,
                     value: value,
                 }
                 break;
@@ -247,7 +240,7 @@ const App: Component<AppProps> = (props) => {
                 const list = state.kanban_board.lists.find((list) => `list-${list.name}-${list.counter}` === draggableTask.data.list);
                 command = {
                     action: 'move',
-                    path: StringFormat(pathFormat, list.name, (list.counter).toString(), draggableTask.data.name, (draggableTask.data.counter).toString()),
+                    path: `list["${list.name}"][${list.counter}].tasks["${draggableTask.data.name}"][${draggableTask.data.counter}]`,
                     value: value,
                 };
                 break;
@@ -257,7 +250,6 @@ const App: Component<AppProps> = (props) => {
             commands: [command]
         });
         draggableItem = undefined;
-        pathFormat = '';
         value = {
             index: 0,
             destination: undefined
