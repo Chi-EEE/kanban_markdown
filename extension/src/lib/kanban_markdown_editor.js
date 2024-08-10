@@ -120,6 +120,7 @@ class KanbanMarkdownEditorProvider {
         // Use a nonce to whitelist which scripts can be run
         const nonce = getNonce();
 
+        // To allow SolidJS: https://github.com/withastro/astro/pull/2359
         return /* html */`
         <!DOCTYPE html>
         <html lang="en">
@@ -127,7 +128,6 @@ class KanbanMarkdownEditorProvider {
                 <meta charset="UTF-8">
                 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <!-- Issue: https://github.com/withastro/astro/pull/2359 -->
                 <script nonce="${nonce}">window._$HY||(_$HY={events:[],completed:new WeakSet,r:{}})</script>
                 <script type="module" nonce="${nonce}" crossorigin src="${scriptUri}"></script>
                 <link href="${styleMainUri}" crossorigin rel="stylesheet" />
