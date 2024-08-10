@@ -12,7 +12,6 @@ type TaskModalProps = {
     setState: SetStoreFunction<KanbanMarkdown.State>;
 
     setTaskModalState: Setter<boolean>;
-    updateTask: (task: KanbanMarkdown.KanbanTask) => void;
 };
 
 export const TaskModal: Component<TaskModalProps> = (props) => {
@@ -20,7 +19,6 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
         state,
         setState,
         setTaskModalState,
-        updateTask,
     } = props;
 
     const [getLabelMenuState, setLabelMenuState] = createSignal<boolean>(false);
@@ -100,11 +98,16 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                     },
                 ]
             });
-            updateTask({
-                ...selectedTask,
-                name: newName,
-                description: newDescription,
-            });
+            setState("kanban_board", "lists", (list) =>
+                list.name === state.selectedList.name &&
+                list.counter == state.selectedList.counter,
+                "tasks", (t) => t.name === state.selectedTask.name,
+                {
+                    ...selectedTask,
+                    name: newName,
+                    description: newDescription,
+                }
+            );
             setTaskModalState(false);
         }
     };

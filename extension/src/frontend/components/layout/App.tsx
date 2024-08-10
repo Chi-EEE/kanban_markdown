@@ -1,16 +1,14 @@
 import type { Component } from 'solid-js';
-import { For, Show, createSignal, createEffect, on } from "solid-js";
+import { For, Show, createSignal, createEffect, on, onMount } from "solid-js";
 import { createStore, produce } from 'solid-js/store';
 
 import {
     closestCenter,
     CollisionDetector,
-    createSortable,
     DragDropProvider,
     DragDropSensors,
     DragEventHandler,
     Draggable,
-    DragOverlay,
     Droppable,
     SortableProvider
 } from '@thisbeyond/solid-dnd';
@@ -30,6 +28,9 @@ import { TemporaryKanbanList } from '../content/TemporaryKanbanList';
 type AppProps = {
     kanban_board: KanbanMarkdown.KanbanBoard;
 };
+
+// Global variable to store the scrollLeft value of the kanban board
+var scrollLeft = 0;
 
 const App: Component<AppProps> = (props) => {
     const list_name_tracker_map = new Map<string, KanbanMarkdown.DuplicateNameTracker>();
@@ -56,7 +57,7 @@ const App: Component<AppProps> = (props) => {
 
     const [getTaskModalState, setTaskModalState] = createSignal<boolean>(false);
 
-    function setStyleColor(color) {
+    function setStyleColor(color: string) {
         document.documentElement.style.setProperty('--background-color', color);
         // @ts-ignore
         document.documentElement.style.setProperty('--menu-background-color', pSBC(-0.4, color));
@@ -67,13 +68,6 @@ const App: Component<AppProps> = (props) => {
     }))
 
     setStyleColor(state.kanban_board.properties.color);
-
-    const updateTask = (task: KanbanMarkdown.KanbanTask) => {
-        setState("kanban_board", "lists", (list) =>
-            list.name === state.selectedList.name &&
-            list.counter == state.selectedList.counter,
-            "tasks", (t) => t.name === state.selectedTask.name, task);
-    }
 
     const closestEntity: CollisionDetector = (draggable, droppables, context) => {
         const closestList = closestCenter(
@@ -264,6 +258,12 @@ const App: Component<AppProps> = (props) => {
     const [getAddButtonVisiblity, setAddButtonVisiblity] = createSignal<boolean>(true);
     const [getListTextAreaReference, setListTextAreaReference] = createSignal<HTMLTextAreaElement>();
 
+    let kanbanBoardRef: HTMLDivElement;
+
+    onMount(() => {
+        kanbanBoardRef.scrollLeft = scrollLeft;
+    });
+
     return (
         <div class={styles.App}>
             <TitleBar state={state} setState={setState} />
@@ -274,7 +274,11 @@ const App: Component<AppProps> = (props) => {
                 collisionDetector={closestEntity}
             >
                 <DragDropSensors />
-                <div class={styles.kanban_board}>
+                <div class={styles.kanban_board}
+                    ref={kanbanBoardRef}
+                    onScroll={(event) => {
+                        scrollLeft = event.target.scrollLeft;
+                    }}>
                     <SortableProvider ids={listNames()}>
                         <For each={state.kanban_board.lists}>
                             {(kanban_list) => {
@@ -319,7 +323,6 @@ const App: Component<AppProps> = (props) => {
                     state={state}
                     setState={setState}
                     setTaskModalState={setTaskModalState}
-                    updateTask={updateTask}
                 />
             </Show>
         </div>
