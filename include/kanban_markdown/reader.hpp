@@ -55,6 +55,7 @@ namespace kanban_markdown {
 		};
 
 		struct CurrentTask {
+			unsigned int counter;
 			std::string name;
 		};
 
@@ -198,11 +199,13 @@ namespace kanban_markdown {
 							std::cerr << "Current board is null." << '\n';
 							return 0;
 						}
-						TaskDetail& task_detail = current_list->task_details[current_list->current_task.name];
+						CurrentTask& current_task = current_list->current_task;
+						const std::string current_task_index = fmt::format("{}-{}", current_task.name, current_task.counter);
+						TaskDetail& current_task_detail = current_list->task_details[current_task_index];
 						KanbanAttachment attachment;
 						attachment.url = std::string(a_detail->href.text, a_detail->href.size);
-						task_detail.attachments.push_back(attachment);
-						current_list->current_attachment = &task_detail.attachments.back();
+						current_task_detail.attachments.push_back(attachment);
+						current_list->current_attachment = &current_task_detail.attachments.back();
 					}
 				}
 				break;
@@ -318,8 +321,10 @@ namespace kanban_markdown {
 					std::cerr << "Current board is null." << '\n';
 					return;
 				}
-				TaskDetail& task_detail = current_list->task_details[current_list->current_task.name];
-				if (task_detail.description.empty()) {
+				CurrentTask& current_task = current_list->current_task;
+				const std::string current_task_index = fmt::format("{}-{}", current_task.name, current_task.counter);
+				TaskDetail& current_task_detail = current_list->task_details[current_task_index];
+				if (current_task_detail.description.empty()) {
 					text_content = kanban_markdown_ltrim(text_content);
 					if (text_content.find(":") == 0) // TODO: Fix this
 					{
@@ -327,13 +332,13 @@ namespace kanban_markdown {
 					}
 					text_content = kanban_markdown_trim(text_content);
 					if (!text_content.empty()) {
-						task_detail.description.push_back(text_content);
+						current_task_detail.description.push_back(text_content);
 					}
 				}
 				else {
 					text_content = kanban_markdown_trim(text_content);
 					if (!text_content.empty()) {
-						task_detail.description.push_back(text_content);
+						current_task_detail.description.push_back(text_content);
 					}
 				}
 			}
@@ -348,7 +353,9 @@ namespace kanban_markdown {
 					std::cerr << "Current board is null." << '\n';
 					return;
 				}
-				current_list->task_details[current_list->current_task.name].labels.push_back(text_content);
+				CurrentTask& current_task = current_list->current_task;
+				const std::string current_task_index = fmt::format("{}-{}", current_task.name, current_task.counter);
+				current_list->task_details[current_task_index].labels.push_back(text_content);
 				break;
 			}
 			case TaskReadState::Attachments:
@@ -385,7 +392,9 @@ namespace kanban_markdown {
 					std::cerr << "Current board is null." << '\n';
 					return;
 				}
-				current_list->task_details[current_list->current_task.name].checklist.push_back(checkbox);
+				CurrentTask& current_task = current_list->current_task;
+				const std::string current_task_index = fmt::format("{}-{}", current_task.name, current_task.counter);
+				current_list->task_details[current_task_index].checklist.push_back(checkbox);
 				break;
 			}
 			}
@@ -435,14 +444,20 @@ namespace kanban_markdown {
 					std::cerr << "Current board is null." << '\n';
 					return;
 				}
-				current_list->current_task.name = text_content;
+				const std::string name = text_content;
+				const unsigned int counter = utils::kanban_get_counter_with_name(name, kanban_parser->content_section.task_name_tracker_map);
+
+				current_list->current_task.counter = counter;
+				current_list->current_task.name = name;
+
 				kanban_parser->content_section.content_read_state = ContentReadState::Task;
 
 				TaskDetail task_detail;
-				task_detail.counter = utils::kanban_get_counter_with_name(text_content, kanban_parser->content_section.task_name_tracker_map);
-				task_detail.name = current_list->current_task.name;
+				task_detail.counter = counter;
+				task_detail.name = name;
 				task_detail.checked = current_list->current_stored_checked;
-				current_list->task_details[current_list->current_task.name] = task_detail;
+
+				current_list->task_details[fmt::format("{}-{}", name, counter)] = task_detail;
 				break;
 			}
 			case 2: // It is in the second level of a list
@@ -536,15 +551,23 @@ namespace kanban_markdown {
 						}
 						case ContentReadState::Task:
 						{
-							TaskDetail& current_task_detail = kanban_parser->content_section.current_list->task_details[kanban_parser->content_section.current_list->current_task.name];
+							CurrentTask& current_task = kanban_parser->content_section.current_list->current_task;
+							const std::string current_task_index = fmt::format("{}-{}", current_task.name, current_task.counter);
+
+							TaskDetail current_task_detail_cloned = kanban_parser->content_section.current_list->task_details[current_task_index];
 							// If a counter already exists, replace the counter with the new counter
 							unsigned int counter = std::atoll(doc.child("span").attribute("data-counter").value());
 							if (counter > 0) {
-								if (current_task_detail.counter != counter) {
-									kanban_parser->content_section.task_name_tracker_map[current_task_detail.name].used_hash.erase(current_task_detail.counter);
+								if (current_task_detail_cloned.counter != counter) {
+									kanban_parser->content_section.task_name_tracker_map[current_task_detail_cloned.name].used_hash.erase(current_task_detail_cloned.counter);
 								}
-								current_task_detail.counter = counter;
-								kanban_parser->content_section.task_name_tracker_map[current_task_detail.name].used_hash.insert(counter);
+								current_task.counter = counter;
+								current_task_detail_cloned.counter = counter;
+
+								kanban_parser->content_section.task_name_tracker_map[current_task_detail_cloned.name].used_hash.insert(counter);
+
+								kanban_parser->content_section.current_list->task_details.erase(current_task_index);
+								kanban_parser->content_section.current_list->task_details[fmt::format("{}-{}", current_task.name, current_task.counter)] = current_task_detail_cloned;
 							}
 							break;
 						}
