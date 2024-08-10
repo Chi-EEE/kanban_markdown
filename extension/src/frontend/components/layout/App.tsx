@@ -29,7 +29,8 @@ type AppProps = {
     kanban_board: KanbanMarkdown.KanbanBoard;
 };
 
-// Global variable to store the scrollLeft value of the kanban board
+// Global variables to store the scroll position of the kanban board
+var scrollTop = 0;
 var scrollLeft = 0;
 
 const App: Component<AppProps> = (props) => {
@@ -261,6 +262,7 @@ const App: Component<AppProps> = (props) => {
     let kanbanBoardRef: HTMLDivElement;
 
     onMount(() => {
+        kanbanBoardRef.scrollTop = scrollTop;
         kanbanBoardRef.scrollLeft = scrollLeft;
     });
 
@@ -277,6 +279,7 @@ const App: Component<AppProps> = (props) => {
                 <div class={styles.kanban_board}
                     ref={kanbanBoardRef}
                     onScroll={(event) => {
+                        scrollTop = event.target.scrollTop;
                         scrollLeft = event.target.scrollLeft;
                     }}>
                     <SortableProvider ids={listNames()}>
