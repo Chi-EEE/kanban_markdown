@@ -38,8 +38,9 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
         },
     });
 
+    const previousTitle = state.kanban_board.name;
     createEffect(on(() => getTitleState(), (titleState) => {
-        if (titleState === "text") {
+        if (titleState === "text" && previousTitle !== state.kanban_board.name) {
             // @ts-ignore
             vscode.postMessage({
                 commands: [
