@@ -102,6 +102,33 @@ const App: Component<AppProps> = (props) => {
         }
     };
 
+    interface DraggingTask {
+        type: 'task';
+        data: {
+            name: string;
+            counter: number;
+            list: string;
+        };
+    };
+
+    interface DraggingList {
+        type: 'list';
+        data: {
+            name: string;
+            counter: number;
+        };
+    };
+
+    const StringFormat = (str: string, ...args: string[]) =>
+        str.replace(/{(\d+)}/g, (match, index) => args[index] || '')
+
+    let draggableItem: DraggingTask | DraggingList | undefined = undefined;
+    let pathFormat: string = '';
+    let value = {
+        index: 0,
+        destination: undefined
+    };
+
     const move = (
         draggable: Draggable,
         droppable: Droppable,
@@ -143,22 +170,11 @@ const App: Component<AppProps> = (props) => {
 
         setState("kanban_board", "lists", produce((lists: Array<KanbanMarkdown.KanbanList>) => {
             if (draggableIsList) {
-                const list = lists.find((list) => `list-${list.name}-${list.counter}` === draggableListId);
                 const oldIndex = lists.findIndex((list) => `list-${list.name}-${list.counter}` === draggableListId);
                 const newIndex = lists.findIndex((list) => `list-${list.name}-${list.counter}` === droppableListId);
                 arrayMoveMutable(lists, oldIndex, newIndex);
-                // @ts-ignore
-                vscode.postMessage({
-                    commands: [
-                        {
-                            action: 'move',
-                            path: `list["${encodeURI(list.name)}"][${list.counter}]`,
-                            value: {
-                                index: newIndex,
-                            }
-                        }
-                    ]
-                });
+                pathFormat = `list["{0}"][{1}]`;
+                value.index = newIndex;
             } else {
                 const list = lists.find((list) => `list-${list.name}-${list.counter}` === draggableListId);
                 if (!list) return;
@@ -170,41 +186,40 @@ const App: Component<AppProps> = (props) => {
                     if (!newList) return;
                     const newIndex = map.get(droppable.id as string) || map.size;
                     newList.tasks.splice(newIndex, 0, task);
-                    // @ts-ignore
-                    vscode.postMessage({
-                        commands: [
-                            {
-                                action: 'move',
-                                path: `list["${encodeURI(list.name)}"][${list.counter}].tasks["${encodeURI(draggable.data.name)}"][${draggable.data.counter}]`,
-                                value: {
-                                    index: newIndex,
-                                    destination: `list["${encodeURI(newList.name)}"][${newList.counter}].tasks`
-                                }
-                            }
-                        ]
-                    });
+                    pathFormat = `list["{0}"][{1}].tasks["{2}"][{3}]`;
+                    value.index = newIndex;
+                    value.destination = `list["${encodeURI(newList.name)}"][${newList.counter}].tasks`;
                 } else {
                     const oldIndex = list.tasks.findIndex((task) => `task-${task.name}-${task.counter}` === draggable.id);
                     const newIndex = map.get(droppable.id as string);
                     arrayMoveMutable(list.tasks, oldIndex, newIndex);
-                    // @ts-ignore
-                    vscode.postMessage({
-                        commands: [
-                            {
-                                action: 'move',
-                                path: `list["${encodeURI(list.name)}"][${list.counter}].tasks["${encodeURI(draggable.data.name)}"][${draggable.data.counter}]`,
-                                value: {
-                                    index: newIndex,
-                                }
-                            }
-                        ]
-                    });
+                    pathFormat = `list["{0}"][{1}].tasks["{2}"][{3}]`;
+                    value.index = newIndex;
                 }
             }
         }));
     };
 
     const onDragStart: DragEventHandler = ({ draggable, droppable }) => {
+        if (!draggable) {
+            return;
+        }
+        switch (draggable.data.type) {
+            case 'list':
+                draggableItem = {
+                    type: 'list',
+                    // @ts-ignore
+                    data: draggable.data,
+                };
+                break;
+            case 'task':
+                draggableItem = {
+                    type: 'task',
+                    // @ts-ignore
+                    data: draggable.data,
+                };
+                break;
+        };
         setDraggingState(true);
     }
 
@@ -217,6 +232,36 @@ const App: Component<AppProps> = (props) => {
 
     const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
         move(draggable, droppable, false);
+        let command = {};
+        switch (draggableItem.type) {
+            case 'list':
+                const draggableList = draggableItem as DraggingList;
+                command = {
+                    action: 'move',
+                    path: StringFormat(pathFormat, draggableList.data.name, (draggableList.data.counter).toString()),
+                    value: value,
+                }
+                break;
+            case 'task':
+                const draggableTask = draggableItem as DraggingTask;
+                const list = state.kanban_board.lists.find((list) => `list-${list.name}-${list.counter}` === draggableTask.data.list);
+                command = {
+                    action: 'move',
+                    path: StringFormat(pathFormat, list.name, (list.counter).toString(), draggableTask.data.name, (draggableTask.data.counter).toString()),
+                    value: value,
+                };
+                break;
+        }
+        // @ts-ignore
+        vscode.postMessage({
+            commands: [command]
+        });
+        draggableItem = undefined;
+        pathFormat = '';
+        value = {
+            index: 0,
+            destination: undefined
+        }
         setDraggingState(false);
     }
 

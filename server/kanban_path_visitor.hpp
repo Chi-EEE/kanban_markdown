@@ -122,34 +122,6 @@ namespace server
 
 #pragma region Private
 	private:
-		std::string urlDecode(std::string text)
-		{
-			std::string escaped;
-
-			for (auto i = text.begin(), nd = text.end(); i < nd; ++i)
-			{
-				auto c = (*i);
-
-				switch (c)
-				{
-				case '%':
-					if (i[1] && i[2]) {
-						char hs[]{ i[1], i[2] };
-						escaped += static_cast<char>(strtol(hs, nullptr, 16));
-						i += 2;
-					}
-					break;
-				case '+':
-					escaped += ' ';
-					break;
-				default:
-					escaped += c;
-				}
-			}
-
-			return escaped;
-		}
-
 		std::vector<std::string> parsePathString(const std::string& s, char delimiter = '.')
 		{
 			std::vector<std::string> splitted;

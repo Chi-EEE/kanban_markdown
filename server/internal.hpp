@@ -43,6 +43,34 @@ namespace server
 		return std::string(val_data, val_size);
 	}
 
+	static inline std::string urlDecode(std::string text)
+	{
+		std::string escaped;
+
+		for (auto i = text.begin(), nd = text.end(); i < nd; ++i)
+		{
+			auto c = (*i);
+
+			switch (c)
+			{
+			case '%':
+				if (i[1] && i[2]) {
+					char hs[]{ i[1], i[2] };
+					escaped += static_cast<char>(strtol(hs, nullptr, 16));
+					i += 2;
+				}
+				break;
+			case '+':
+				escaped += ' ';
+				break;
+			default:
+				escaped += c;
+			}
+		}
+
+		return escaped;
+	}
+
 	struct KanbanTuple
 	{
 		std::string file_path;

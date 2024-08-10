@@ -46,7 +46,7 @@ class KanbanMarkdownEditorProvider {
             console.log('Kanban Markdown Editor: ', document.uri.fsPath)
 
             server.sendRequest({
-                type: 'parse',
+                type: 'parseFile',
                 file: document.uri.fsPath,
             }).then(() => {
                 webviewPanel.webview.options = {
@@ -68,11 +68,15 @@ class KanbanMarkdownEditorProvider {
                 const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument(e => {
                     if (e.document.uri.toString() === document.uri.toString()) {
                         server.sendRequest({
+                            type: 'parseFileWithContent',
+                            file: document.uri.fsPath,
+                            content: encodeURI(document.getText()),
+                        }).then(server.sendRequest({
                             type: 'get',
                             format: 'json',
                         }).then(data => {
                             updateWebview(data);
-                        });
+                        }));
                     }
                 });
 

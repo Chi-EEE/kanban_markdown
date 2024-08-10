@@ -3,7 +3,7 @@
 #include <string>
 
 namespace kanban_markdown::constants {
-	const std::string END_OF_MARKDOWN_LINE = "  \n";
+	const std::string END_OF_MARKDOWN_LINE = "  \r\n";
 	const std::string github_added_tag = "user-content-";
 
 	const std::string kanban_md = "kanban_md";

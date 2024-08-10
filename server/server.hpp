@@ -65,9 +65,30 @@ namespace server
 					std::string type_str = yyjson_get_string_object(type);
 					switch (hash(type_str))
 					{
-					case hash("parse"):
+					case hash("parseFile"):
 					{
-						tl::expected<KanbanTuple, std::string> maybe_kanban_tuple = parse(root);
+						tl::expected<KanbanTuple, std::string> maybe_kanban_tuple = parseFile(root);
+						if (!maybe_kanban_tuple.has_value())
+						{
+							throw std::runtime_error(maybe_kanban_tuple.error());
+						}
+						else
+						{
+							kanban_tuple = maybe_kanban_tuple.value();
+							yyjson_mut_doc* doc = yyjson_mut_doc_new(NULL);
+							yyjson_mut_val* root = yyjson_mut_obj(doc);
+							yyjson_mut_doc_set_root(doc, root);
+							yyjson_mut_obj_add_str(doc, root, "id", id_str.c_str());
+							yyjson_mut_obj_add_bool(doc, root, "success", true);
+							const char* json = yyjson_mut_write(doc, 0, NULL);
+							printf("%s\n", json);
+							free((void*)json);
+						}
+						break;
+					}
+					case hash("parseFileWithContent"):
+					{
+						tl::expected<KanbanTuple, std::string> maybe_kanban_tuple = parseFileWithContent(root);
 						if (!maybe_kanban_tuple.has_value())
 						{
 							throw std::runtime_error(maybe_kanban_tuple.error());
@@ -272,7 +293,7 @@ namespace server
 			return modified;
 		}
 
-		static tl::expected<KanbanTuple, std::string> parse(yyjson_val* root)
+		static tl::expected<KanbanTuple, std::string> parseFile(yyjson_val* root)
 		{
 			yyjson_val* file = yyjson_obj_get(root, "file");
 			if (file == NULL)
@@ -286,12 +307,45 @@ namespace server
 				throw std::runtime_error(fmt::format(R"(Error: File path "{}" does not exist.)", file_path));
 			}
 
-			std::ifstream file_stream(file_path);
+			std::ifstream file_stream(file_path, std::ios::binary);
 			std::stringstream buffer;
 			buffer << file_stream.rdbuf();
 			const std::string input_file_string = buffer.str();
 			file_stream.close();
 			buffer.clear();
+
+			auto& maybe_kanban_board = kanban_markdown::parse(input_file_string);
+			if (!maybe_kanban_board.has_value())
+			{
+				return tl::make_unexpected(maybe_kanban_board.error());
+			}
+
+			KanbanTuple kanban_tuple;
+			kanban_tuple.file_path = file_path;
+			kanban_tuple.kanban_board = maybe_kanban_board.value();
+			return kanban_tuple;
+		}
+
+		static tl::expected<KanbanTuple, std::string> parseFileWithContent(yyjson_val* root)
+		{
+			yyjson_val* file = yyjson_obj_get(root, "file");
+			if (file == NULL)
+			{
+				throw std::runtime_error("Error: Missing required 'file' field in root object.");
+			}
+			yyjson_val* content = yyjson_obj_get(root, "content");
+			if (content == NULL)
+			{
+				throw std::runtime_error("Error: Missing required 'content' field in root object.");
+			}
+			std::string file_path = yyjson_get_string_object(file);
+
+			if (!std::filesystem::exists(file_path))
+			{
+				throw std::runtime_error(fmt::format(R"(Error: File path "{}" does not exist.)", file_path));
+			}
+
+			const std::string input_file_string = urlDecode(yyjson_get_string_object(content));
 
 			auto& maybe_kanban_board = kanban_markdown::parse(input_file_string);
 			if (!maybe_kanban_board.has_value())

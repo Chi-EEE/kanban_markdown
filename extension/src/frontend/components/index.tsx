@@ -18,8 +18,7 @@ window.addEventListener('message', function (event) {
     const kanbanBoard = JSON.parse(event.data.text).json;
     if (event.data.type === 'update') {
         if (rendered) {
-            // Broken
-            // hydrate(() => <App kanban_board={kanbanBoard} />, root!);
+            hydrate(() => <App kanban_board={kanbanBoard} />, root!);
         } else {
             render(() => <App kanban_board={kanbanBoard} />, root!);
         }

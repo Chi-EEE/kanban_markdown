@@ -12,6 +12,7 @@
 #include <chrono>
 #include <asap/asap.h>
 
+#include <tsl/ordered_map.h>
 #include <tsl/robin_map.h>
 #include <tsl/robin_set.h>
 
@@ -77,7 +78,7 @@ namespace kanban_markdown {
 			KanbanAttachment* current_attachment;
 
 			bool current_stored_checked = false;
-			tsl::robin_map<std::string, TaskDetail> task_details;
+			tsl::ordered_map<std::string, TaskDetail> task_details;
 		};
 
 		enum class ContentReadState {
@@ -656,9 +657,9 @@ namespace kanban_markdown {
 	inline tl::expected<KanbanBoard, std::string> parse(std::string md_string) {
 		KanbanParser kanban_parser;
 
-		bool has_properties = md_string.substr(0, 4) == "---\n";
+		bool has_properties = md_string.substr(0, 5) == "---\r\n";
 		if (has_properties) {
-			std::size_t end_of_properties = md_string.find("---\n", 4);
+			std::size_t end_of_properties = md_string.find("---\r\n", 5);
 			if (end_of_properties == std::string::npos) {
 				return tl::make_unexpected("Invalid Markdown file. Properties are not closed.");
 			}
