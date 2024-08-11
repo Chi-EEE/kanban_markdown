@@ -3,6 +3,11 @@ export namespace KanbanMarkdown {
         selectedList: KanbanList | undefined;
         selectedTask: KanbanTask | undefined;
         kanban_board: KanbanBoard;
+        window_state: {
+            taskModalState: boolean;
+            scrollTop: number;
+            scrollLeft: number;
+        }
     }
 
     export interface KanbanBoard {

@@ -10,15 +10,12 @@ import { KanbanMarkdown } from "../../types";
 type TaskModalProps = {
     state: KanbanMarkdown.State;
     setState: SetStoreFunction<KanbanMarkdown.State>;
-
-    setTaskModalState: Setter<boolean>;
 };
 
 export const TaskModal: Component<TaskModalProps> = (props) => {
     const {
         state,
         setState,
-        setTaskModalState,
     } = props;
 
     const [getLabelMenuState, setLabelMenuState] = createSignal<boolean>(false);
@@ -108,7 +105,7 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
                     description: newDescription,
                 }
             );
-            setTaskModalState(false);
+            setState("window_state", "taskModalState", false);
         }
     };
 
@@ -116,7 +113,7 @@ export const TaskModal: Component<TaskModalProps> = (props) => {
         <div class={styles.modal}>
             <div id={styles.modal_content}>
                 <span id={styles.modal_close} onClick={() => {
-                    setTaskModalState(false);
+                    setState("window_state", "taskModalState", false);
                 }}>&times;</span>
                 <div id={styles.modal_main}>
                     <div id={styles.modal_header}>

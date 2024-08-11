@@ -1,9 +1,9 @@
 ---
 Color: "#5186b8"
-Version: 266
+Version: 269
 Created: 2024-07-19 23:35:18 UTC
-Last Modified: 2024-08-11 01:05:27 UTC
-Checksum: b7199d920422d08fd07ae78c5ba53ebbee6b5bc5f8e958815612e53821885ea3
+Last Modified: 2024-08-11 16:40:47 UTC
+Checksum: 4b969469a8c4297332f0cef866d7098b5444bb846cb4c6ada6e3359e45e574fc
 ---
 
 > [!NOTE]  
@@ -15,7 +15,6 @@ No description available.
 ## Board:  
 
 ### <span data-checked="false" data-counter="1">To do:</span>  
-- [ ] <span id="kanban_md-task-creating_label_in_the_card_modal_closes_it-1" data-counter="1">Creating Label in the Card Modal closes it</span>  
 - [ ] <span id="kanban_md-task-make_the_server_more_safer_with_indexes-1" data-counter="1">Make the server more safer with indexes</span>  
 
 ### <span data-checked="false" data-counter="1">Pending:</span>  
@@ -25,6 +24,7 @@ No description available.
 ### <span data-checked="false" data-counter="1">Doing:</span>  
 
 ### <span data-checked="true" data-counter="1">Done:</span>  
+- [x] <span id="kanban_md-task-creating_label_in_the_card_modal_closes_it-1" data-counter="1">Creating Label in the Card Modal closes it</span>  
 - [x] <span id="kanban_md-task-use_solidjs_for_frontend_instead_of_jquery_to_allow_for_reactivity_for_minimal_dom_manipulation-1" data-counter="1">Use SolidJS for Frontend instead of JQuery to allow for Reactivity for minimal DOM manipulation</span>  
 - [x] <span id="kanban_md-task-fix_empty_description-1" data-counter="1">Fix empty description</span>  
 - [x] <span id="kanban_md-task-allow_for_multiple_lists_with_the_same_name-1" data-counter="1">Allow for multiple Lists with the same name</span>  

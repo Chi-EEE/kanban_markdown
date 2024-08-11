@@ -29,9 +29,16 @@ type AppProps = {
     kanban_board: KanbanMarkdown.KanbanBoard;
 };
 
-// Global variables to store the scroll position of the kanban board
-var scrollTop = 0;
-var scrollLeft = 0;
+const [state, setState] = createStore<KanbanMarkdown.State>({
+    selectedList: undefined,
+    selectedTask: undefined,
+    kanban_board: undefined,
+    window_state: {
+        taskModalState: false,
+        scrollTop: 0,
+        scrollLeft: 0
+    }
+});
 
 const App: Component<AppProps> = (props) => {
     const list_name_tracker_map = new Map<string, KanbanMarkdown.DuplicateNameTracker>();
@@ -50,13 +57,19 @@ const App: Component<AppProps> = (props) => {
     }
     props.kanban_board.task_name_tracker_map = task_name_tracker_map;
 
-    const [state, setState] = createStore<KanbanMarkdown.State>({
-        selectedList: undefined,
-        selectedTask: undefined,
-        kanban_board: props.kanban_board,
-    });
+    setState(produce((state) => {
+        state.kanban_board = props.kanban_board;
 
-    const [getTaskModalState, setTaskModalState] = createSignal<boolean>(false);
+        if (state.selectedList) {
+            const kanban_list = state.kanban_board.lists.find((list) => list.name === state.selectedList.name && list.counter === state.selectedList.counter);
+            state.selectedList = kanban_list;
+            if (state.selectedTask) {
+                state.selectedTask = kanban_list.tasks
+                    .find((task) => task.name === state.selectedTask.name && task.counter === state.selectedTask.counter);
+            }
+        }
+    }));
+
 
     function setStyleColor(color: string) {
         document.documentElement.style.setProperty('--background-color', color);
@@ -262,8 +275,8 @@ const App: Component<AppProps> = (props) => {
     let kanbanBoardRef: HTMLDivElement;
 
     onMount(() => {
-        kanbanBoardRef.scrollTop = scrollTop;
-        kanbanBoardRef.scrollLeft = scrollLeft;
+        kanbanBoardRef.scrollTop = state.window_state.scrollTop;
+        kanbanBoardRef.scrollLeft = state.window_state.scrollLeft;
     });
 
     return (
@@ -279,8 +292,10 @@ const App: Component<AppProps> = (props) => {
                 <div class={styles.kanban_board}
                     ref={kanbanBoardRef}
                     onScroll={(event) => {
-                        scrollTop = event.target.scrollTop;
-                        scrollLeft = event.target.scrollLeft;
+                        setState("window_state", produce((window_state) => {
+                            window_state.scrollTop = kanbanBoardRef.scrollTop;
+                            window_state.scrollLeft = kanbanBoardRef.scrollLeft;
+                        }));
                     }}>
                     <SortableProvider ids={listNames()}>
                         <For each={state.kanban_board.lists}>
@@ -297,7 +312,6 @@ const App: Component<AppProps> = (props) => {
                                                     kanban_list={kanban_list}
                                                     kanban_task={kanban_task}
                                                     draggingState={draggingState}
-                                                    setTaskModalState={setTaskModalState}
                                                 />
                                             )}
                                         </For>
@@ -321,11 +335,10 @@ const App: Component<AppProps> = (props) => {
                     </Show>
                 </div>
             </DragDropProvider>
-            <Show when={getTaskModalState()}>
+            <Show when={state.window_state.taskModalState}>
                 <TaskModal
                     state={state}
                     setState={setState}
-                    setTaskModalState={setTaskModalState}
                 />
             </Show>
         </div>

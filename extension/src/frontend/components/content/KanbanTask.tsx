@@ -17,7 +17,6 @@ type KanbanTaskProps = {
     kanban_task: KanbanMarkdown.KanbanTask;
 
     draggingState: Accessor<boolean>;
-    setTaskModalState: Setter<boolean>;
 };
 
 export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
@@ -29,7 +28,6 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
         kanban_task,
 
         draggingState,
-        setTaskModalState,
     } = props;
 
     const [getName, setName] = createSignal<string>(kanban_task.name);
@@ -73,7 +71,7 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
             state.selectedList = kanban_list;
             state.selectedTask = kanban_task;
         }));
-        setTaskModalState(true);
+        setState("window_state", "taskModalState", true);
         setTaskMenuActionsState(false);
     }
 
