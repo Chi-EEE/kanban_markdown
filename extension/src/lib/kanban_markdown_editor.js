@@ -67,16 +67,18 @@ class KanbanMarkdownEditorProvider {
 
                 const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument(e => {
                     if (e.document.uri.toString() === document.uri.toString()) {
-                        server.sendRequest({
-                            type: 'parseFileWithContent',
-                            file: document.uri.fsPath,
-                            content: encodeURI(document.getText()),
-                        }).then(server.sendRequest({
-                            type: 'get',
-                            format: 'json',
-                        }).then(data => {
-                            updateWebview(data);
-                        }));
+                        this.compressGzipString(e.document.getText(), (/** @type {any} */ err, /** @type {string} */ compressedString) => {
+                            server.sendRequest({
+                                type: 'parseFileWithContent',
+                                file: document.uri.fsPath,
+                                content: compressedString,
+                            }).then(server.sendRequest({
+                                type: 'get',
+                                format: 'json',
+                            }).then(data => {
+                                updateWebview(data);
+                            }));
+                        });
                     }
                 });
 
@@ -189,6 +191,17 @@ class KanbanMarkdownEditorProvider {
             markdown);
 
         return vscode.workspace.applyEdit(edit);
+    }
+
+    compressGzipString(inputString, callback) {
+        let buffer = Buffer.from(inputString, 'utf-8');
+        zlib.gzip(buffer, (err, compressedBuffer) => {
+            if (err) {
+                return callback(err);
+            }
+            let compressedString = compressedBuffer.toString('base64');
+            callback(null, compressedString);
+        });
     }
 
     // @ts-ignore

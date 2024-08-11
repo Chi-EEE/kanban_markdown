@@ -1,9 +1,9 @@
 ---
 Color: "#5186b8"
-Version: 247
+Version: 264
 Created: 2024-07-19 23:35:18 UTC
-Last Modified: 2024-08-08 22:46:13 UTC
-Checksum: 85dadc8b4f8766b42d0abc1c488ac4cba37099a79dfb190e81fa34e39092474f
+Last Modified: 2024-08-11 01:03:12 UTC
+Checksum: 80efae5b2b76266b746d36652eb47c6da152299424fd8f6179b564c54ab7621d
 ---
 
 > [!NOTE]  
@@ -15,18 +15,20 @@ No description available.
 ## Board:  
 
 ### <span data-checked="false" data-counter="1">To do:</span>  
-- [ ] <span id="kanban_md-task-allow_for_multiple_lists_with_the_same_name-1" data-counter="1">Allow for multiple Lists with the same name</span>  
-- [ ] <span id="kanban_md-task-bug:_double_clicking_on_created_card_opens_card_modal-1" data-counter="1">Bug: Double clicking on created card opens card_modal</span>  
-- [ ] <span id="kanban_md-task-bug:_fix_the_use_of_html_tags_in_this-1" data-counter="1">Bug: Fix the use of html tags in this</span>  
+- [ ] <span id="kanban_md-task-creating_label_in_the_card_modal_closes_it-1" data-counter="1">Creating Label in the Card Modal closes it</span>  
+- [ ] <span id="kanban_md-task-make_the_server_more_safer_with_indexes-1" data-counter="1">Make the server more safer with indexes</span>  
 
 ### <span data-checked="false" data-counter="1">Pending:</span>  
 - [ ] <span id="kanban_md-task-add_close_other_menus-1" data-counter="1">Add close other menus</span>  
-- [ ] <span id="kanban_md-task-fix_empty_description-1" data-counter="1">Fix empty description</span>  
+- [ ] <span id="kanban_md-task-bug:_fix_the_use_of_html_tags_in_this-1" data-counter="1">Bug: Fix the use of html tags in this</span>  
 
 ### <span data-checked="false" data-counter="1">Doing:</span>  
 - [ ] <span id="kanban_md-task-use_solidjs_for_frontend_instead_of_jquery_to_allow_for_reactivity_for_minimal_dom_manipulation-1" data-counter="1">Use SolidJS for Frontend instead of JQuery to allow for Reactivity for minimal DOM manipulation</span>  
 
 ### <span data-checked="true" data-counter="1">Done:</span>  
+- [x] <span id="kanban_md-task-fix_empty_description-1" data-counter="1">Fix empty description</span>  
+- [x] <span id="kanban_md-task-allow_for_multiple_lists_with_the_same_name-1" data-counter="1">Allow for multiple Lists with the same name</span>  
+- [x] <span id="kanban_md-task-bug:_double_clicking_on_created_card_opens_card_modal-1" data-counter="1">Bug: Double clicking on created card opens card_modal</span>  
 - [x] <span id="kanban_md-task-allow_for_the_card_to_expand_when_reaching_max_width_size-1" data-counter="1">Allow for the card to expand when reaching max width size</span>  
 - [x] <span id="kanban_md-task-fix_the_dot_in_strings_(spliting)_[maybe]-1" data-counter="1">Fix the dot in strings (spliting) [MAYBE]</span>  
 - [x] <span id="kanban_md-task-hide_categories_in_task_if_unused-1" data-counter="1">Hide categories in Task if unused</span>  

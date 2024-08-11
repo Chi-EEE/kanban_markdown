@@ -122,7 +122,9 @@ namespace server::commands
 			std::shared_ptr<kanban_markdown::KanbanTask> kanban_task = std::make_shared<kanban_markdown::KanbanTask>();
 			kanban_task->counter = kanban_markdown::utils::kanban_get_counter_with_name(name_str, this->kanban_board->task_name_tracker_map);
 			kanban_task->name = name_str;
-			kanban_task->description = split(yyjson_get_string_object(description), "\n");
+			const std::string description_str = yyjson_get_string_object(description);
+			if (!description_str.empty())
+				kanban_task->description = split(description_str, "\n");
 
 			size_t idx, max;
 			yyjson_val* label;

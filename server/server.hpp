@@ -10,7 +10,9 @@
 #include <kanban_markdown/kanban_markdown.hpp>
 
 #include <tobiaslocker_base64/base64.hpp>
+
 #include <gzip/compress.hpp>
+#include <gzip/decompress.hpp>
 
 #include "constants.hpp"
 #include "internal.hpp"
@@ -310,11 +312,11 @@ namespace server
 			std::ifstream file_stream(file_path, std::ios::binary);
 			std::stringstream buffer;
 			buffer << file_stream.rdbuf();
-			const std::string input_file_string = buffer.str();
+			const std::string content_str = buffer.str();
 			file_stream.close();
 			buffer.clear();
 
-			auto& maybe_kanban_board = kanban_markdown::parse(input_file_string);
+			auto& maybe_kanban_board = kanban_markdown::parse(content_str);
 			if (!maybe_kanban_board.has_value())
 			{
 				return tl::make_unexpected(maybe_kanban_board.error());
@@ -345,9 +347,12 @@ namespace server
 				throw std::runtime_error(fmt::format(R"(Error: File path "{}" does not exist.)", file_path));
 			}
 
-			const std::string input_file_string = urlDecode(yyjson_get_string_object(content));
+			const std::string content_b64_str = yyjson_get_string_object(content);
+			const std::string content_compressed_str = base64::from_base64(content_b64_str);
 
-			auto& maybe_kanban_board = kanban_markdown::parse(input_file_string);
+			const std::string content_str = gzip::decompress(content_compressed_str.c_str(), content_compressed_str.size());
+
+			auto& maybe_kanban_board = kanban_markdown::parse(content_str);
 			if (!maybe_kanban_board.has_value())
 			{
 				return tl::make_unexpected(maybe_kanban_board.error());

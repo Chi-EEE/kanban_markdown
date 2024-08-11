@@ -86,6 +86,7 @@ namespace server::commands
 				{
 					throw std::runtime_error("Invalid path: The destination must be a list name");
 				}
+				destination_list_name = urlDecode(destination_list_name);
 				unsigned int destination_list_counter = std::stoul(destination_list_counter_str);
 
 				auto parent_it = std::find_if(this->kanban_board->list.begin(), this->kanban_board->list.end(), [&destination_list_name, &destination_list_counter](const auto& x)
