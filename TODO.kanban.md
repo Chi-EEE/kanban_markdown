@@ -1,9 +1,9 @@
 ---
 Color: "#5186b8"
-Version: 264
+Version: 266
 Created: 2024-07-19 23:35:18 UTC
-Last Modified: 2024-08-11 01:03:12 UTC
-Checksum: 80efae5b2b76266b746d36652eb47c6da152299424fd8f6179b564c54ab7621d
+Last Modified: 2024-08-11 01:05:27 UTC
+Checksum: b7199d920422d08fd07ae78c5ba53ebbee6b5bc5f8e958815612e53821885ea3
 ---
 
 > [!NOTE]  
@@ -23,9 +23,9 @@ No description available.
 - [ ] <span id="kanban_md-task-bug:_fix_the_use_of_html_tags_in_this-1" data-counter="1">Bug: Fix the use of html tags in this</span>  
 
 ### <span data-checked="false" data-counter="1">Doing:</span>  
-- [ ] <span id="kanban_md-task-use_solidjs_for_frontend_instead_of_jquery_to_allow_for_reactivity_for_minimal_dom_manipulation-1" data-counter="1">Use SolidJS for Frontend instead of JQuery to allow for Reactivity for minimal DOM manipulation</span>  
 
 ### <span data-checked="true" data-counter="1">Done:</span>  
+- [x] <span id="kanban_md-task-use_solidjs_for_frontend_instead_of_jquery_to_allow_for_reactivity_for_minimal_dom_manipulation-1" data-counter="1">Use SolidJS for Frontend instead of JQuery to allow for Reactivity for minimal DOM manipulation</span>  
 - [x] <span id="kanban_md-task-fix_empty_description-1" data-counter="1">Fix empty description</span>  
 - [x] <span id="kanban_md-task-allow_for_multiple_lists_with_the_same_name-1" data-counter="1">Allow for multiple Lists with the same name</span>  
 - [x] <span id="kanban_md-task-bug:_double_clicking_on_created_card_opens_card_modal-1" data-counter="1">Bug: Double clicking on created card opens card_modal</span>  
