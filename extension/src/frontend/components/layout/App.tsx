@@ -1,4 +1,4 @@
-import type { Component } from 'solid-js';
+import type { Accessor, Component } from 'solid-js';
 import { For, Show, createSignal, createEffect, on, onMount } from "solid-js";
 import { createStore, produce } from 'solid-js/store';
 
@@ -113,6 +113,7 @@ const App: Component<AppProps> = (props) => {
     interface DraggingTask {
         type: 'task';
         data: {
+            index: Accessor<number>;
             name: string;
             counter: number;
             list: string;
@@ -122,6 +123,7 @@ const App: Component<AppProps> = (props) => {
     interface DraggingList {
         type: 'list';
         data: {
+            index: Accessor<number>;
             name: string;
             counter: number;
         };
@@ -233,30 +235,37 @@ const App: Component<AppProps> = (props) => {
 
     const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
         move(draggable, droppable, false);
-        let command = {};
+        let command = undefined;
         switch (draggableItem.type) {
             case 'list':
                 const draggableList = draggableItem as DraggingList;
-                command = {
-                    action: 'move',
-                    path: `list["${draggableList.data.name}"][${draggableList.data.counter}]`,
-                    value: value,
+                if (draggableList.data.index() !== value.index) {
+                    command = {
+                        action: 'move',
+                        path: `list["${draggableList.data.name}"][${draggableList.data.counter}]`,
+                        value: value,
+                    }
                 }
                 break;
             case 'task':
                 const draggableTask = draggableItem as DraggingTask;
                 const list = state.kanban_board.lists.find((list) => `list-${list.name}-${list.counter}` === draggableTask.data.list);
-                command = {
-                    action: 'move',
-                    path: `list["${list.name}"][${list.counter}].tasks["${draggableTask.data.name}"][${draggableTask.data.counter}]`,
-                    value: value,
-                };
+                const path = `list["${list.name}"][${list.counter}].tasks["${draggableTask.data.name}"][${draggableTask.data.counter}]`;
+                if (!value.destination && draggableTask.data.index() !== value.index || value.destination && !path.includes(value.destination)) {
+                    command = {
+                        action: 'move',
+                        path: path,
+                        value: value,
+                    };
+                }
                 break;
         }
-        // @ts-ignore
-        vscode.postMessage({
-            commands: [command]
-        });
+        if (command) {
+            // @ts-ignore
+            vscode.postMessage({
+                commands: [command]
+            });
+        }
         draggableItem = undefined;
         value = {
             index: 0,
@@ -299,14 +308,20 @@ const App: Component<AppProps> = (props) => {
                     }}>
                     <SortableProvider ids={listNames()}>
                         <For each={state.kanban_board.lists}>
-                            {(kanban_list) => {
+                            {(kanban_list, list_index) => {
                                 const sortedKanbanIds = () => kanban_list.tasks.map((kanban_task) => `task-${kanban_task.name}-${kanban_task.counter}`);
 
-                                return (<KanbanList state={state} setState={setState} kanban_list={kanban_list} >
+                                return (<KanbanList
+                                    list_index={list_index}
+                                    state={state}
+                                    setState={setState}
+                                    kanban_list={kanban_list}
+                                >
                                     <SortableProvider ids={sortedKanbanIds()}>
                                         <For each={kanban_list.tasks}>
-                                            {(kanban_task) => (
+                                            {(kanban_task, task_index) => (
                                                 <KanbanTask
+                                                    task_index={task_index}
                                                     state={state}
                                                     setState={setState}
                                                     kanban_list={kanban_list}

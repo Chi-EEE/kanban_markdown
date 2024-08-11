@@ -10,6 +10,7 @@ import { applyAutoResize } from '../../utils';
 import { createSortable } from '@thisbeyond/solid-dnd';
 
 type KanbanTaskProps = {
+    task_index: Accessor<number>,
     state: KanbanMarkdown.State;
     setState: SetStoreFunction<KanbanMarkdown.State>;
 
@@ -21,6 +22,7 @@ type KanbanTaskProps = {
 
 export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
     const {
+        task_index,
         state,
         setState,
 
@@ -124,6 +126,7 @@ export const KanbanTask: VoidComponent<KanbanTaskProps> = (props) => {
     }
 
     const sortable = createSortable(`task-${kanban_task.name}-${kanban_task.counter}`, {
+        index: task_index,
         name: kanban_task.name,
         counter: kanban_task.counter,
         type: "task",

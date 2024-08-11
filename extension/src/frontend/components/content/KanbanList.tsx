@@ -12,6 +12,7 @@ import { createSortable, maybeTransformStyle } from '@thisbeyond/solid-dnd';
 
 type KanbanListProps = {
     children: JSXElement;
+    list_index: Accessor<number>;
 
     state: KanbanMarkdown.State;
     setState: SetStoreFunction<KanbanMarkdown.State>;
@@ -21,6 +22,7 @@ type KanbanListProps = {
 
 export const KanbanList: Component<KanbanListProps> = (props) => {
     const {
+        list_index,
         state,
         setState,
 
@@ -79,6 +81,7 @@ export const KanbanList: Component<KanbanListProps> = (props) => {
     const [getAddButtonVisiblity, setAddButtonVisiblity] = createSignal<boolean>(true);
 
     const sortable = createSortable(`list-${kanban_list.name}-${kanban_list.counter}`, {
+        index: list_index,
         name: kanban_list.name,
         counter: kanban_list.counter,
         type: "list",
