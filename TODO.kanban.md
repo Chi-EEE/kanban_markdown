@@ -1,9 +1,9 @@
 ---
 Color: "#5186b8"
-Version: 269
+Version: 270
 Created: 2024-07-19 23:35:18 UTC
-Last Modified: 2024-08-11 16:40:47 UTC
-Checksum: 4b969469a8c4297332f0cef866d7098b5444bb846cb4c6ada6e3359e45e574fc
+Last Modified: 2024-08-11 23:04:58 UTC
+Checksum: 173aa165b932c7253050ca64a88c7a5d1c757e2fb7d0c6075fe2cb035a65e256
 ---
 
 > [!NOTE]  
@@ -11,6 +11,10 @@ Checksum: 4b969469a8c4297332f0cef866d7098b5444bb846cb4c6ada6e3359e45e574fc
 
 # TODO Board  
 No description available.  
+
+## Labels:  
+- <span id="kanban_md-label-testlabel" data-counter="1" data-color="#d12929">TestLabel</span>  
+  - [Bug: Fix the use of html tags in this](#user-content-kanban_md-task-bug:_fix_the_use_of_html_tags_in_this-1)  
 
 ## Board:  
 
@@ -20,6 +24,8 @@ No description available.
 ### <span data-checked="false" data-counter="1">Pending:</span>  
 - [ ] <span id="kanban_md-task-add_close_other_menus-1" data-counter="1">Add close other menus</span>  
 - [ ] <span id="kanban_md-task-bug:_fix_the_use_of_html_tags_in_this-1" data-counter="1">Bug: Fix the use of html tags in this</span>  
+  - **Labels**:  
+    - [<span data-counter="1">TestLabel</span>](#user-content-kanban_md-label-testlabel)  
 
 ### <span data-checked="false" data-counter="1">Doing:</span>  
 
