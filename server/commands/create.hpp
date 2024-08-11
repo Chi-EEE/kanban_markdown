@@ -199,8 +199,17 @@ namespace server::commands
 			std::string name_str = yyjson_get_string_object(name);
 			re2::RE2::GlobalReplace(&name_str, constants::vertical_whitespace_regex_pattern, "");
 
+			auto kanban_label_it = std::find_if(kanban_task->labels.begin(), kanban_task->labels.end(), [&name_str](const std::shared_ptr<kanban_markdown::KanbanLabel>& x)
+				{ return x->name == name_str; });
+
+			if (kanban_label_it == kanban_task->labels.end())
+			{
+				throw std::runtime_error("Unable to create another KanbanLabel, it already exists inside of the task.");
+			}
+
 			auto it = std::find_if(this->kanban_board->labels.begin(), this->kanban_board->labels.end(), [&name_str](const std::shared_ptr<kanban_markdown::KanbanLabel>& x)
 				{ return x->name == name_str; });
+
 			std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label;
 			if (it == this->kanban_board->labels.end())
 			{
