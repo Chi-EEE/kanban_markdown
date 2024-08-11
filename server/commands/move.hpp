@@ -46,7 +46,7 @@ namespace server::commands
 			const MoveValue* move_value = (MoveValue*)userdata;
 			std::shared_ptr<kanban_markdown::KanbanList> kanban_list = *kanban_list_iterator;
 			kanban_list_iterator = this->kanban_board->list.erase(kanban_list_iterator);
-			if (move_value->index >= this->kanban_board->list.size())
+			if (move_value->index < 0 || move_value->index >= this->kanban_board->list.size())
 			{
 				this->kanban_board->list.push_back(kanban_list);
 			}
@@ -71,7 +71,7 @@ namespace server::commands
 			if (move_value->destination.empty()) {
 				std::shared_ptr<kanban_markdown::KanbanTask> kanban_task = *kanban_task_iterator;
 				kanban_task_iterator = kanban_list->tasks.erase(kanban_task_iterator);
-				if (move_value->index >= kanban_list->tasks.size()) {
+				if (move_value->index < 0 || move_value->index >= kanban_list->tasks.size()) {
 					kanban_list->tasks.push_back(kanban_task);
 				}
 				else {
@@ -101,7 +101,7 @@ namespace server::commands
 
 				std::shared_ptr<kanban_markdown::KanbanTask> task = kanban_list->tasks[old_index];
 				task->checked = parent_list->checked;
-				if (move_value->index >= parent_list->tasks.size())
+				if (move_value->index < 0 || move_value->index >= parent_list->tasks.size())
 				{
 					parent_list->tasks.push_back(task);
 				}
