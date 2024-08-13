@@ -3,7 +3,7 @@
 #include <tsl/robin_map.h>
 #include <tsl/robin_set.h>
 
-#include "kanban.hpp"
+#include "kanban_board.hpp"
 
 namespace kanban_markdown::utils {
 	static inline unsigned int kanban_get_counter_with_name(std::string name_str, tsl::robin_map<std::string, DuplicateNameTracker>& duplicate_name_tracker_map) {

@@ -186,7 +186,7 @@ namespace server
 			yyjson_mut_obj_add_str(new_doc, new_root, "id", id_str.c_str());
 			yyjson_mut_val* kanban_board_object = yyjson_mut_obj(new_doc);
 			yyjson_mut_obj_add_val(new_doc, new_root, "json", kanban_board_object);
-			kanban_markdown::json(kanban_tuple_.kanban_board, new_doc, kanban_board_object);
+			kanban_markdown::writer::json::format(kanban_tuple_.kanban_board, new_doc, kanban_board_object);
 			const char* json = yyjson_mut_write(new_doc, 0, nullptr);
 			printf("%s\n", json);
 			free((void*)json);
@@ -199,7 +199,7 @@ namespace server
 			yyjson_mut_val* new_root = yyjson_mut_obj(new_doc);
 			yyjson_mut_doc_set_root(new_doc, new_root);
 			yyjson_mut_obj_add_str(new_doc, new_root, "id", id_str.c_str());
-			const std::string md_string = kanban_markdown::markdown_format(kanban_tuple_.kanban_board);
+			const std::string md_string = kanban_markdown::writer::markdown::format_str(kanban_tuple_.kanban_board);
 			const std::string compressed_md_string = gzip::compress(md_string.data(), md_string.size(), Z_BEST_COMPRESSION);
 			const std::string md_base64_string = base64::to_base64(compressed_md_string);
 			yyjson_mut_obj_add_str(new_doc, new_root, "markdown", md_base64_string.c_str());

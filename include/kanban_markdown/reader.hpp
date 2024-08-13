@@ -20,7 +20,7 @@
 #include <pugixml.hpp>
 #include <yaml-cpp/yaml.h>
 
-#include "kanban.hpp"
+#include "kanban_board.hpp"
 #include "constants.hpp"
 
 #include "internal.hpp"
