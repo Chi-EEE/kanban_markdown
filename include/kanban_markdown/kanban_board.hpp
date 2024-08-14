@@ -10,7 +10,7 @@
 #include <tsl/robin_map.h>
 #include <tsl/robin_set.h>
 
-#include "internal.hpp"
+#include <kanban_markdown/internal.hpp>
 
 namespace kanban_markdown {
 	class DuplicateNameTracker {
