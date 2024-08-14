@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iostream>
+#include <vector>
+#include <sstream>
 #include <string>
 
 #include <picosha2.h>
@@ -36,7 +39,7 @@ namespace kanban_markdown::writer::markdown {
 				markdown_file += fmt::format(
 					R"(- <span id="{kanban_md}-label-{id}" data-color="{color}">{name}</span>{eol})",
 					fmt::arg("kanban_md", constants::kanban_md),
-					fmt::arg("id", internal::kanban_markdown_string_to_id(kanban_label_name)),
+					fmt::arg("id", internal::string_to_id(kanban_label_name)),
 					fmt::arg("color", kanban_label->color),
 					fmt::arg("name", kanban_label_name),
 					fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
@@ -47,7 +50,7 @@ namespace kanban_markdown::writer::markdown {
 						R"(  - [{name}](#{github}{kanban_md}-task-{id}-{counter}){eol})",
 						fmt::arg("github", kanban_writer_flags.github ? constants::github_added_tag : ""),
 						fmt::arg("kanban_md", constants::kanban_md),
-						fmt::arg("id", internal::kanban_markdown_string_to_id(kanban_task_name)),
+						fmt::arg("id", internal::string_to_id(kanban_task_name)),
 						fmt::arg("counter", kanban_task->counter),
 						fmt::arg("name", kanban_task_name),
 						fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
@@ -72,7 +75,7 @@ namespace kanban_markdown::writer::markdown {
 					markdown_file += fmt::format(R"(- [{checked}] <span id="{kanban_md}-task-{id}-{counter}" data-counter="{counter}">{name}</span>{eol})",
 						fmt::arg("checked", kanban_task->checked ? 'x' : ' '),
 						fmt::arg("kanban_md", constants::kanban_md),
-						fmt::arg("id", internal::kanban_markdown_string_to_id(kanban_task->name)),
+						fmt::arg("id", internal::string_to_id(kanban_task->name)),
 						fmt::arg("counter", kanban_task->counter),
 						fmt::arg("name", kanban_task->name),
 						fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
@@ -92,7 +95,7 @@ namespace kanban_markdown::writer::markdown {
 								"    - [{name}](#{github}{kanban_md}-label-{id}){eol}",
 								fmt::arg("github", kanban_writer_flags.github ? constants::github_added_tag : ""),
 								fmt::arg("kanban_md", constants::kanban_md),
-								fmt::arg("id", internal::kanban_markdown_string_to_id(kanban_label_name)),
+								fmt::arg("id", internal::string_to_id(kanban_label_name)),
 								fmt::arg("name", kanban_label_name),
 								fmt::arg("eol", constants::END_OF_MARKDOWN_LINE)
 							);

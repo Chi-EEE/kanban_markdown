@@ -6,7 +6,7 @@
 
 #include <yyjson.h>
 
-#include <kanban_markdown/kanban.hpp>
+#include <kanban_markdown/kanban_board.hpp>
 #include <kanban_markdown/utils.hpp>
 
 namespace server
