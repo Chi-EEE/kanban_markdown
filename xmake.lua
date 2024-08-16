@@ -7,6 +7,14 @@ else
     set_runtimes("MT")
 end
 
+if is_plat("wasm") then
+    add_requires("emscripten")
+    set_toolchains("emcc@emscripten")
+else 
+    add_requires("cosmocc")
+    set_toolchains("@cosmocc")
+end
+
 add_repositories("local-repo xmake/repo")
 
 add_requires("asap-fork", "fmt", "md4c", "pugixml", "tl_expected", "robin-map", "ordered_map")
@@ -15,7 +23,7 @@ add_requires("cpp-dump")
 
 add_requires("argparse")
 
-add_requires("re2", "cosmocc")
+add_requires("re2")
 
 target("kanban-markdown")
     set_kind("$(kind)")
@@ -50,7 +58,6 @@ target_end()
 target("kanban-markdown_server")
     set_kind("binary")
     set_languages("cxx17")
-    set_toolchains("@cosmocc")
     add_packages("re2")
 
     add_headerfiles("server/(**.hpp)")
