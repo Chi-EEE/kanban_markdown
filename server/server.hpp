@@ -316,7 +316,7 @@ namespace server
 			file_stream.close();
 			buffer.clear();
 
-			auto& maybe_kanban_board = kanban_markdown::reader::parse(content_str);
+			tl::expected<kanban_markdown::KanbanBoard, std::string> maybe_kanban_board = kanban_markdown::reader::parse(content_str);
 			if (!maybe_kanban_board.has_value())
 			{
 				return tl::make_unexpected(maybe_kanban_board.error());
@@ -352,7 +352,7 @@ namespace server
 
 			const std::string content_str = gzip::decompress(content_compressed_str.c_str(), content_compressed_str.size());
 
-			auto& maybe_kanban_board = kanban_markdown::reader::parse(content_str);
+			tl::expected<kanban_markdown::KanbanBoard, std::string> maybe_kanban_board = kanban_markdown::reader::parse(content_str);
 			if (!maybe_kanban_board.has_value())
 			{
 				return tl::make_unexpected(maybe_kanban_board.error());

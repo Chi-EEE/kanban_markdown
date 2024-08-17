@@ -12,7 +12,6 @@ if is_plat("wasm") then
     set_toolchains("emcc@emscripten")
 else 
     add_requires("cosmocc")
-    set_toolchains("@cosmocc")
 end
 
 add_repositories("local-repo xmake/repo")
@@ -59,6 +58,9 @@ target("kanban-markdown_server")
     set_kind("binary")
     set_languages("cxx17")
     add_packages("re2")
+    if not is_plat("wasm") then
+        set_toolchains("@cosmocc")
+    end
 
     add_headerfiles("server/(**.hpp)")
     add_files("server/*.cpp")
