@@ -57,6 +57,10 @@ target_end()
 target("kanban-markdown_server")
     set_kind("binary")
     set_languages("cxx17")
+    if not is_plat("wasm") then
+        set_toolchains("@cosmocc")
+    end
+    
     add_packages("re2")
     if not is_plat("wasm") then
         set_toolchains("@cosmocc")
