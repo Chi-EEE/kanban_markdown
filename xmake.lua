@@ -42,18 +42,6 @@ target("kanban-markdown")
     add_defines("VC_EXTRALEAN", "WIN32_LEAN_AND_MEAN")
 target_end()
 
-target("kanban-markdown_cli")
-    set_kind("binary")
-    set_languages("cxx17")
-    add_packages("argparse")
-
-    add_files("cli/*.cpp")
-
-    set_targetdir("$(buildir)/$(plat)/$(arch)/$(mode)/cli")
-
-    add_deps("kanban-markdown", {public = true})
-target_end()
-
 target("kanban-markdown_server")
     set_kind("binary")
     set_languages("cxx17")
