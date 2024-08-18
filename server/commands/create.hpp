@@ -202,7 +202,7 @@ namespace server::commands
 			auto kanban_label_it = std::find_if(kanban_task->labels.begin(), kanban_task->labels.end(), [&name_str](const std::shared_ptr<kanban_markdown::KanbanLabel>& x)
 				{ return x->name == name_str; });
 
-			if (kanban_label_it == kanban_task->labels.end())
+			if (kanban_label_it != kanban_task->labels.end())
 			{
 				throw std::runtime_error("Unable to create another KanbanLabel, it already exists inside of the task.");
 			}
