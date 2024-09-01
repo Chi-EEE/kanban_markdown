@@ -9,7 +9,6 @@ end
 
 if is_plat("wasm") then
     add_requires("emscripten")
-    set_toolchains("emcc@emscripten")
 else 
     add_requires("cosmocc")
 end
@@ -24,7 +23,7 @@ add_requires("argparse")
 
 add_requires("re2")
 
-target("kanban-markdown")
+target("kanban_markdown", function()
     set_kind("$(kind)")
     set_languages("cxx17")
 
@@ -40,37 +39,42 @@ target("kanban-markdown")
     add_includedirs("include", {public = true})
 
     add_defines("VC_EXTRALEAN", "WIN32_LEAN_AND_MEAN")
-target_end()
+end)
 
-target("kanban-markdown_server")
-    set_kind("binary")
-    set_languages("cxx17")
-    if not is_plat("wasm") then
+if is_plat("windows", "linux", "macosx") then
+    target("kanban_markdown-server", function()
+        set_kind("binary")
+        set_languages("cxx17")
+
+        add_requires("cosmocc")
         set_toolchains("@cosmocc")
-    end
-    
-    add_packages("re2")
-    if not is_plat("wasm") then
-        set_toolchains("@cosmocc")
-    end
+        
+        add_packages("re2")
 
-    add_headerfiles("server/(**.hpp)")
-    add_files("server/*.cpp")
+        add_headerfiles("server/(**.hpp)")
+        add_files("server/*.cpp")
 
-    after_build(function (target) 
-        local target_extension_path = path.join("$(scriptdir)", "extension", "server", "kanban-markdown_server.exe")
-        os.cp(path.join(target:targetdir(), "kanban-markdown_server.exe"), target_extension_path)
-        local verifiedHash = import("xmake.hash").sha256(io.readfile(target_extension_path, {encoding = "binary"}))
-        io.writefile(target_extension_path .. ".sha256", verifiedHash)
+        set_targetdir("$(buildir)/$(plat)/$(arch)/$(mode)/server")
+
+        add_deps("kanban_markdown", {public = true})
     end)
+end
 
-    set_targetdir("$(buildir)/$(plat)/$(arch)/$(mode)/server")
+if is_plat("wasm") then 
+    target("kanban_markdown-wasm", function()
+        set_kind("binary")
+        set_languages("cxx17")
 
-    add_deps("kanban-markdown", {public = true})
-target_end()
+        add_packages("emscripten")
+        set_toolchains("emcc@emscripten")
+
+        add_headerfiles("wasm/(**.hpp)")
+        add_files("wasm/*.cpp")
+    end)
+end
 
 for _, test_file in ipairs(os.files("tests/test_*.cpp")) do
-    target(path.basename(test_file, ".cpp"))
+    target(path.basename(test_file, ".cpp"), function()
         set_kind("binary")
         set_languages("cxx17")
         set_default(false)
@@ -84,6 +88,6 @@ for _, test_file in ipairs(os.files("tests/test_*.cpp")) do
 
         set_targetdir("$(buildir)/$(plat)/$(arch)/$(mode)/tests")
 
-        add_deps("kanban-markdown", {public = true})
-    target_end()
+        add_deps("kanban_markdown", {public = true})
+    end)
 end
