@@ -1,26 +1,31 @@
-#include <emscripten/emscripten.h>
 #include <emscripten/bind.h>
+#include <string>
 
-#include <kanban_markdown/kanban_markdown.hpp>
+class MyClass {
+public:
+    MyClass() : value(0) {}
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-#else
-#define EXTERN
-#endif
+    void setValue(int val) {
+        value = val;
+    }
 
-int main() {
-  return 0;
-}
+    int getValue() const {
+        return value;
+    }
 
+    std::string greet() const {
+        return "Hello from MyClass!";
+    }
+
+private:
+    int value;
+};
+
+// Bindings
 EMSCRIPTEN_BINDINGS(my_class_example) {
-  emscripten::class_<kanban_markdown::KanbanBoard>("KanbanBoard");
-}
-
-EMSCRIPTEN_BINDINGS(my_module) {
-    emscripten::function("parse", &kanban_markdown::reader::parse);
-}
-
-EXTERN EMSCRIPTEN_KEEPALIVE void myFunction(int argc, char ** argv) {
-    printf("MyFunction Called\n");
+    emscripten::class_<MyClass>("MyClass")
+        .constructor()
+        .function("setValue", &MyClass::setValue)
+        .function("getValue", &MyClass::getValue)
+        .function("greet", &MyClass::greet);
 }
