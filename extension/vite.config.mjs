@@ -42,11 +42,11 @@ const obfuscatorConfig = {
 export default defineConfig({
     plugins: [
         solidPlugin(),
-        rollupObfuscator({
-            global: true,
-            exclude: ['./node_modules/**/*'],
-            ...obfuscatorConfig,
-        })
+        // rollupObfuscator({
+        //     global: true,
+        //     exclude: ['./node_modules/**/*'],
+        //     ...obfuscatorConfig,
+        // })
     ],
     server: {
         port: 3000,

@@ -5,7 +5,7 @@
 #include <memory>
 
 #include <asap/asap.h>
-#include <cpp-dump/dump.hpp>
+#include <cpp-dump.hpp>
 
 #include <tsl/robin_map.h>
 #include <tsl/robin_set.h>

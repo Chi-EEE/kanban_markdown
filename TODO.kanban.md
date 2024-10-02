@@ -14,7 +14,7 @@ No description available.
 
 ## Labels:  
 - <span id="kanban_md-label-testlabel" data-counter="1" data-color="#d12929">TestLabel</span>  
-  - [Bug: Fix the use of html tags in this](#user-content-kanban_md-task-bug:_fix_the_use_of_html_tags_in_this-1)  
+  - [<span data-counter="1">Bug: Fix the use of html tags in this</span>](#user-content-kanban_md-task-bug:_fix_the_use_of_html_tags_in_this-1)  
 
 ## Board:  
 
