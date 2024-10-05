@@ -44,21 +44,20 @@ target("kanban_markdown", function()
     add_defines("VC_EXTRALEAN", "WIN32_LEAN_AND_MEAN")
 end)
 
-if is_plat("windows", "linux", "macosx") then
-    target("kanban_markdown-server", function()
-        set_kind("binary")
-        set_languages("cxx17")
-        
-        add_packages("re2")
+target("kanban_markdown-server", function()
+    set_kind("binary")
+    set_languages("cxx17")
+    
+    add_packages("re2", {public = true})
 
-        add_headerfiles("server/(**.hpp)")
-        add_files("server/*.cpp")
+    add_headerfiles("server/(**.hpp)")
+    add_includedirs("server", {public = true})
+    add_files("server/*.cpp")
 
-        set_targetdir("$(buildir)/$(plat)/$(arch)/$(mode)/server")
+    set_targetdir("$(buildir)/$(plat)/$(arch)/$(mode)/server")
 
-        add_deps("kanban_markdown", {public = true})
-    end)
-end
+    add_deps("kanban_markdown", {public = true})
+end)
 
 if is_plat("wasm") then 
     target("kanban_markdown-wasm", function()
@@ -69,6 +68,6 @@ if is_plat("wasm") then
         add_headerfiles("wasm/(**.hpp)")
         add_files("wasm/*.cpp")
     
-        add_deps("kanban_markdown", {public = true})
+        add_deps("kanban_markdown", "kanban_markdown-server", {public = true})
     end)
 end

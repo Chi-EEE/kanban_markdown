@@ -1,31 +1,6 @@
 #include <emscripten/bind.h>
-#include <string>
-#include <tl/expected.hpp>
 #include <kanban_markdown/kanban_markdown.hpp>
-
-class MyClass
-{
-public:
-    MyClass() : value(0) {}
-
-    void setValue(int val)
-    {
-        value = val;
-    }
-
-    int getValue() const
-    {
-        return value;
-    }
-
-    std::string greet() const
-    {
-        return "Hello from MyClass!";
-    }
-
-private:
-    int value;
-};
+#include <server.hpp>
 
 template <typename T>
 struct Ok
@@ -46,6 +21,46 @@ emscripten::val parse(std::string md_string)
     if (!maybe_kanban_board)
         return emscripten::val(Err{maybe_kanban_board.error()});
     return emscripten::val(Ok<kanban_markdown::KanbanBoard>{maybe_kanban_board.value()});
+}
+
+emscripten::val update(kanban_markdown::KanbanBoard kanban_board, std::string input)
+{
+    server::KanbanTuple kanban_tuple{
+        .file_path = "",
+        .kanban_board = kanban_board,
+    };
+
+    yyjson_doc *doc = NULL;
+    try
+    {
+        doc = yyjson_read(input.c_str(), input.size(), 0);
+        if (doc == NULL)
+        {
+            return emscripten::val(Err{"The input is invalid; it must be in JSON format."});
+        }
+        yyjson_val *root = yyjson_doc_get_root(doc);
+        if (root == NULL)
+        {
+            yyjson_doc_free(doc);
+            return emscripten::val(Err{"The input is invalid; it must be in JSON format."});
+        }
+        bool modified = server::KanbanServer::commands(kanban_tuple, root, "");
+        if (modified)
+        {
+            kanban_tuple.kanban_board.version += 1;
+            kanban_tuple.kanban_board.last_modified = kanban_markdown::internal::now_utc();
+        }
+        yyjson_doc_free(doc);
+        return emscripten::val(Ok<kanban_markdown::KanbanBoard>{kanban_tuple.kanban_board});
+    }
+    catch (const std::exception &e)
+    {
+        if (doc != NULL)
+        {
+            yyjson_doc_free(doc);
+        }
+        return emscripten::val(Err{e.what()});
+    }
 }
 
 // Binding code
@@ -126,7 +141,7 @@ EMSCRIPTEN_BINDINGS(my_class_example)
         .property("github", &kanban_markdown::writer::markdown::Flags::github);
 
     emscripten::function("parse", &parse);
+    emscripten::function("update", &update);
     emscripten::function("json_format_str", &kanban_markdown::writer::json::format_str);
     emscripten::function("markdown_format_str", &kanban_markdown::writer::markdown::format_str);
-
 }

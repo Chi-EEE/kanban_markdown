@@ -161,21 +161,21 @@ namespace server
 		void internal_visitBoard()
 		{
 			std::string board_item = urlDecode(this->path_split[0]);
-			switch (hash(board_item))
+			switch (kanban_markdown::internal::hash(board_item))
 			{
-			case hash("name"):
+			case kanban_markdown::internal::hash("name"):
 				this->editBoardName();
 				break;
-			case hash("description"):
+			case kanban_markdown::internal::hash("description"):
 				this->editBoardDescription();
 				break;
-			case hash("color"):
+			case kanban_markdown::internal::hash("color"):
 				this->editBoardColor();
 				break;
-			case hash("list"):
+			case kanban_markdown::internal::hash("list"):
 				this->editBoardList();
 				break;
-			case hash("labels"):
+			case kanban_markdown::internal::hash("labels"):
 				this->editBoardLabels();
 				break;
 			default:
@@ -191,15 +191,15 @@ namespace server
 				}
 				board_item_index_name = urlDecode(board_item_index_name);
 
-				switch (hash(board_item_name))
+				switch (kanban_markdown::internal::hash(board_item_name))
 				{
-				case hash("list"):
+				case kanban_markdown::internal::hash("list"):
 				{
 					unsigned int board_index_counter = std::stoul(board_optional_index_counter_str);
 					internal_visitList(board_item_index_name, board_index_counter);
 					break;
 				}
-				case hash("labels"):
+				case kanban_markdown::internal::hash("labels"):
 				{
 					internal_visitLabels(board_item_index_name);
 					break;
@@ -228,15 +228,15 @@ namespace server
 			{
 				std::shared_ptr<kanban_markdown::KanbanList> kanban_list = *it;
 				std::string second = urlDecode(this->path_split[1]);
-				switch (hash(second))
+				switch (kanban_markdown::internal::hash(second))
 				{
-				case hash("name"):
+				case kanban_markdown::internal::hash("name"):
 					this->editListName(kanban_list);
 					break;
-				case hash("checked"):
+				case kanban_markdown::internal::hash("checked"):
 					this->editListChecked(kanban_list);
 					break;
-				case hash("tasks"):
+				case kanban_markdown::internal::hash("tasks"):
 					this->editListTasks(kanban_list);
 					break;
 				default:
@@ -253,9 +253,9 @@ namespace server
 
 					unsigned int task_index_counter = std::stoul(task_index_counter_str);
 
-					switch (hash(list_item_name))
+					switch (kanban_markdown::internal::hash(list_item_name))
 					{
-					case hash("tasks"):
+					case kanban_markdown::internal::hash("tasks"):
 					{
 						this->internal_visitTasks(kanban_list, task_index_name, task_index_counter);
 						break;
@@ -286,24 +286,24 @@ namespace server
 			{
 				std::shared_ptr<kanban_markdown::KanbanTask>& kanban_task = *it;
 				std::string third = urlDecode(this->path_split[2]);
-				switch (hash(third))
+				switch (kanban_markdown::internal::hash(third))
 				{
-				case hash("name"):
+				case kanban_markdown::internal::hash("name"):
 					this->editTaskName(kanban_list, kanban_task);
 					break;
-				case hash("checked"):
+				case kanban_markdown::internal::hash("checked"):
 					this->editTaskChecked(kanban_list, kanban_task);
 					break;
-				case hash("description"):
+				case kanban_markdown::internal::hash("description"):
 					this->editTaskDescription(kanban_list, kanban_task);
 					break;
-				case hash("labels"):
+				case kanban_markdown::internal::hash("labels"):
 					this->editTaskLabels(kanban_list, kanban_task);
 					break;
-				case hash("attachments"):
+				case kanban_markdown::internal::hash("attachments"):
 					this->editTaskAttachments(kanban_list, kanban_task);
 					break;
-				case hash("checklist"):
+				case kanban_markdown::internal::hash("checklist"):
 					this->editTaskChecklist(kanban_list, kanban_task);
 					break;
 				default:
@@ -317,15 +317,15 @@ namespace server
 					}
 					task_item_index_name = urlDecode(task_item_index_name);
 
-					switch (hash(task_item_name))
+					switch (kanban_markdown::internal::hash(task_item_name))
 					{
-					case hash("labels"):
+					case kanban_markdown::internal::hash("labels"):
 						this->internal_visitTaskLabels(kanban_list, kanban_task, task_item_index_name);
 						break;
-					case hash("attachments"):
+					case kanban_markdown::internal::hash("attachments"):
 						this->internal_visitTaskAttachments(kanban_list, kanban_task, task_item_index_name);
 						break;
-					case hash("checklist"):
+					case kanban_markdown::internal::hash("checklist"):
 						this->internal_visitTaskChecklist(kanban_list, kanban_task, task_item_index_name);
 						break;
 					default:
@@ -353,15 +353,15 @@ namespace server
 			{
 				std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = *it;
 				std::string fourth = urlDecode(this->path_split[3]);
-				switch (hash(fourth))
+				switch (kanban_markdown::internal::hash(fourth))
 				{
-				case hash("name"):
+				case kanban_markdown::internal::hash("name"):
 					this->editTaskLabelName(kanban_list, kanban_task, kanban_label);
 					break;
-				case hash("color"):
+				case kanban_markdown::internal::hash("color"):
 					this->editTaskLabelColor(kanban_list, kanban_task, kanban_label);
 					break;
-				case hash("tasks"):
+				case kanban_markdown::internal::hash("tasks"):
 					throw std::runtime_error("Error: Editing Tasks through labels is not supported. Please edit tasks directly within their respective lists.");
 				default:
 					throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanLabel named "{}")", fourth));
@@ -385,12 +385,12 @@ namespace server
 			{
 				std::shared_ptr<kanban_markdown::KanbanAttachment> kanban_attachment = *it;
 				std::string fourth = urlDecode(this->path_split[3]);
-				switch (hash(fourth))
+				switch (kanban_markdown::internal::hash(fourth))
 				{
-				case hash("name"):
+				case kanban_markdown::internal::hash("name"):
 					this->editTaskAttachmentName(kanban_list, kanban_task, kanban_attachment);
 					break;
-				case hash("url"):
+				case kanban_markdown::internal::hash("url"):
 					this->editTaskAttachmentUrl(kanban_list, kanban_task, kanban_attachment);
 					break;
 				default:
@@ -415,12 +415,12 @@ namespace server
 			{
 				std::shared_ptr<kanban_markdown::KanbanChecklistItem> kanban_checklist_item = *it;
 				std::string fourth = urlDecode(this->path_split[3]);
-				switch (hash(fourth))
+				switch (kanban_markdown::internal::hash(fourth))
 				{
-				case hash("name"):
+				case kanban_markdown::internal::hash("name"):
 					this->editTaskChecklistName(kanban_list, kanban_task, kanban_checklist_item);
 					break;
-				case hash("checked"):
+				case kanban_markdown::internal::hash("checked"):
 					this->editTaskChecklistChecked(kanban_list, kanban_task, kanban_checklist_item);
 					break;
 				default:
@@ -445,15 +445,15 @@ namespace server
 			{
 				std::shared_ptr<kanban_markdown::KanbanLabel> kanban_label = *it;
 				std::string second = urlDecode(this->path_split[1]);
-				switch (hash(second))
+				switch (kanban_markdown::internal::hash(second))
 				{
-				case hash("name"):
+				case kanban_markdown::internal::hash("name"):
 					this->editLabelName(kanban_label);
 					break;
-				case hash("color"):
+				case kanban_markdown::internal::hash("color"):
 					this->editLabelColor(kanban_label);
 					break;
-				case hash("tasks"):
+				case kanban_markdown::internal::hash("tasks"):
 					throw std::runtime_error("Error: Editing Tasks through labels is not supported. Please edit tasks directly within their respective lists.");
 				default:
 					throw std::runtime_error(fmt::format(R"(Invalid path: There are no fields inside KanbanLabel named "{}")", second));
