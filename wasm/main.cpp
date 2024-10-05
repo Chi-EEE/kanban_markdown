@@ -66,7 +66,7 @@ EMSCRIPTEN_BINDINGS(my_class_example)
         .property("tm_isdst", &std::tm::tm_isdst)
         .property("tm_gmtoff", &std::tm::tm_gmtoff);
 
-    emscripten::class_<kanban_markdown::KanbanBoard>("kanban_markdown::KanbanBoard")
+    emscripten::class_<kanban_markdown::KanbanBoard>("KanbanBoard")
         .property("color", &kanban_markdown::KanbanBoard::color)
         .property("created", &kanban_markdown::KanbanBoard::created)
         .property("last_modified", &kanban_markdown::KanbanBoard::last_modified)
@@ -77,43 +77,43 @@ EMSCRIPTEN_BINDINGS(my_class_example)
         .property("labels", &kanban_markdown::KanbanBoard::labels)
         .property("list", &kanban_markdown::KanbanBoard::list);
 
-    emscripten::class_<kanban_markdown::KanbanList>("kanban_markdown::KanbanList")
-        .smart_ptr<std::shared_ptr<kanban_markdown::KanbanList>>("std::shared_ptr<kanban_markdown::KanbanList>")
+    emscripten::class_<kanban_markdown::KanbanList>("KanbanList")
+        .smart_ptr<std::shared_ptr<kanban_markdown::KanbanList>>("KanbanList")
         .property("checked", &kanban_markdown::KanbanList::checked)
         .property("counter", &kanban_markdown::KanbanList::counter)
         .property("name", &kanban_markdown::KanbanList::name)
         .property("tasks", &kanban_markdown::KanbanList::tasks);
-    emscripten::register_vector<std::shared_ptr<kanban_markdown::KanbanList>>("KanbanListList");
+    emscripten::register_vector<std::shared_ptr<kanban_markdown::KanbanList>>("KanbanList.List");
 
-    emscripten::class_<kanban_markdown::KanbanLabel>("kanban_markdown::KanbanLabel")
-        .smart_ptr<std::shared_ptr<kanban_markdown::KanbanLabel>>("std::shared_ptr<kanban_markdown::KanbanLabel>")
+    emscripten::class_<kanban_markdown::KanbanLabel>("KanbanLabel")
+        .smart_ptr<std::shared_ptr<kanban_markdown::KanbanLabel>>("KanbanLabel")
         .property("color", &kanban_markdown::KanbanLabel::color)
         .property("name", &kanban_markdown::KanbanLabel::name)
         .property("tasks", &kanban_markdown::KanbanLabel::tasks);
-    emscripten::register_vector<std::shared_ptr<kanban_markdown::KanbanLabel>>("KanbanLabelList");
+    emscripten::register_vector<std::shared_ptr<kanban_markdown::KanbanLabel>>("KanbanLabel.List");
 
-    emscripten::class_<kanban_markdown::KanbanTask>("kanban_markdown::KanbanTask")
-        .smart_ptr<std::shared_ptr<kanban_markdown::KanbanTask>>("std::shared_ptr<kanban_markdown::KanbanTask>")
+    emscripten::class_<kanban_markdown::KanbanTask>("KanbanTask")
+        .smart_ptr<std::shared_ptr<kanban_markdown::KanbanTask>>("KanbanTask")
         .property("name", &kanban_markdown::KanbanTask::name)
         .property("description", &kanban_markdown::KanbanTask::description)
         .property("labels", &kanban_markdown::KanbanTask::labels)
         .property("attachments", &kanban_markdown::KanbanTask::attachments)
         .property("checklist", &kanban_markdown::KanbanTask::checklist);
-    emscripten::register_vector<std::shared_ptr<kanban_markdown::KanbanTask>>("KanbanTaskList");
+    emscripten::register_vector<std::shared_ptr<kanban_markdown::KanbanTask>>("KanbanTask.List");
 
-    emscripten::class_<kanban_markdown::KanbanAttachment>("kanban_markdown::KanbanAttachment")
-        .smart_ptr<std::shared_ptr<kanban_markdown::KanbanAttachment>>("std::shared_ptr<kanban_markdown::KanbanAttachment>")
+    emscripten::class_<kanban_markdown::KanbanAttachment>("KanbanAttachment")
+        .smart_ptr<std::shared_ptr<kanban_markdown::KanbanAttachment>>("KanbanAttachment")
         .property("name", &kanban_markdown::KanbanAttachment::name)
         .property("url", &kanban_markdown::KanbanAttachment::url);
-    emscripten::register_vector<std::shared_ptr<kanban_markdown::KanbanAttachment>>("KanbanAttachmentList");
+    emscripten::register_vector<std::shared_ptr<kanban_markdown::KanbanAttachment>>("KanbanAttachment.List");
 
-    emscripten::class_<kanban_markdown::KanbanChecklistItem>("kanban_markdown::KanbanChecklistItem")
-        .smart_ptr<std::shared_ptr<kanban_markdown::KanbanChecklistItem>>("std::shared_ptr<kanban_markdown::KanbanChecklistItem>")
+    emscripten::class_<kanban_markdown::KanbanChecklistItem>("KanbanChecklistItem")
+        .smart_ptr<std::shared_ptr<kanban_markdown::KanbanChecklistItem>>("KanbanChecklistItem")
         .property("checked", &kanban_markdown::KanbanChecklistItem::checked)
         .property("name", &kanban_markdown::KanbanChecklistItem::name);
-    emscripten::register_vector<std::shared_ptr<kanban_markdown::KanbanChecklistItem>>("KanbanChecklistItemList");
+    emscripten::register_vector<std::shared_ptr<kanban_markdown::KanbanChecklistItem>>("KanbanChecklistItem.List");
 
-    emscripten::class_<Ok<kanban_markdown::KanbanBoard>>("Ok<kanban_markdown::KanbanBoard>")
+    emscripten::class_<Ok<kanban_markdown::KanbanBoard>>("Ok<KanbanBoard>")
         .property("value", &Ok<kanban_markdown::KanbanBoard>::value)
         .property("ok", &Ok<kanban_markdown::KanbanBoard>::ok);
 
@@ -121,5 +121,12 @@ EMSCRIPTEN_BINDINGS(my_class_example)
         .property("error", &Err::error)
         .property("ok", &Err::ok);
 
+    emscripten::class_<kanban_markdown::writer::markdown::Flags>("KanbanMarkdownFlags")
+        .constructor()
+        .property("github", &kanban_markdown::writer::markdown::Flags::github);
+
     emscripten::function("parse", &parse);
+    emscripten::function("json_format_str", &kanban_markdown::writer::json::format_str);
+    emscripten::function("markdown_format_str", &kanban_markdown::writer::markdown::format_str);
+
 }

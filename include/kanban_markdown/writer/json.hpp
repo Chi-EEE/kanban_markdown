@@ -16,7 +16,11 @@ namespace kanban_markdown::writer::json {
 		else {
 			yyjson_mut_obj_add_strncpy(doc, root, "name", kanban_board.name.c_str(), kanban_board.name.length());
 		}
-		yyjson_mut_obj_add_str(doc, root, "description", kanban_board.description.empty() ? constants::default_description.c_str() : kanban_board.description.c_str());
+		if (kanban_board.description.empty()) {
+			yyjson_mut_obj_add_strncpy(doc, root, "description", constants::default_description.c_str(), constants::default_description.length());
+		} else {
+			yyjson_mut_obj_add_strncpy(doc, root, "description", kanban_board.description.c_str(), kanban_board.description.length());
+		}
 
 		// Properties
 		yyjson_mut_val* properties_obj = yyjson_mut_obj(doc);
