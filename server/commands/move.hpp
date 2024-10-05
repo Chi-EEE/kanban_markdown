@@ -179,7 +179,7 @@ namespace server::commands
 		}
 	};
 
-	void command_move(KanbanTuple& kanban_tuple, yyjson_val* command)
+	void command_move(kanban_markdown::KanbanBoard &kanban_board, yyjson_val* command)
 	{
 		yyjson_val* path = yyjson_obj_get(command, "path");
 		if (path == NULL)
@@ -213,7 +213,7 @@ namespace server::commands
 
 		std::string path_str = yyjson_get_string_object(path);
 
-		MoveCommandVisitor visitor(&kanban_tuple.kanban_board, path_str, &move_value);
+		MoveCommandVisitor visitor(&kanban_board, path_str, &move_value);
 		visitor.run();
 	}
 }

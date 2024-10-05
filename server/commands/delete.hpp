@@ -146,7 +146,7 @@ namespace server::commands
 		}
 	};
 
-	void command_delete(KanbanTuple& kanban_tuple, yyjson_val* command)
+	void command_delete(kanban_markdown::KanbanBoard &kanban_board, yyjson_val* command)
 	{
 		yyjson_val* path = yyjson_obj_get(command, "path");
 		if (path == NULL)
@@ -154,7 +154,7 @@ namespace server::commands
 			throw std::runtime_error("Error: Missing required 'path' field in command object");
 		}
 		std::string path_str = yyjson_get_string_object(path);
-		DeleteCommandVisitor visitor(&kanban_tuple.kanban_board, path_str, (void*)nullptr);
+		DeleteCommandVisitor visitor(&kanban_board, path_str, (void*)nullptr);
 		visitor.run();
 	}
 }

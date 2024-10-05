@@ -24,6 +24,12 @@
 
 namespace server
 {
+	struct KanbanCommandResult
+	{
+		bool modified = false;
+		std::string message;
+	};
+
 	class KanbanServer
 	{
 	public:
@@ -82,9 +88,8 @@ namespace server
 							yyjson_mut_doc_set_root(doc, root);
 							yyjson_mut_obj_add_str(doc, root, "id", id_str.c_str());
 							yyjson_mut_obj_add_bool(doc, root, "success", true);
-							const char *json = yyjson_mut_write(doc, 0, NULL);
-							printf("%s\n", json);
-							free((void *)json);
+							std::string json = std::string(yyjson_mut_write(doc, 0, NULL));
+							std::cout << json << std::endl;
 						}
 						break;
 					}
@@ -103,9 +108,8 @@ namespace server
 							yyjson_mut_doc_set_root(doc, root);
 							yyjson_mut_obj_add_str(doc, root, "id", id_str.c_str());
 							yyjson_mut_obj_add_bool(doc, root, "success", true);
-							const char *json = yyjson_mut_write(doc, 0, NULL);
-							printf("%s\n", json);
-							free((void *)json);
+							std::string json = std::string(yyjson_mut_write(doc, 0, NULL));
+							std::cout << json << std::endl;
 						}
 						break;
 					}
@@ -118,12 +122,13 @@ namespace server
 						else
 						{
 							KanbanTuple &kanban_tuple_ = kanban_tuple.value();
-							bool modified = KanbanServer::withKanbanTuple(kanban_tuple_, root, id_str, type_str);
-							if (modified)
+							KanbanCommandResult kanban_command_result = KanbanServer::withKanbanBoard(kanban_tuple_.kanban_board, root, id_str, type_str);
+							if (kanban_command_result.modified)
 							{
 								kanban_tuple_.kanban_board.version += 1;
 								kanban_tuple_.kanban_board.last_modified = kanban_markdown::internal::now_utc();
 							}
+							std::cout << kanban_command_result.message << std::endl;
 						}
 						break;
 					}
@@ -136,9 +141,8 @@ namespace server
 					yyjson_mut_doc_set_root(doc, root);
 					yyjson_mut_obj_add_bool(doc, root, "success", false);
 					yyjson_mut_obj_add_str(doc, root, "error", e.what());
-					const char *json = yyjson_mut_write(doc, 0, NULL);
-					printf("%s\n", json);
-					free((void *)json);
+					std::string json = std::string(yyjson_mut_write(doc, 0, NULL));
+					std::cout << json << std::endl;
 				}
 				if (doc != NULL)
 				{
@@ -147,42 +151,54 @@ namespace server
 			}
 		}
 
-		static bool withKanbanTuple(KanbanTuple &kanban_tuple_, yyjson_val *root, std::string id_str, std::string type_str)
+		static KanbanCommandResult withKanbanBoard(kanban_markdown::KanbanBoard &kanban_board, yyjson_val *root, std::string id_str, std::string type_str)
 		{
 			switch (kanban_markdown::internal::hash(type_str))
 			{
 			case kanban_markdown::internal::hash("commands"):
-				return KanbanServer::commands(kanban_tuple_, root, id_str);
+				return KanbanServer::commands(kanban_board, root, id_str);
 			case kanban_markdown::internal::hash("get"):
-				return KanbanServer::get(kanban_tuple_, root, id_str);
+				return KanbanServer::get(kanban_board, root, id_str);
 			default:
-				throw std::runtime_error(fmt::format(R"(Error: Unknown command type "{}".)", type_str));
-				return false;
+				return KanbanCommandResult{
+					.modified = false,
+					.message = fmt::format(R"(Error: Unknown command type "{}".)", type_str),
+				};
 			}
 		}
 
-		static bool get(KanbanTuple &kanban_tuple_, yyjson_val *root, std::string id_str)
+		static KanbanCommandResult get(kanban_markdown::KanbanBoard &kanban_board, yyjson_val *root, std::string id_str)
 		{
 			yyjson_val *format = yyjson_obj_get(root, "format");
 			if (format == NULL)
 			{
-				throw std::runtime_error("Error: Missing required 'format' field in root object.");
+				return KanbanCommandResult{
+					.modified = false,
+					.message = "Error: Missing required 'format' field in root object.",
+				};
 			}
 
 			std::string format_str = yyjson_get_string_object(format);
-			switch (kanban_markdown::internal::hash(format_str))
+
+			std::string message = [&]()
 			{
-			case kanban_markdown::internal::hash("json"):
-				return KanbanServer::get_json(kanban_tuple_, id_str);
-			case kanban_markdown::internal::hash("markdown"):
-				return KanbanServer::get_markdown(kanban_tuple_, id_str);
-			default:
-				throw std::runtime_error(fmt::format(R"(Error: Unknown format type "{}".)", format_str));
-			}
-			return false;
+				switch (kanban_markdown::internal::hash(format_str))
+				{
+				case kanban_markdown::internal::hash("json"):
+					return KanbanServer::get_json(kanban_board, id_str);
+				case kanban_markdown::internal::hash("markdown"):
+					return KanbanServer::get_markdown(kanban_board, id_str);
+				default:
+					return fmt::format(R"(Error: Unknown format type "{}".)", format_str);
+				}
+			}();
+			return KanbanCommandResult{
+				.modified = false,
+				.message = message,
+			};
 		}
 
-		static bool get_json(KanbanTuple &kanban_tuple_, std::string id_str)
+		static std::string get_json(kanban_markdown::KanbanBoard &kanban_board, std::string id_str)
 		{
 			yyjson_mut_doc *new_doc = yyjson_mut_doc_new(nullptr);
 			yyjson_mut_val *new_root = yyjson_mut_obj(new_doc);
@@ -190,32 +206,28 @@ namespace server
 			yyjson_mut_obj_add_str(new_doc, new_root, "id", id_str.c_str());
 			yyjson_mut_val *kanban_board_object = yyjson_mut_obj(new_doc);
 			yyjson_mut_obj_add_val(new_doc, new_root, "json", kanban_board_object);
-			kanban_markdown::writer::json::format(kanban_tuple_.kanban_board, new_doc, kanban_board_object);
-			const char *json = yyjson_mut_write(new_doc, 0, nullptr);
-			printf("%s\n", json);
-			free((void *)json);
+			kanban_markdown::writer::json::format(kanban_board, new_doc, kanban_board_object);
+			std::string json = std::string(yyjson_mut_write(new_doc, 0, NULL));
 			yyjson_mut_doc_free(new_doc);
-			return false;
+			return json;
 		}
 
-		static bool get_markdown(KanbanTuple &kanban_tuple_, std::string id_str)
+		static std::string get_markdown(kanban_markdown::KanbanBoard &kanban_board, std::string id_str)
 		{
 			yyjson_mut_doc *new_doc = yyjson_mut_doc_new(nullptr);
 			yyjson_mut_val *new_root = yyjson_mut_obj(new_doc);
 			yyjson_mut_doc_set_root(new_doc, new_root);
 			yyjson_mut_obj_add_str(new_doc, new_root, "id", id_str.c_str());
-			const std::string md_string = kanban_markdown::writer::markdown::format_str(kanban_tuple_.kanban_board);
+			const std::string md_string = kanban_markdown::writer::markdown::format_str(kanban_board);
 			const std::string compressed_md_string = gzip::compress(md_string.data(), md_string.size(), Z_BEST_COMPRESSION);
 			const std::string md_base64_string = base64::to_base64(compressed_md_string);
 			yyjson_mut_obj_add_str(new_doc, new_root, "markdown", md_base64_string.c_str());
-			const char *json = yyjson_mut_write(new_doc, 0, NULL);
-			printf("%s\n", json);
-			free((void *)json);
+			std::string json = std::string(yyjson_mut_write(new_doc, 0, NULL));
 			yyjson_mut_doc_free(new_doc);
-			return false;
+			return json;
 		}
 
-		static bool commands(KanbanTuple &kanban_tuple_, yyjson_val *root, std::string id_str)
+		static KanbanCommandResult commands(kanban_markdown::KanbanBoard &kanban_board, yyjson_val *root, std::string id_str)
 		{
 			yyjson_val *commands = yyjson_obj_get(root, "commands");
 			if (!commands || !yyjson_is_arr(commands))
@@ -225,11 +237,12 @@ namespace server
 				yyjson_mut_doc_set_root(doc, root);
 				yyjson_mut_obj_add_str(doc, root, "id", id_str.c_str());
 				yyjson_mut_obj_add_bool(doc, root, "success", false);
-				const char *json = yyjson_mut_write(doc, 0, NULL);
-				printf("%s\n", json);
-				free((void *)json);
+				std::string json = std::string(yyjson_mut_write(doc, 0, NULL));
 				yyjson_mut_doc_free(doc);
-				return false;
+				return KanbanCommandResult{
+					.modified = false,
+					.message = json,
+				};
 			}
 			yyjson_mut_doc *new_doc = yyjson_mut_doc_new(NULL);
 			yyjson_mut_val *new_root = yyjson_mut_obj(new_doc);
@@ -261,28 +274,28 @@ namespace server
 					{
 					case kanban_markdown::internal::hash("create"):
 					{
-						commands::command_create(kanban_tuple_, command);
+						commands::command_create(kanban_board, command);
 						modified = true;
 						success = true;
 						break;
 					}
 					case kanban_markdown::internal::hash("update"):
 					{
-						commands::command_update(kanban_tuple_, command);
+						commands::command_update(kanban_board, command);
 						modified = true;
 						success = true;
 						break;
 					}
 					case kanban_markdown::internal::hash("delete"):
 					{
-						commands::command_delete(kanban_tuple_, command);
+						commands::command_delete(kanban_board, command);
 						modified = true;
 						success = true;
 						break;
 					}
 					case kanban_markdown::internal::hash("move"):
 					{
-						commands::command_move(kanban_tuple_, command);
+						commands::command_move(kanban_board, command);
 						modified = true;
 						success = true;
 						break;
@@ -299,11 +312,13 @@ namespace server
 				yyjson_mut_arr_append(commands_array, command_obj);
 			}
 
-			const char *json = yyjson_mut_write(new_doc, 0, NULL);
-			printf("%s\n", json);
-			free((void *)json);
+			std::string json = std::string(yyjson_mut_write(new_doc, 0, NULL));
 			yyjson_mut_doc_free(new_doc);
-			return modified;
+
+			return KanbanCommandResult{
+				.modified = modified,
+				.message = json,
+			};
 		}
 
 		static tl::expected<KanbanTuple, std::string> parseFile(yyjson_val *root)

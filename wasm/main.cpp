@@ -25,11 +25,6 @@ emscripten::val parse(std::string md_string)
 
 emscripten::val update(kanban_markdown::KanbanBoard kanban_board, std::string input)
 {
-    server::KanbanTuple kanban_tuple{
-        .file_path = "",
-        .kanban_board = kanban_board,
-    };
-
     yyjson_doc *doc = NULL;
     try
     {
@@ -44,14 +39,14 @@ emscripten::val update(kanban_markdown::KanbanBoard kanban_board, std::string in
             yyjson_doc_free(doc);
             return emscripten::val(Err{"The input is invalid; it must be in JSON format."});
         }
-        bool modified = server::KanbanServer::commands(kanban_tuple, root, "");
-        if (modified)
+        server::KanbanCommandResult kanban_command_result = server::KanbanServer::commands(kanban_board, root, "");
+        if (kanban_command_result.modified)
         {
-            kanban_tuple.kanban_board.version += 1;
-            kanban_tuple.kanban_board.last_modified = kanban_markdown::internal::now_utc();
+            kanban_board.version += 1;
+            kanban_board.last_modified = kanban_markdown::internal::now_utc();
         }
         yyjson_doc_free(doc);
-        return emscripten::val(Ok<kanban_markdown::KanbanBoard>{kanban_tuple.kanban_board});
+        return emscripten::val(Ok<kanban_markdown::KanbanBoard>{kanban_board});
     }
     catch (const std::exception &e)
     {
