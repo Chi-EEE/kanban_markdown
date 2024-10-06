@@ -161,8 +161,8 @@ namespace server
 				return KanbanServer::get(kanban_board, root, id_str);
 			default:
 				return KanbanCommandResult{
-					.modified = false,
-					.message = fmt::format(R"(Error: Unknown command type "{}".)", type_str),
+					false,
+					fmt::format(R"(Error: Unknown command type "{}".)", type_str),
 				};
 			}
 		}
@@ -173,8 +173,8 @@ namespace server
 			if (format == NULL)
 			{
 				return KanbanCommandResult{
-					.modified = false,
-					.message = "Error: Missing required 'format' field in root object.",
+					false,
+					"Error: Missing required 'format' field in root object.",
 				};
 			}
 
@@ -193,8 +193,8 @@ namespace server
 				}
 			}();
 			return KanbanCommandResult{
-				.modified = false,
-				.message = message,
+				false,
+				message,
 			};
 		}
 
@@ -240,8 +240,8 @@ namespace server
 				std::string json = std::string(yyjson_mut_write(doc, 0, NULL));
 				yyjson_mut_doc_free(doc);
 				return KanbanCommandResult{
-					.modified = false,
-					.message = json,
+					false,
+					json,
 				};
 			}
 			yyjson_mut_doc *new_doc = yyjson_mut_doc_new(NULL);
@@ -316,8 +316,8 @@ namespace server
 			yyjson_mut_doc_free(new_doc);
 
 			return KanbanCommandResult{
-				.modified = modified,
-				.message = json,
+				modified,
+				json,
 			};
 		}
 

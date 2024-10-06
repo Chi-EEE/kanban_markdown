@@ -11,8 +11,8 @@ if is_plat("wasm") then
     add_requires("emscripten")
     set_toolchains("emcc@emscripten")
 else 
-    add_requires("cosmocc")
-    set_toolchains("@cosmocc")
+    -- add_requires("cosmocc")
+    -- set_toolchains("@cosmocc")
 end
 
 add_repositories("local-repo xmake/repo")

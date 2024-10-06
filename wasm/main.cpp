@@ -31,13 +31,12 @@ emscripten::val update(kanban_markdown::KanbanBoard kanban_board, std::string in
         doc = yyjson_read(input.c_str(), input.size(), 0);
         if (doc == NULL)
         {
-            return emscripten::val(Err{"The input is invalid; it must be in JSON format."});
+            throw std::runtime_error("The input is invalid; it must be in JSON format.");
         }
         yyjson_val *root = yyjson_doc_get_root(doc);
         if (root == NULL)
         {
-            yyjson_doc_free(doc);
-            return emscripten::val(Err{"The input is invalid; it must be in JSON format."});
+            throw std::runtime_error("The input is invalid; it must be in JSON format.");
         }
         server::KanbanCommandResult kanban_command_result = server::KanbanServer::commands(kanban_board, root, "");
         if (kanban_command_result.modified)
