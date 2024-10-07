@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@vscode/wasm-component-model':
+        specifier: ^1.0.1
+        version: 1.0.1
     devDependencies:
       '@thisbeyond/solid-dnd':
         specifier: ^0.7.5
@@ -565,6 +569,11 @@ packages:
   '@vscode/test-electron@2.4.1':
     resolution: {integrity: sha512-Gc6EdaLANdktQ1t+zozoBVRynfIsMKMc94Svu1QreOBC8y76x4tvaK32TljrLi1LI2+PK58sDVbL7ALdqf3VRQ==}
     engines: {node: '>=16'}
+
+  '@vscode/wasm-component-model@1.0.1':
+    resolution: {integrity: sha512-4xvoVsn8uVdamXk7XPe93VhQJuHpxPzKp1IQ5Ioh6GCmtfxeNEGBLEFUMrFWIYezIcmIcp5dHgJxlirthpLkqA==}
+    engines: {node: '>=18.18.2'}
+    hasBin: true
 
   '@webassemblyjs/ast@1.12.1':
     resolution: {integrity: sha512-EKfMUOPRRUTy5UII4qJDGPpqfwjOmZ5jeGFwid9mnoqIFK+e0vqoi1qH56JpmZSzEL53jKnNzScdmftJyG5xWg==}
@@ -1971,6 +1980,10 @@ packages:
   util@0.12.5:
     resolution: {integrity: sha512-kZf/K6hEIrWHI6XqOFUiiMa+79wE/D8Q+NCNAWclkyg3b4d2k7s0QGepNjiABc+aR3N1PAyHL7p6UcLY6LmrnA==}
 
+  uuid@9.0.1:
+    resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
+    hasBin: true
+
   v8-to-istanbul@9.3.0:
     resolution: {integrity: sha512-kiGUalWN+rgBJ/1OHZsBtU4rXZOfj/7rKQxULKlIzwzQSvMJUUNgPwJEEh7gU6xEVxC0ahoOBvN2YI8GH6FNgA==}
     engines: {node: '>=10.12.0'}
@@ -2590,6 +2603,12 @@ snapshots:
       semver: 7.6.2
     transitivePeerDependencies:
       - supports-color
+
+  '@vscode/wasm-component-model@1.0.1':
+    dependencies:
+      semver: 7.6.2
+      uuid: 9.0.1
+      yargs: 17.7.2
 
   '@webassemblyjs/ast@1.12.1':
     dependencies:
@@ -4035,6 +4054,8 @@ snapshots:
       is-generator-function: 1.0.10
       is-typed-array: 1.1.13
       which-typed-array: 1.1.15
+
+  uuid@9.0.1: {}
 
   v8-to-istanbul@9.3.0:
     dependencies:

@@ -1,8 +1,10 @@
 const { getNonce } = require('./util');
 const zlib = require('zlib');
+const fs = require('fs');
 
 const vscode = require('vscode');
-const { KanbanMarkdownServer } = require('./kanban_markdown_server');
+const { WasmContext } = require('@vscode/wasm-component-model')
+// const { KanbanMarkdownServer } = require('./kanban_markdown_server');
 
 /**
  * @implements {vscode.CustomTextEditorProvider}
@@ -14,9 +16,25 @@ class KanbanMarkdownEditorProvider {
      * @param {vscode.ExtensionContext} context 
      * @returns {vscode.Disposable}
      */
-    static register(context) {
+    static async register(context) {
         const provider = new KanbanMarkdownEditorProvider(context);
         const providerRegistration = vscode.window.registerCustomEditorProvider(KanbanMarkdownEditorProvider.viewType, provider);
+        
+        const filename = vscode.Uri.joinPath(context.extensionUri, 'target', 'wasm32-unknown-unknown', 'debug', 'calculator.wasm');
+        const bits = await vscode.workspace.fs.readFile(filename);
+        const module = await WebAssembly.compile(bits);
+
+        // The context for the WASM module
+        const wasmContext = new WasmContext.Default();
+
+        // Create the bindings to import the log function into the WASM module
+        const imports = calculator._.imports.create(service, wasmContext);
+        // Instantiate the module
+        const instance = await WebAssembly.instantiate(module, imports);
+
+        // Bind the WASM memory to the context
+        wasmContext.initialize(new Memory.Default(instance.exports));
+        
         return providerRegistration;
     }
 
@@ -42,68 +60,57 @@ class KanbanMarkdownEditorProvider {
     resolveCustomTextEditor(document, webviewPanel, token) {
         // Setup initial content for the webview
         // This cannot be done in the constructor because the webviewPanel is not available yet
-        KanbanMarkdownServer.new(this.context).then(server => {
-            console.log('Kanban Markdown Editor: ', document.uri.fsPath)
+        fs.readFile(document.uri.fsPath, 'binary', (err, data) => {
+            /**
+             * @param {any} data
+             */
+            function updateWebview(data) {
+                webviewPanel.webview.postMessage({
+                    type: 'update',
+                    text: JSON.stringify(data),
+                });
+            }
 
-            server.sendRequest({
-                type: 'parseFile',
-                file: document.uri.fsPath,
-            }).then(() => {
-                webviewPanel.webview.options = {
-                    enableScripts: true,
-                };
+            webviewPanel.webview.options = {
+                enableScripts: true,
+            };
 
-                webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+            webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
-                /**
-                 * @param {any} data
-                 */
-                function updateWebview(data) {
-                    webviewPanel.webview.postMessage({
-                        type: 'update',
-                        text: JSON.stringify(data),
-                    });
+            console.log('1:');
+            console.log('Module:', Module);
+            console.log('2:');
+            const maybe_kanban_board = Module.parse(data);
+            console.log('Received data:', maybe_kanban_board.ok);
+            if (!maybe_kanban_board.ok) {
+                console.error('Failed to parse file:', maybe_kanban_board.err);
+                return;
+            }
+            let kanban_board = maybe_kanban_board.value;
+
+            const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument(e => {
+                if (e.document.uri.toString() === document.uri.toString()) {
+                    kanban_board = Module.parse(e.document.getText()).value;
+                    updateWebview(Module.json_format_str(kanban_board));
                 }
-
-                const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument(e => {
-                    if (e.document.uri.toString() === document.uri.toString()) {
-                        this.compressGzipString(e.document.getText(), (/** @type {any} */ err, /** @type {string} */ compressedString) => {
-                            server.sendRequest({
-                                type: 'parseFileWithContent',
-                                file: document.uri.fsPath,
-                                content: compressedString,
-                            }).then(server.sendRequest({
-                                type: 'get',
-                                format: 'json',
-                            }).then(data => {
-                                updateWebview(data);
-                            }));
-                        });
-                    }
-                });
-
-                // Make sure we get rid of the listener when our editor is closed.
-                webviewPanel.onDidDispose(() => {
-                    server.close();
-                    changeDocumentSubscription.dispose();
-                });
-
-                webviewPanel.webview.onDidReceiveMessage(e => {
-                    this.sendCommands(server, document, e);
-                });
-
-                server.sendRequest({
-                    type: 'get',
-                    format: 'json',
-                }).then(data => {
-                    updateWebview(data);
-                });
             });
-        }).catch(error => {
 
+            // Make sure we get rid of the listener when our editor is closed.
+            webviewPanel.onDidDispose(() => {
+                server.close();
+                changeDocumentSubscription.dispose();
+            });
+
+            webviewPanel.webview.onDidReceiveMessage(e => {
+                Module.update(kanban_board, JSON.stringify({
+                    type: 'commands',
+                    commands: e.commands,
+                }))
+                this.updateTextDocument(document, Module.markdown_format_str(kanban_board));
+            });
+
+            updateWebview(Module.json_format_str(kanban_board));
         });
-
-
     }
 
     /**
@@ -118,7 +125,7 @@ class KanbanMarkdownEditorProvider {
 
         const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(
             this.context.extensionUri, 'dist', 'frontend', 'bundled.css'));
-
+        
         // Use a nonce to whitelist which scripts can be run
         const nonce = getNonce();
 
@@ -147,34 +154,6 @@ class KanbanMarkdownEditorProvider {
     }
 
     /**
-     * @param {KanbanMarkdownServer} server
-     * @param {vscode.TextDocument} document 
-     * @param {*} e 
-     * @returns 
-     */
-    sendCommands(server, document, e) {
-        server.sendRequest({
-            type: 'commands',
-            commands: e.commands,
-        }).then(() => {
-            return server.sendRequest({
-                type: 'get',
-                format: 'markdown',
-            });
-        }).then(data => {
-            this.decompressGzipString(data.markdown, (/** @type {any} */ err, /** @type {string} */ markdown) => {
-                if (err) {
-                    console.error('Error decompressing string:', err);
-                    return;
-                }
-                this.updateTextDocument(document, markdown);
-            });
-        }).catch(error => {
-            console.error("Error in processing requests:", error);
-        });
-    }
-
-    /**
      * @private
      * @param {vscode.TextDocument} document 
      * @param {string} markdown
@@ -192,30 +171,6 @@ class KanbanMarkdownEditorProvider {
 
         return vscode.workspace.applyEdit(edit);
     }
-
-    compressGzipString(inputString, callback) {
-        let buffer = Buffer.from(inputString, 'utf-8');
-        zlib.gzip(buffer, (err, compressedBuffer) => {
-            if (err) {
-                return callback(err);
-            }
-            let compressedString = compressedBuffer.toString('base64');
-            callback(null, compressedString);
-        });
-    }
-
-    // @ts-ignore
-    decompressGzipString(gzipString, callback) {
-        let buffer = Buffer.from(gzipString, 'base64');
-        zlib.gunzip(buffer, (err, decompressedBuffer) => {
-            if (err) {
-                return callback(err);
-            }
-            let decompressedString = decompressedBuffer.toString('utf-8');
-            callback(null, decompressedString);
-        });
-    }
-
 }
 
 module.exports = {

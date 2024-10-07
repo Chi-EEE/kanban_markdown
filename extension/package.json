@@ -52,14 +52,17 @@
         "javascript-obfuscator": "^4.1.1",
         "rollup-obfuscator": "^4.1.1",
         "solid-js": "^1.8.19",
+        "solid-tippy": "^0.2.1",
+        "tippy.js": "^6.3.7",
         "ts-loader": "^9.5.1",
         "typescript": "^5.4.5",
         "vite": "^5.3.5",
         "vite-plugin-solid": "^2.10.2",
         "webpack": "^5.93.0",
         "webpack-cli": "^5.1.4",
-        "webpack-obfuscator": "^3.5.1",
-        "solid-tippy": "^0.2.1",
-        "tippy.js": "^6.3.7"
+        "webpack-obfuscator": "^3.5.1"
+    },
+    "dependencies": {
+        "@vscode/wasm-component-model": "^1.0.1"
     }
 }
