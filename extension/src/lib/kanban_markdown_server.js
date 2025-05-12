@@ -34,15 +34,16 @@ class KanbanMarkdownServer {
 
     async initializeServer() {
         // Check if server exists
-        const server_path = vscode.Uri.joinPath(this.context.extensionUri, 'server', 'kanban-markdown_server.exe');
+        const server_path = vscode.Uri.joinPath(this.context.extensionUri, 'server', 'kanban_markdown-server.exe');
+        console.log(`Searching for server in ${server_path.fsPath}`);
         if (!fs.existsSync(server_path.fsPath)) {
-            console.log("Server not found");
+            console.error("Server not found");
             return;
         }
 
-        const server_hash_path = vscode.Uri.joinPath(this.context.extensionUri, 'server', 'kanban-markdown_server.exe.sha256');
+        const server_hash_path = vscode.Uri.joinPath(this.context.extensionUri, 'server', 'kanban_markdown-server.exe.sha256');
         if (!fs.existsSync(server_hash_path.fsPath)) {
-            console.log("Server hash not found");
+            console.error("Server hash not found");
             return;
         }
 
@@ -59,7 +60,9 @@ class KanbanMarkdownServer {
             return;
         }
 
+        console.log("Starting kanban markdown server")
         this.server = spawn(server_path.fsPath);
+        console.log("Started kanban markdown server")
 
         this.server.stdout.on('data', (data) => {
             data = data.toString();

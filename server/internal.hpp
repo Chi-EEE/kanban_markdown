@@ -11,16 +11,6 @@
 
 namespace server
 {
-	static constexpr inline uint32_t hash(const std::string_view s) noexcept
-	{
-		uint32_t hash = 5381;
-
-		for (const char* c = s.data(); c < s.data() + s.size(); ++c)
-			hash = ((hash << 5) + hash) + (unsigned char)*c;
-
-		return hash;
-	}
-
 	static std::vector<std::string> split(std::string s, std::string delimiter) {
 		size_t pos_start = 0, pos_end, delim_len = delimiter.length();
 		std::string token;

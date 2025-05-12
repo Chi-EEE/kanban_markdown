@@ -48,3 +48,4 @@ vsxmake*/
 .vscode/compile_commands.json
 .vscode/settings.json
 compile_commands.json
+/.cache

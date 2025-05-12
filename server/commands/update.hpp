@@ -141,7 +141,7 @@ namespace server::commands
 		}
 	};
 
-	void command_update(KanbanTuple& kanban_tuple, yyjson_val* command)
+	void command_update(kanban_markdown::KanbanBoard &kanban_board, yyjson_val* command)
 	{
 		yyjson_val* path = yyjson_obj_get(command, "path");
 		if (path == NULL)
@@ -155,7 +155,7 @@ namespace server::commands
 		}
 		std::string path_str = yyjson_get_string_object(path);
 
-		UpdateCommandVisitor visitor(&kanban_tuple.kanban_board, path_str, (void*)value);
+		UpdateCommandVisitor visitor(&kanban_board, path_str, (void*)value);
 		visitor.run();
 	}
 }

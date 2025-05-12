@@ -83,7 +83,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
                 </Switch>
             </div>
             <input type="color" class={styles.background_color_picker} value={state.kanban_board.properties.color}
-                onInput={(event) => {
+                onChange={(event) => {
                     const color = (event.target as HTMLInputElement).value;
                     setState("kanban_board", "properties", "color", color);
                     // @ts-ignore
