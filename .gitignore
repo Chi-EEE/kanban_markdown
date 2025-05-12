@@ -1,4 +1,4 @@
-# Visual Studio Code Extension (Use `vsce package` to create a .vsix package)
+# Visual Studio Code Extension (Use `pnpm vsce package --no-dependencies` to create a .vsix package)
 *.vsix
 
 # Prerequisites
